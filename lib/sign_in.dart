@@ -59,13 +59,14 @@ class _SignInState extends State<SignIn> {
         onWillPop: () async => false,
         child: Scaffold(
             body: Center(
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
-          const Text("Welcome!\nLogin to Hi Society Admin Dashboard", textAlign: TextAlign.center),
-          const SizedBox(height: 36),
-          Form(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+            const Text("Welcome!\nLogin to Hi Society Admin Dashboard", textAlign: TextAlign.center),
+            const SizedBox(height: 36),
+            Form(
                 key: _formKey,
                 child: Column(children: [
                   primaryTextField(
+                      autofillHints: AutofillHints.email,
                       width: 400,
                       controller: emailController,
                       labelText: "Enter Email or Username",
@@ -75,6 +76,7 @@ class _SignInState extends State<SignIn> {
                       errorText: "Username/Email required",
                       textCapitalization: TextCapitalization.none),
                   primaryTextField(
+                      autofillHints: AutofillHints.password,
                       width: 400,
                       controller: passwordController,
                       labelText: "Enter Password",
@@ -85,7 +87,7 @@ class _SignInState extends State<SignIn> {
                       showPassword: showPassword,
                       showPasswordPressed: () => setState(() => showPassword = !showPassword))
                 ])),
-          Padding(
+            Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 48),
               child: primaryButton(
                   // loadingWait: loadingWait,
@@ -101,8 +103,8 @@ class _SignInState extends State<SignIn> {
                     }
                     // setState(() => loadingWait = false);
                   }),
-          )
-        ]),
-            )));
+            )
+          ]),
+        )));
   }
 }

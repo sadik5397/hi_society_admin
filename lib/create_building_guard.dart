@@ -55,7 +55,7 @@ class _CreateBuildingGuardAppState extends State<CreateBuildingGuardApp> {
         appBar: primaryAppBar(context: context, title: "Create Guard App for Building ${widget.buildingID}"),
         body: Center(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-          primaryButton(title: "Create Guard App", onTap: () async => await createGuardApp(accessToken: accessToken, buildingID: widget.buildingID)),
+          primaryButton(width: 400,title: "Create Guard App", onTap: () async => await createGuardApp(accessToken: accessToken, buildingID: widget.buildingID)),
           if (apiResult != null) const SizedBox(height: 36),
           if (apiResult != null) const Text("Guard App Created"),
           if (apiResult != null) const SizedBox(height: 12),

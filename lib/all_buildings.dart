@@ -63,7 +63,7 @@ class _AllBuildingsState extends State<AllBuildings> {
               itemCount: apiResult.length,
               itemBuilder: (context, index) => basicListTile(
                     context: context,
-                    address: apiResult[index]["address"],
+                    subTitle: apiResult[index]["address"],
                     // title: apiResult[index]["buildingId"].toString(),
                     title: apiResult[index]["buildingName"],
                     onTap: () => route(context, CreateBuildingGuardApp(buildingID: apiResult[index]["buildingId"])),

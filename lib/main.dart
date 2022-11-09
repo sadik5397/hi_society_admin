@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'home.dart';
 import 'sign_in.dart';
 
+//Main
+//region
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kDebugMode) print("---- HI SOCIETY | ADMIN DASHBOARD ----");
@@ -24,26 +25,25 @@ class MyApp extends StatelessWidget {
         title: 'Hi Society Admin',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-          scaffoldBackgroundColor: Colors.white,
-          brightness: Brightness.light,
-          appBarTheme: AppBarTheme(
-            backgroundColor: Colors.blue.shade50,
-            centerTitle: true,
-          ),
-        ),
+            primarySwatch: Colors.blue,
+            useMaterial3: true,
+            scaffoldBackgroundColor: Colors.white,
+            brightness: Brightness.light,
+            appBarTheme: AppBarTheme(backgroundColor: Colors.blue.shade50, centerTitle: true)),
         home: accessToken.isEmpty ? const SignIn() : const Home());
   }
 }
+//endregion
 
 //Static Values
-String placeholderImage =
-    "https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=";
+//region
+String placeholderImage = "https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=";
 Color themeOf = const Color(0xFFe8f5ff);
 Color primaryColor = Colors.blue;
+//endregion
 
 //Components
+//region
 AppBar primaryAppBar({required BuildContext context, String? title}) {
   return AppBar(title: Text(title ?? "Hi Society"), actions: [
     IconButton(
@@ -91,8 +91,8 @@ InkWell menuGridTile({required String title, required String assetImage, Widget?
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Padding(
                 padding: const EdgeInsets.only(bottom: 6),
-                child: Image.network(
-                  "https://sadik.work/_/hi_society_app_assets/menu/$assetImage.png",
+                child: Image.asset(
+                  "assets/$assetImage.png",
                   height: 40,
                   fit: BoxFit.fitHeight,
                 )),
@@ -120,12 +120,14 @@ Padding primaryTextField(
     VoidCallback? showPasswordPressed,
     VoidCallback? onFieldSubmittedAlternate,
     Function(String value)? onFieldSubmitted,
+    String? initialValue,
     bool isDisable = false}) {
   return Padding(
       padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding ?? 18),
       child: SizedBox(
         width: width,
         child: TextFormField(
+            initialValue: initialValue,
             autofillHints: [autofillHints],
             focusNode: focusNode,
             onFieldSubmitted: onFieldSubmitted,
@@ -199,7 +201,7 @@ Widget primaryButton({double width = double.maxFinite, required String title, re
           child: Text(title.toUpperCase())));
 }
 
-ListTile basicListTile({required BuildContext context, required String title, required String address, VoidCallback? onTap}) {
+ListTile basicListTile({required BuildContext context, required String title, required String subTitle, VoidCallback? onTap}) {
   return ListTile(
       visualDensity: VisualDensity.standard,
       tileColor: Colors.grey.shade50,
@@ -207,6 +209,23 @@ ListTile basicListTile({required BuildContext context, required String title, re
       dense: false,
       trailing: IconButton(icon: const Icon(Icons.arrow_forward_ios_rounded), onPressed: onTap, color: Colors.grey),
       title: Text(title),
-      subtitle: Text(address),
+      subtitle: Text(subTitle),
       onTap: onTap);
 }
+
+ListTile smartListTile({required BuildContext context, required String title, String? subTitle, VoidCallback? onEdit, VoidCallback? onDelete, VoidCallback? onTap}) {
+  return ListTile(
+      visualDensity: VisualDensity.comfortable,
+      tileColor: Colors.grey.shade50,
+      enableFeedback: true,
+      dense: false,
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
+        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.edit), onPressed: onEdit, color: primaryColor, iconSize: 24, visualDensity: VisualDensity.comfortable))
+      ]),
+      title: Text(title),
+      subtitle: subTitle != null ? Text(subTitle) : null,
+      onTap: onTap);
+}
+
+//endregion

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/all_buildings.dart';
+import 'package:hi_society_admin/security_alert.dart';
+import 'package:hi_society_admin/utility_contact.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 import 'sign_in.dart';
@@ -27,7 +30,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             primarySwatch: Colors.blue,
             useMaterial3: true,
-            scaffoldBackgroundColor: Colors.white,
+            scaffoldBackgroundColor: const Color(0xfff7f7f7),
             brightness: Brightness.light,
             appBarTheme: AppBarTheme(backgroundColor: Colors.blue.shade50, centerTitle: true)),
         home: accessToken.isEmpty ? const SignIn() : const Home());
@@ -55,6 +58,29 @@ AppBar primaryAppBar({required BuildContext context, String? title}) {
         },
         icon: const Icon(Icons.more_vert_rounded))
   ]);
+}
+
+Container dashboardHeader({required BuildContext context, String? title}) {
+  return Container(
+      padding: const EdgeInsets.all(12),
+      height: 84,
+      alignment: Alignment.center,
+      color: Colors.white,
+      width: double.maxFinite,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SelectableText(title.toString(), style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black.withOpacity(.75))),
+          SelectableText("Logged in as Super-Admin", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
+        ]),
+        IconButton(
+            onPressed: () async {
+              route(context, const Home());
+              final pref = await SharedPreferences.getInstance();
+              pref.clear();
+            },
+            icon: const Icon(Icons.power_settings_new_rounded),
+            tooltip: "Sign Out")
+      ]));
 }
 
 Future<dynamic> route(BuildContext context, Widget widget) {
@@ -201,14 +227,14 @@ Widget primaryButton({double width = double.maxFinite, required String title, re
           child: Text(title.toUpperCase())));
 }
 
-ListTile basicListTile({required BuildContext context, required String title, required String subTitle, VoidCallback? onTap}) {
+ListTile basicListTile({required BuildContext context, required String title, required String subTitle, VoidCallback? onTap, bool isVerified = false}) {
   return ListTile(
       visualDensity: VisualDensity.standard,
       tileColor: Colors.grey.shade50,
       enableFeedback: true,
       dense: false,
-      trailing: IconButton(icon: const Icon(Icons.arrow_forward_ios_rounded), onPressed: onTap, color: Colors.grey),
-      title: Text(title),
+      trailing: isVerified ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white)) : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
+      title: Text(title, style: TextStyle(color: isVerified ? primaryColor : Colors.black87)),
       subtitle: Text(subTitle),
       onTap: onTap);
 }
@@ -226,6 +252,40 @@ ListTile smartListTile({required BuildContext context, required String title, St
       title: Text(title),
       subtitle: subTitle != null ? Text(subTitle) : null,
       onTap: onTap);
+}
+
+Padding sidebarMenuIcon({required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label}) {
+  return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              visualDensity: VisualDensity.standard,
+              shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shadowColor: Colors.transparent,
+              fixedSize: const Size(256, 50)),
+          onPressed: () => route(context, toPage ?? const FlutterLogo()),
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)])));
+}
+
+Row includeDashboard({required Widget child, required BuildContext context, String? header}) {
+  return Row(children: [
+    Container(
+        width: 280,
+        color: primaryColor,
+        child: Column(children: [
+          InkWell(
+              onTap: () => route(context, const Home()),
+              child: Container(padding: const EdgeInsets.all(24), height: 84, width: 280, color: Colors.blueAccent, child: Image.asset("assets/logo.png", fit: BoxFit.fitHeight))),
+          const SizedBox(height: 6),
+          sidebarMenuIcon(context: context, icon: Icons.chevron_right, label: "All Building", toPage: const AllBuildings()),
+          sidebarMenuIcon(context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactSubGroup()),
+          sidebarMenuIcon(context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+        ])),
+    Expanded(child: Column(children: [dashboardHeader(context: context, title: header), Expanded(child: child)]))
+  ]);
 }
 
 //endregion

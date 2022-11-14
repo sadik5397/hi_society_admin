@@ -108,58 +108,61 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: primaryAppBar(context: context, title: "Utility Contact Group"),
-        body: ListView(padding: const EdgeInsets.symmetric(vertical: 12), children: [
-          Container(
-            alignment: Alignment.centerRight,
-            child: primaryButton(
-                width: 200,
-                title: "Add New Category",
-                onTap: () => showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return addNewCategory(
-                          context: context,
-                          onSubmit: () async {
-                            addUtilityCategory(accessToken: accessToken, name: categoryController.text);
-                            Navigator.pop(context);
-                            setState(() {
-                              utilityCategoryList.add({"name": categoryController.text});
-                            });
-                            categoryController.clear();
-                          });
-                    })),
-          ),
-          if (utilityCategoryList.isEmpty)
-            const Padding(padding: EdgeInsets.all(48), child: Center(child: CircularProgressIndicator()))
-          else
-            ListView.builder(
-                primary: false,
-                shrinkWrap: true,
-                itemCount: utilityCategoryList.length,
-                itemBuilder: (context, index) => smartListTile(
-                    context: context,
-                    title: utilityCategoryList[index]["name"],
-                    onDelete: () {
-                      deleteUtilityCategory(accessToken: accessToken, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
-                      setState(() => utilityCategoryList.removeAt(index));
-                    },
-                    onEdit: () {
-                      setState(() => categoryController = TextEditingController(text: utilityCategoryList[index]["name"]));
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) => updateCategory(
+        body: includeDashboard(
+            context: context,
+            header: "Utility Contact Group",
+            child: Column(children: [
+              const SizedBox(height: 12),
+              Container(
+                alignment: Alignment.centerRight,
+                child: primaryButton(
+                    width: 200,
+                    title: "Add New Category",
+                    onTap: () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return addNewCategory(
                               context: context,
                               onSubmit: () async {
-                                updateUtilityCategory(accessToken: accessToken, name: categoryController.text, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
+                                addUtilityCategory(accessToken: accessToken, name: categoryController.text);
                                 Navigator.pop(context);
                                 setState(() {
-                                  utilityCategoryList[index]["name"] = categoryController.text;
+                                  utilityCategoryList.add({"name": categoryController.text});
                                 });
                                 categoryController.clear();
-                              }));
-                    }))
-        ]));
+                              });
+                        })),
+              ),
+              if (utilityCategoryList.isEmpty)
+                const Padding(padding: EdgeInsets.all(48), child: Center(child: CircularProgressIndicator()))
+              else
+                ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: utilityCategoryList.length,
+                    itemBuilder: (context, index) => smartListTile(
+                        context: context,
+                        title: utilityCategoryList[index]["name"],
+                        onDelete: () {
+                          deleteUtilityCategory(accessToken: accessToken, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
+                          setState(() => utilityCategoryList.removeAt(index));
+                        },
+                        onEdit: () {
+                          setState(() => categoryController = TextEditingController(text: utilityCategoryList[index]["name"]));
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) => updateCategory(
+                                  context: context,
+                                  onSubmit: () async {
+                                    updateUtilityCategory(accessToken: accessToken, name: categoryController.text, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
+                                    Navigator.pop(context);
+                                    setState(() {
+                                      utilityCategoryList[index]["name"] = categoryController.text;
+                                    });
+                                    categoryController.clear();
+                                  }));
+                        }))
+            ])));
   }
 
   AlertDialog addNewCategory({required BuildContext context, required VoidCallback onSubmit}) {

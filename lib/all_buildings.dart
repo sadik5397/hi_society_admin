@@ -54,20 +54,27 @@ class _AllBuildingsState extends State<AllBuildings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: primaryAppBar(context: context, title: "All Registered Buildings"),
-      body: apiResult == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              shrinkWrap: true,
-              primary: false,
-              itemCount: apiResult.length,
-              itemBuilder: (context, index) => basicListTile(
-                    context: context,
-                    subTitle: apiResult[index]["address"],
-                    // title: apiResult[index]["buildingId"].toString(),
-                    title: apiResult[index]["buildingName"],
-                    onTap: () => route(context, CreateBuildingGuardApp(buildingID: apiResult[index]["buildingId"])),
-                  )),
+      body: includeDashboard(
+          context: context,
+          header: "All Registered Buildings",
+          child: apiResult == null
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: apiResult.length,
+                  itemBuilder: (context, index) => basicListTile(
+                        isVerified: apiResult[index]["guard"] != null,
+                        context: context,
+                        subTitle: apiResult[index]["address"],
+                        title: apiResult[index]["buildingName"],
+                        onTap: () => route(
+                            context,
+                            CreateBuildingGuardApp(
+                              buildingName: apiResult[index]["buildingName"],
+                              buildingID: apiResult[index]["buildingId"],
+                              guard: (apiResult[index]["guard"] != null) ? apiResult[index]["guard"] : {"result": "null"},
+                            )),
+                      ))),
     );
   }
 }

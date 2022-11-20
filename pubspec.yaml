@@ -41,7 +41,9 @@ dependencies:
   http:
   flutter_launcher_icons:
   shared_preferences:
+  page_transition:
   intl: ^0.17.0
+  lottie:
 
 
 

@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/all_buildings.dart';
+import 'package:hi_society_admin/contacts.dart';
 import 'package:hi_society_admin/security_alert.dart';
 import 'package:hi_society_admin/utility_contact.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 import 'sign_in.dart';
@@ -83,16 +85,9 @@ Container dashboardHeader({required BuildContext context, String? title}) {
       ]));
 }
 
-Future<dynamic> route(BuildContext context, Widget widget) {
-  return Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => widget),
-  );
-}
+Future<dynamic> route(BuildContext context, Widget widget) => Navigator.push(context, PageTransition(child: widget, type: PageTransitionType.fade));
 
-dynamic routeBack(BuildContext context) {
-  return Navigator.pop(context);
-}
+dynamic routeBack(BuildContext context) => Navigator.pop(context);
 
 showSnackBar({required BuildContext context, String action = "Dismiss", required String label, int seconds = 2, int milliseconds = 0}) {
   final snackBar = SnackBar(
@@ -254,20 +249,40 @@ ListTile smartListTile({required BuildContext context, required String title, St
       onTap: onTap);
 }
 
-Padding sidebarMenuIcon({required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label}) {
+Padding sidebarMenuItem({required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
   return Padding(
       padding: const EdgeInsets.only(top: 6),
-      child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              visualDensity: VisualDensity.standard,
-              shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shadowColor: Colors.transparent,
-              fixedSize: const Size(256, 50)),
-          onPressed: () => route(context, toPage ?? const FlutterLogo()),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)])));
+      child: isHeader
+          ? Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20))
+          : ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  visualDensity: VisualDensity.standard,
+                  shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shadowColor: Colors.transparent,
+                  fixedSize: const Size(256, 50)),
+              onPressed: () => route(context, toPage ?? const Home()),
+              child: Padding(
+                padding: EdgeInsets.only(left: isSubMenu ? 36 : 0),
+                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
+              )));
+}
+
+Theme sidebarMenuHead({required BuildContext context, required String title, required List<Widget> children}) {
+  return Theme(
+    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+    child: ExpansionTile(
+      initiallyExpanded: true,
+      maintainState: true,
+      iconColor: Colors.white,
+      collapsedIconColor: Colors.white,
+      tilePadding: const EdgeInsets.symmetric(horizontal: 28),
+      title: sidebarMenuItem(context: context, label: title, isHeader: true),
+      children: children,
+    ),
+  );
 }
 
 Row includeDashboard({required Widget child, required BuildContext context, String? header}) {
@@ -280,9 +295,12 @@ Row includeDashboard({required Widget child, required BuildContext context, Stri
               onTap: () => route(context, const Home()),
               child: Container(padding: const EdgeInsets.all(24), height: 84, width: 280, color: Colors.blueAccent, child: Image.asset("assets/logo.png", fit: BoxFit.fitHeight))),
           const SizedBox(height: 6),
-          sidebarMenuIcon(context: context, icon: Icons.chevron_right, label: "All Building", toPage: const AllBuildings()),
-          sidebarMenuIcon(context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactSubGroup()),
-          sidebarMenuIcon(context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+          sidebarMenuItem(context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
+          sidebarMenuHead(context: context, title: "Utility Contacts", children: [
+            sidebarMenuItem(context: context, icon: Icons.chevron_right, label: "Contact Group", toPage: const UtilityContactSubGroup(), isSubMenu: true),
+            sidebarMenuItem(context: context, icon: Icons.chevron_right, label: "Contacts", toPage: const UtilityContacts(), isSubMenu: true),
+          ]),
+          sidebarMenuItem(context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
         ])),
     Expanded(child: Column(children: [dashboardHeader(context: context, title: header), Expanded(child: child)]))
   ]);

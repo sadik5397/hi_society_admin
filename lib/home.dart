@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/security_alert.dart';
 import 'package:hi_society_admin/utility_contact.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api.dart';
 import 'dart:convert';
@@ -68,16 +69,18 @@ class _HomeState extends State<Home> {
           body: includeDashboard(
               header: "Home",
               context: context,
-              child: GridView(
-                padding: const EdgeInsets.all(12),
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 180, mainAxisSpacing: 12, crossAxisSpacing: 12),
-                children: [
-                  menuGridTile(title: "All Buildings", assetImage: "apartment", context: context, toPage: const AllBuildings()),
-                  menuGridTile(title: "Utility Contact\nSub Group List", assetImage: "utility", context: context, toPage: const UtilityContactSubGroup()),
-                  menuGridTile(title: "Security Alert\nType List", assetImage: "utility", context: context, toPage: const SecurityAlertGroup()),
-                ],
-              )),
+              child: Lottie.network("https://assets1.lottiefiles.com/packages/lf20_Sw60y11Cpf.json", fit: BoxFit.contain),
+              // child: GridView(
+              //   padding: const EdgeInsets.all(12),
+              //   shrinkWrap: true,
+              //   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 180, mainAxisSpacing: 12, crossAxisSpacing: 12),
+              //   children: [
+              //     menuGridTile(title: "All Buildings", assetImage: "apartment", context: context, toPage: const AllBuildings()),
+              //     menuGridTile(title: "Utility Contact\nSub Group List", assetImage: "utility", context: context, toPage: const UtilityContactSubGroup()),
+              //     menuGridTile(title: "Security Alert\nType List", assetImage: "utility", context: context, toPage: const SecurityAlertGroup())
+              //   ],
+              // ),
+          ),
         ));
   }
 }

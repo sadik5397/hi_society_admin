@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../api/api.dart';
-import 'home.dart';
-import 'main.dart';
+import '../api.dart';
+import '../components.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -18,8 +18,8 @@ class _SignInState extends State<SignIn> {
   String accessToken = "";
   bool loadingWait = false;
   bool showPassword = false;
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController(text: "admin@lh.com");
+  final TextEditingController passwordController = TextEditingController(text: "1234");
   final _formKey = GlobalKey<FormState>();
   dynamic apiResult = {};
 
@@ -97,7 +97,7 @@ class _SignInState extends State<SignIn> {
                     FocusManager.instance.primaryFocus?.unfocus();
                     // setState(() => loadingWait = true);
                     if (_formKey.currentState!.validate()) {
-                      await doSignIn(email: emailController.text.toLowerCase(), password: passwordController.text, showHome: () => route(context, const Home()));
+                      await doSignIn(email: emailController.text.toLowerCase(), password: passwordController.text, showHome: () => route(context, const AllBuildings()));
                     } else {
                       showSnackBar(context: context, label: "Invalid Entry! Please Check");
                     }

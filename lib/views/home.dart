@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hi_society_admin/security_alert.dart';
-import 'package:hi_society_admin/utility_contact.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api/api.dart';
+import '../api.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
-import 'all_buildings.dart';
-import 'main.dart';
+import '../components.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -67,6 +63,7 @@ class _HomeState extends State<Home> {
         top: false,
         child: Scaffold(
           body: includeDashboard(
+            pageName: "Home",
               header: "Home",
               context: context,
               child: Lottie.network("https://assets1.lottiefiles.com/packages/lf20_Sw60y11Cpf.json", fit: BoxFit.contain),

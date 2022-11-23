@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hi_society_admin/building_utility_contacts.dart';
-import 'package:hi_society_admin/create_building_guard.dart';
+import 'package:hi_society_admin/views/building_utility_contacts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'api/api.dart';
-import 'main.dart';
+import '../api.dart';
+import '../components.dart';
 
 class UtilityContacts extends StatefulWidget {
   const UtilityContacts({Key? key}) : super(key: key);
@@ -56,21 +54,20 @@ class _UtilityContactsState extends State<UtilityContacts> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: includeDashboard(
+          pageName: "Contacts",
           context: context,
           header: "All Utility Contacts of Building",
           child: apiResult == null
               ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
-              shrinkWrap: true,
-              itemCount: apiResult.length,
-              itemBuilder: (context, index) => basicListTile(
-                context: context,
-                subTitle: apiResult[index]["address"],
-                title: apiResult[index]["buildingName"],
-                onTap: () => route(
-                    context,
-                    BuildingUtilityContacts()), //todo:
-              ))),
+                  shrinkWrap: true,
+                  itemCount: apiResult.length,
+                  itemBuilder: (context, index) => basicListTile(
+                        context: context,
+                        subTitle: apiResult[index]["address"],
+                        title: apiResult[index]["buildingName"],
+                        onTap: () => route(context, const BuildingUtilityContacts()), //todo:
+                      ))),
     );
   }
 }

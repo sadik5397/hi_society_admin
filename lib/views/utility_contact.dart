@@ -1,11 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'api/api.dart';
-import 'main.dart';
+import '../api.dart';
+import '../components.dart';
 
 class UtilityContactSubGroup extends StatefulWidget {
   const UtilityContactSubGroup({Key? key}) : super(key: key);
@@ -41,8 +41,8 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
     try {
       var response = await http.post(Uri.parse("$baseUrl/utility-contact/manage/category/create"), headers: authHeader(accessToken), body: jsonEncode({"name": name}));
       Map result = jsonDecode(response.body);
-      print(name);
-      print(result);
+      if (kDebugMode) print(name);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         setState(() => utilityCategoryList = result["data"]);
@@ -59,8 +59,8 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
     try {
       var response = await http.post(Uri.parse("$baseUrl/utility-contact/manage/category/update"), headers: authHeader(accessToken), body: jsonEncode({"name": name, "categoryId": cid}));
       Map result = jsonDecode(response.body);
-      print(name);
-      print(result);
+      if (kDebugMode) print(name);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         setState(() => utilityCategoryList = result["data"]);
@@ -78,7 +78,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
     try {
       var response = await http.post(Uri.parse("$baseUrl/utility-contact/manage/category/delete?cid=$cid"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
-      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         setState(() => utilityCategoryList = result["data"]);
@@ -109,6 +109,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
+          pageName: "Contact Group",
             context: context,
             header: "Utility Contact Group",
             child: Column(children: [

@@ -1,0 +1,387 @@
+import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'views/all_buildings/all_buildings.dart';
+import 'views/contacts.dart';
+import 'views/home.dart';
+import 'views/security_alert.dart';
+import 'views/sign_in.dart';
+import 'views/utility_contact.dart';
+
+//Static Values
+//region
+String placeholderImage = "https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=";
+Color themeOf = const Color(0xFFe8f5ff);
+Color primaryColor = const Color(0xff2196f3);
+//endregion
+
+//Components
+//region
+AppBar primaryAppBar({required BuildContext context, String? title}) {
+  return AppBar(title: Text(title ?? "Hi Society"), actions: [
+    IconButton(
+        onPressed: () async {
+          final pref = await SharedPreferences.getInstance();
+          await pref.clear();
+          // ignore: use_build_context_synchronously
+          route(context, const SignIn());
+        },
+        icon: const Icon(Icons.more_vert_rounded))
+  ]);
+}
+
+Container dashboardHeader({required BuildContext context, String? title}) {
+  return Container(
+      padding: const EdgeInsets.all(12),
+      height: 84,
+      alignment: Alignment.center,
+      color: Colors.white,
+      width: double.maxFinite,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SelectableText(title.toString(), style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black.withOpacity(.75))),
+          SelectableText("Logged in as Super-Admin", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
+        ]),
+        IconButton(
+            onPressed: () async {
+              route(context, const Home());
+              final pref = await SharedPreferences.getInstance();
+              pref.clear();
+            },
+            icon: const Icon(Icons.power_settings_new_rounded),
+            tooltip: "Sign Out")
+      ]));
+}
+
+Future<dynamic> route(BuildContext context, Widget widget) => Navigator.push(context, PageTransition(child: widget, type: PageTransitionType.fade));
+
+dynamic routeBack(BuildContext context) => Navigator.pop(context);
+
+showSnackBar({required BuildContext context, String action = "Dismiss", required String label, int seconds = 0, int milliseconds = 100}) {
+  final snackBar = SnackBar(
+    backgroundColor: primaryColor,
+    dismissDirection: DismissDirection.horizontal,
+    behavior: SnackBarBehavior.floating,
+    duration: Duration(seconds: seconds, milliseconds: milliseconds),
+    content: Text(label, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white)),
+    action: SnackBarAction(textColor: Colors.white, label: action, onPressed: () => ScaffoldMessenger.of(context).clearSnackBars()),
+  );
+  return ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+InkWell menuGridTile({required String title, required String assetImage, Widget? toPage, required BuildContext context}) {
+  return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => (toPage == null) ? showSnackBar(context: context, label: "Not Implemented Yet") : route(context, toPage),
+      child: Container(
+          padding: const EdgeInsets.all(12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: const Color(0x1E1ABC9C)),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Image.asset(
+                  "assets/$assetImage.png",
+                  height: 40,
+                  fit: BoxFit.fitHeight,
+                )),
+            Text(title, textAlign: TextAlign.center)
+          ])));
+}
+
+Padding primaryTextField(
+    {required String labelText,
+    double? width,
+    bool isPassword = false,
+    double? bottomPadding,
+    bool isDate = false,
+    bool hasSubmitButton = false,
+    TextInputType keyboardType = TextInputType.text,
+    String hintText = "Type Here",
+    required TextEditingController controller,
+    bool autoFocus = false,
+    FocusNode? focusNode,
+    String errorText = "This field should not be empty",
+    bool required = false,
+    String autofillHints = "",
+    bool showPassword = false,
+    TextCapitalization textCapitalization = TextCapitalization.sentences,
+    VoidCallback? showPasswordPressed,
+    VoidCallback? onFieldSubmittedAlternate,
+    Function(String value)? onFieldSubmitted,
+    String? initialValue,
+    bool isDisable = false}) {
+  return Padding(
+      padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding ?? 18),
+      child: SizedBox(
+        width: width,
+        child: TextFormField(
+            initialValue: initialValue,
+            autofillHints: [autofillHints],
+            focusNode: focusNode,
+            onFieldSubmitted: onFieldSubmitted,
+            keyboardType: keyboardType,
+            textCapitalization: textCapitalization,
+            obscureText: (isPassword) ? !showPassword : false,
+            controller: controller,
+            // style: textFieldLabel,
+            autofocus: autoFocus,
+            enabled: !isDisable,
+            validator: (value) => required
+                ? value == null || value.isEmpty
+                    ? errorText
+                    : null
+                : null,
+            decoration: InputDecoration(
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide.none),
+                labelText: labelText,
+                isDense: false,
+                alignLabelWithHint: true,
+                filled: true,
+                // fillColor: themeOf,
+                contentPadding: const EdgeInsets.all(12),
+                // labelStyle: textFieldLabel,
+                hintText: hintText,
+                // hintStyle: textFieldHint,
+                // floatingLabelStyle: textFieldLabelFloating,
+                suffixIcon: (isPassword)
+                    ? IconButton(
+                        onPressed: showPasswordPressed,
+                        icon: Icon((!showPassword) ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                        iconSize: 18,
+                        color: Colors.grey.shade500,
+                      )
+                    : (isDate)
+                        ? IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.calendar_month_sharp),
+                            iconSize: 18,
+                            color: Colors.grey.shade500,
+                          )
+                        : (hasSubmitButton)
+                            ? IconButton(
+                                onPressed: onFieldSubmittedAlternate,
+                                icon: const Icon(Icons.arrow_downward_sharp),
+                                iconSize: 18,
+                                color: Colors.grey.shade500,
+                              )
+                            : (true) //todo: controller.text.isNotEmpty (state is not updating)
+                                ? IconButton(
+                                    onPressed: () => controller.clear(),
+                                    icon: const Icon(Icons.cancel_outlined),
+                                    iconSize: 18,
+                                    color: Colors.grey.shade500,
+                                  )
+                                // ignore: dead_code
+                                : null)),
+      ));
+}
+
+Widget primaryButton(
+    {double paddingTop = 0,
+    double paddingLeft = 12,
+    double paddingRight = 12,
+    double paddingBottom = 12,
+    double width = double.maxFinite,
+    required String title,
+    IconData? icon,
+    required VoidCallback onTap,
+    bool primary = true}) {
+  return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(paddingLeft, paddingTop, paddingRight, paddingBottom),
+      child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+              backgroundColor: primary ? primaryColor : themeOf,
+              fixedSize: Size(width, 44),
+              foregroundColor: primary ? Colors.white : primaryColor,
+              shape: RoundedRectangleBorder(side: const BorderSide(color: Colors.transparent), borderRadius: BorderRadius.circular(12))),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [if (icon != null) Icon(icon, size: 18), if (icon != null) const SizedBox(width: 6), Text(title.toUpperCase())],
+          )));
+}
+
+ListTile basicListTile({required BuildContext context, required String title, required String subTitle, VoidCallback? onTap, bool isVerified = false}) {
+  return ListTile(
+      visualDensity: VisualDensity.standard,
+      tileColor: Colors.grey.shade50,
+      enableFeedback: true,
+      dense: false,
+      trailing: isVerified ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white)) : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
+      title: Text(title, style: TextStyle(color: isVerified ? primaryColor : Colors.black87)),
+      subtitle: Text(subTitle),
+      onTap: onTap);
+}
+
+ListTile smartListTile({required BuildContext context, required String title, String? subTitle, VoidCallback? onEdit, VoidCallback? onDelete, VoidCallback? onTap}) {
+  return ListTile(
+      visualDensity: VisualDensity.comfortable,
+      tileColor: Colors.grey.shade50,
+      enableFeedback: true,
+      dense: false,
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
+        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.edit), onPressed: onEdit, color: primaryColor, iconSize: 24, visualDensity: VisualDensity.comfortable))
+      ]),
+      title: Text(title),
+      subtitle: subTitle != null ? Text(subTitle) : null,
+      onTap: onTap);
+}
+
+Padding sidebarMenuItem({String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
+  return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: isHeader
+          ? Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20))
+          : ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  visualDensity: VisualDensity.standard,
+                  shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  backgroundColor: pageName.toLowerCase() == label.toLowerCase() ? Colors.white.withOpacity(.15) : Colors.transparent,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shadowColor: Colors.transparent,
+                  fixedSize: const Size(256, 50)),
+              onPressed: () => route(context, toPage ?? const AllBuildings()),
+              child: Padding(
+                padding: EdgeInsets.only(left: isSubMenu ? 36 : 0),
+                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
+              )));
+}
+
+Theme sidebarMenuHead({required BuildContext context, required String title, required List<Widget> children}) {
+  return Theme(
+    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+    child: ExpansionTile(
+      initiallyExpanded: true,
+      maintainState: true,
+      iconColor: Colors.white,
+      collapsedIconColor: Colors.white,
+      tilePadding: const EdgeInsets.symmetric(horizontal: 28),
+      title: sidebarMenuItem(context: context, label: title, isHeader: true),
+      children: children,
+    ),
+  );
+}
+
+Row includeDashboard({required Widget child, required BuildContext context, String? header, required String pageName}) {
+  return Row(children: [
+    Container(
+        width: 280,
+        color: primaryColor,
+        child: Column(children: [
+          InkWell(
+              onTap: () => route(context, const AllBuildings()),
+              child: Container(padding: const EdgeInsets.all(24), height: 84, width: 280, color: Colors.blueAccent, child: Image.asset("assets/logo.png", fit: BoxFit.fitHeight))),
+          const SizedBox(height: 6),
+          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
+          sidebarMenuHead(context: context, title: "Utility Contacts", children: [
+            sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Contact Group", toPage: const UtilityContactSubGroup(), isSubMenu: true),
+            sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Contacts", toPage: const UtilityContacts(), isSubMenu: true),
+          ]),
+          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+        ])),
+    Expanded(child: Column(children: [dashboardHeader(context: context, title: header), Expanded(child: child)]))
+  ]);
+}
+
+Container dataTableContainer(
+    {required String title,
+    required Widget child,
+    int entryCount = 0,
+    String primaryButtonText = "Add New",
+    VoidCallback? primaryButtonOnTap,
+    String secondaryButtonText = "Add New",
+    List<String> headerRow = const [],
+    List<int> flex = const [],
+    VoidCallback? secondaryButtonOnTap}) {
+  return Container(
+      margin: const EdgeInsets.all(12),
+      decoration: BoxDecoration(border: Border.all(color: Colors.black12), borderRadius: BorderRadius.circular(12), color: Colors.white),
+      child: Column(children: [
+        Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(children: [
+              SelectableText(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 12),
+              if (entryCount > 0)
+                Chip(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    backgroundColor: Colors.black.withOpacity(.05),
+                    label: SelectableText("$entryCount Entries", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
+              const Expanded(child: SizedBox()),
+              if (primaryButtonOnTap != null) primaryButton(title: primaryButtonText, onTap: primaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add),
+              if (secondaryButtonOnTap != null) primaryButton(title: primaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add)
+            ])),
+        const Divider(height: 1),
+        Expanded(
+            child: Column(children: [
+          Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                  children: List.generate(
+                      headerRow.length,
+                      (index) => Expanded(
+                          flex: flex[index],
+                          child: SelectableText(headerRow[index], textAlign: index == 0 ? TextAlign.start : TextAlign.center, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))))),
+          Expanded(child: child)
+        ]))
+      ]));
+}
+
+ColoredBox dataTableAlternativeColorCells({required int index, required Widget child}) => ColoredBox(color: index % 2 == 0 ? themeOf.withOpacity(.4) : Colors.transparent, child: child);
+
+Expanded dataTableListTile({required String title, String? subtitle, int flex = 1, bool hideImage = false}) {
+  return Expanded(
+      flex: flex,
+      child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(children: [
+            if (!hideImage) CircleAvatar(backgroundImage: NetworkImage(placeholderImage), radius: 24, backgroundColor: Colors.grey.shade50),
+            if (!hideImage) const SizedBox(width: 12),
+            Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SelectableText(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              if (subtitle != null) const SizedBox(height: 3),
+              if (subtitle != null) SelectableText(subtitle, style: const TextStyle(color: Colors.black87))
+            ])
+          ])));
+}
+
+Expanded dataTableSingleInfo({required String title, int flex = 1, Color color = Colors.black87}) {
+  return Expanded(flex: flex, child: SelectableText(title, textAlign: TextAlign.center, style: TextStyle(color: color, fontWeight: FontWeight.normal, fontSize: 16, height: 0)));
+}
+
+Expanded dataTableChip({required String label, Color color = const Color(0xff2196f3), int flex = 1, Alignment alignment = Alignment.center}) {
+  return Expanded(
+      flex: flex,
+      child: Align(
+        alignment: alignment,
+        child: Chip(
+            label: SelectableText(label.toUpperCase(), style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 14, height: 0)),
+            backgroundColor: color.withOpacity(.08),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            labelPadding: const EdgeInsets.only(right: 14),
+            avatar: CircleAvatar(backgroundColor: color, radius: 4)),
+      ));
+}
+
+Expanded dataTableIcon({required VoidCallback onTap, int flex = 1, required IconData icon, Color color = const Color(0xff2196f3), String toolTip = "Edit"}) {
+  return Expanded(
+      flex: flex,
+      child: Padding(
+          padding: const EdgeInsets.only(right: 18),
+          child: IconButton(
+              style: ElevatedButton.styleFrom(shape: const CircleBorder()),
+              onPressed: onTap,
+              icon: Icon(icon, color: color),
+              visualDensity: VisualDensity.standard,
+              iconSize: 28,
+              tooltip: toolTip.toUpperCase(),
+              padding: const EdgeInsets.all(16))));
+}
+
+Expanded dataTableNull({int flex = 1}) => Expanded(flex: flex, child: const SizedBox());
+
+//endregion

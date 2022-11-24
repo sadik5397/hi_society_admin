@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api.dart';
@@ -31,11 +32,10 @@ class _AddBuildingState extends State<AddBuilding> {
       var response = await http.post(Uri.parse("$baseUrl/building"), headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats}));
       Map result = jsonDecode(response.body);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
         setState(() => apiResult = result["data"]);
         successRoute.call();
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
       showSnackBar(context: context, label: e.toString());
@@ -142,7 +142,7 @@ class _AddBuildingState extends State<AddBuilding> {
                                       name: buildingNameController.text,
                                       address: buildingAddressController.text,
                                       photo: buildingHeaderPhotoController.text,
-                                      successRoute: () => routeBack(context));
+                                      successRoute: showSuccess(context: context, label: "${buildingNameController.text} Added Successfully", onTap: () => route(context, const AllBuildings())));
                                 } else {
                                   showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                 }

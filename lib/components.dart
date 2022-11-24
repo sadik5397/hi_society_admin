@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'views/all_buildings/all_buildings.dart';
 import 'views/contacts.dart';
@@ -13,6 +14,16 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 String placeholderImage = "https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=";
 Color themeOf = const Color(0xFFe8f5ff);
 Color primaryColor = const Color(0xff2196f3);
+//endregion
+
+//region Static Functions
+String capitalizeAllWord(String value) {
+  var result = value[0].toUpperCase();
+  for (int i = 1; i < value.length; i++) {
+    (value[i - 1] == " ") ? result = result + value[i].toUpperCase() : result = result + value[i];
+  }
+  return result;
+}
 //endregion
 
 //region Components
@@ -66,6 +77,39 @@ showSnackBar({required BuildContext context, String action = "Dismiss", required
     action: SnackBarAction(textColor: Colors.white, label: action, onPressed: () => ScaffoldMessenger.of(context).clearSnackBars()),
   );
   return ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+showError({required BuildContext context, String action = "OKAY", String? label, String? title, int? seconds}) {
+  return QuickAlert.show(
+      context: context,
+      width: 400,
+      type: QuickAlertType.error,
+      borderRadius: 16,
+      animType: QuickAlertAnimType.slideInUp,
+      title: title ?? 'ERROR',
+      text: capitalizeAllWord(label ?? "Something Went Wrong!"),
+      confirmBtnText: action,
+      backgroundColor: Colors.white,
+      titleColor: primaryColor,
+      textColor: Colors.black87,
+      autoCloseDuration: seconds != null ? Duration(seconds: seconds) : null);
+}
+
+showSuccess({required BuildContext context, String action = "OKAY", String? label, String? title, int? seconds, VoidCallback? onTap}) {
+  return QuickAlert.show(
+      context: context,
+      onConfirmBtnTap: onTap,
+      width: 400,
+      type: QuickAlertType.success,
+      borderRadius: 16,
+      animType: QuickAlertAnimType.slideInUp,
+      title: title ?? 'SUCCESS',
+      text: capitalizeAllWord(label ?? "Progress Complete"),
+      confirmBtnText: action,
+      backgroundColor: Colors.white,
+      titleColor: primaryColor,
+      textColor: Colors.black87,
+      autoCloseDuration: seconds != null ? Duration(seconds: seconds) : null);
 }
 
 InkWell menuGridTile({required String title, required String assetImage, Widget? toPage, required BuildContext context}) {

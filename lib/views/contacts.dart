@@ -28,7 +28,7 @@ class _UtilityContactsState extends State<UtilityContacts> {
         setState(() => apiResult = result["data"]);
         //todo: if success
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {

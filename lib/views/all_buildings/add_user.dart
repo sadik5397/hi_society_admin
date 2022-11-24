@@ -1,9 +1,8 @@
 import 'dart:math';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/components.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
-import 'package:hi_society_admin/views/all_buildings/update_building.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,18 +37,17 @@ class _AddUserState extends State<AddUser> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
   //APIs
   Future<void> assignUserToRole({required String accessToken, required String email, required String role, required VoidCallback onSuccess, int? flatId}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/user/find/user-id/by-email?email=$email"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
-      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         int thisUserId = result["data"]["userId"];
-        print("Got user ID = $thisUserId");
+        if (kDebugMode) print("Got user ID = $thisUserId");
         var response2 = await http.post(
             Uri.parse((role == "building_manager")
                 ? "$baseUrl/building/test/manager/add?userId=$thisUserId&buildingId=${widget.buildingId}"
@@ -62,7 +60,7 @@ class _AddUserState extends State<AddUser> {
                             : ""),
             headers: authHeader(accessToken));
         Map result2 = jsonDecode(response2.body);
-        print(result2);
+        if (kDebugMode) print(result2);
         if (result2["statusCode"] == 200 || result2["statusCode"] == 201) {
           showSnackBar(context: context, label: result2["message"]);
           onSuccess.call();
@@ -70,7 +68,7 @@ class _AddUserState extends State<AddUser> {
           showSnackBar(context: context, label: result2["message"][0].toString().length == 1 ? result2["message"].toString() : result2["message"][0].toString());
         }
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
       showSnackBar(context: context, label: e.toString());
@@ -83,7 +81,7 @@ class _AddUserState extends State<AddUser> {
       var response = await http.post(Uri.parse("$baseUrl/user/create"),
           headers: primaryHeader, body: jsonEncode({"email": email, "password": newRandomPassword, "confirmPassword": newRandomPassword, "name": name, "gender": "prefer_not_to_say", "phone": phone}));
       Map result = jsonDecode(response.body);
-      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         setState(() => signedUpApiResult = result["data"]);
@@ -100,7 +98,7 @@ class _AddUserState extends State<AddUser> {
                             : ""),
             headers: authHeader(accessToken));
         Map result2 = jsonDecode(response2.body);
-        print(result2);
+        if (kDebugMode) print(result2);
         if (result2["statusCode"] == 200 || result2["statusCode"] == 201) {
           showSnackBar(context: context, label: result2["message"]);
           onSuccess.call();
@@ -108,7 +106,7 @@ class _AddUserState extends State<AddUser> {
           showSnackBar(context: context, label: result2["message"][0].toString().length == 1 ? result2["message"].toString() : result2["message"][0].toString());
         }
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
       showSnackBar(context: context, label: e.toString());
@@ -119,7 +117,7 @@ class _AddUserState extends State<AddUser> {
     try {
       var response = await http.get(Uri.parse("$baseUrl/building/list/flats?bid=${widget.buildingId}"), headers: primaryHeader);
       Map result = jsonDecode(response.body);
-      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         for (int i = 0; i < result["data"].length; i++) {
@@ -129,7 +127,7 @@ class _AddUserState extends State<AddUser> {
           });
         }
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
       showSnackBar(context: context, label: e.toString());

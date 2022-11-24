@@ -29,7 +29,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         showSnackBar(context: context, label: result["message"]);
         setState(() => utilityCategoryList = result["data"]);
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -47,7 +47,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         showSnackBar(context: context, label: result["message"]);
         setState(() => utilityCategoryList = result["data"]);
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -66,7 +66,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         setState(() => utilityCategoryList = result["data"]);
         Navigator.pop(context);
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -83,7 +83,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         showSnackBar(context: context, label: result["message"]);
         setState(() => utilityCategoryList = result["data"]);
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -109,7 +109,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-          pageName: "Contact Group",
+            pageName: "Contact Group",
             context: context,
             header: "Utility Contact Group",
             child: Column(children: [

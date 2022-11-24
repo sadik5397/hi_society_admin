@@ -30,7 +30,7 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
         showSnackBar(context: context, label: result["message"]);
         setState(() => securityAlertTypeList = result["data"]);
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -48,7 +48,7 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
         showSnackBar(context: context, label: result["message"]);
         setState(() => securityAlertTypeList = result["data"]);
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -60,8 +60,8 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
   //   try {
   //     var response = await http.post(Uri.parse("$baseUrl/utility-contact/manage/category/update"), headers: authHeader(accessToken), body: jsonEncode({"name": name, "categoryId": cid}));
   //     Map result = jsonDecode(response.body);
-  //     print(name);
-  //     print(result);
+  //    if (kDebugMode)  print(name);
+  //    if (kDebugMode)  print(result);
   //     if (result["statusCode"] == 200 || result["statusCode"] == 201) {
   //       showSnackBar(context: context, label: result["message"]);
   //       setState(() => securityAlertTypeList = result["data"]);
@@ -79,7 +79,7 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
   //   try {
   //     var response = await http.post(Uri.parse("$baseUrl/utility-contact/manage/category/delete?cid=$cid"), headers: authHeader(accessToken));
   //     Map result = jsonDecode(response.body);
-  //     print(result);
+  //    if (kDebugMode)  print(result);
   //     if (result["statusCode"] == 200 || result["statusCode"] == 201) {
   //       showSnackBar(context: context, label: result["message"]);
   //       setState(() => securityAlertTypeList = result["data"]);

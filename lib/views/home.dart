@@ -64,19 +64,19 @@ class _HomeState extends State<Home> {
         child: Scaffold(
           body: includeDashboard(
             pageName: "Home",
-              header: "Home",
-              context: context,
-              child: Lottie.network("https://assets1.lottiefiles.com/packages/lf20_Sw60y11Cpf.json", fit: BoxFit.contain),
-              // child: GridView(
-              //   padding: const EdgeInsets.all(12),
-              //   shrinkWrap: true,
-              //   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 180, mainAxisSpacing: 12, crossAxisSpacing: 12),
-              //   children: [
-              //     menuGridTile(title: "All Buildings", assetImage: "apartment", context: context, toPage: const AllBuildings()),
-              //     menuGridTile(title: "Utility Contact\nSub Group List", assetImage: "utility", context: context, toPage: const UtilityContactSubGroup()),
-              //     menuGridTile(title: "Security Alert\nType List", assetImage: "utility", context: context, toPage: const SecurityAlertGroup())
-              //   ],
-              // ),
+            header: "Home",
+            context: context,
+            child: Lottie.network("https://assets1.lottiefiles.com/packages/lf20_Sw60y11Cpf.json", fit: BoxFit.contain),
+            // child: GridView(
+            //   padding: const EdgeInsets.all(12),
+            //   shrinkWrap: true,
+            //   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 180, mainAxisSpacing: 12, crossAxisSpacing: 12),
+            //   children: [
+            //     menuGridTile(title: "All Buildings", assetImage: "apartment", context: context, toPage: const AllBuildings()),
+            //     menuGridTile(title: "Utility Contact\nSub Group List", assetImage: "utility", context: context, toPage: const UtilityContactSubGroup()),
+            //     menuGridTile(title: "Security Alert\nType List", assetImage: "utility", context: context, toPage: const SecurityAlertGroup())
+            //   ],
+            // ),
           ),
         ));
   }

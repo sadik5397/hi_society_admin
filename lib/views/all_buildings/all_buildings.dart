@@ -37,7 +37,7 @@ class _AllBuildingsState extends State<AllBuildings> {
           pref.clear();
         }
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         if (result["data"]["role"] != "admin") {
           // ignore: use_build_context_synchronously
           route(context, const SignIn());
@@ -55,13 +55,12 @@ class _AllBuildingsState extends State<AllBuildings> {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/list/with-status"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
-      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         setState(() => apiResult = result["data"].reversed.toList());
-        //todo: if success
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -77,10 +76,10 @@ class _AllBuildingsState extends State<AllBuildings> {
       if (result1["statusCode"] == 200 || result1["statusCode"] == 201) {
         showSnackBar(context: context, label: result1["message"]);
         setState(() => guardAccess = result1["data"]);
-        print("Guard Device Access Created");
+        if (kDebugMode) print("Guard Device Access Created");
         var response2 = await http.post(Uri.parse("$baseUrl/building/info/status/update"), headers: authHeader(accessToken), body: jsonEncode({"buildingId": buildingID, "status": "accepted"}));
         Map result2 = jsonDecode(response2.body);
-        print(result2);
+        if (kDebugMode) print(result2);
         if (result2["statusCode"] == 200 || result2["statusCode"] == 201) {
           showSnackBar(context: context, label: result2["message"]);
           onSuccess.call();
@@ -99,12 +98,12 @@ class _AllBuildingsState extends State<AllBuildings> {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/info/status/update"), headers: authHeader(accessToken), body: jsonEncode({"buildingId": buildingID, "status": "rejected"}));
       Map result = jsonDecode(response.body);
-      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         onSuccess.call();
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
       showSnackBar(context: context, label: e.toString());

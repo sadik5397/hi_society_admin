@@ -36,7 +36,7 @@ class _SignInState extends State<SignIn> {
         setState(() => accessToken = apiResult["accessToken"]);
         showHome.call();
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
       showSnackBar(context: context, label: e.toString());

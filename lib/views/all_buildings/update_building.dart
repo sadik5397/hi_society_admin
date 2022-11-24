@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/add_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,14 +30,14 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/info/contacts/list/for-admin?buildingId=$buildingID"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
-      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         setState(() => buildingExecutiveUsers = result["data"]);
         setState(() => buildingCommittee = result["data"]["committeeHeads"] + result["data"]["committeeMembers"]);
         setState(() => flatOwners = result["data"]["flatOwners"]);
       } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
       }
     } on Exception catch (e) {
@@ -66,7 +67,6 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
             pageName: "All Buildings",
             header: "Information: ${widget.buildingName}",
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-
               //region Guard
               if (widget.guard != null)
                 dataTableContainer(
@@ -75,21 +75,18 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                     title: "Guard Device Access",
                     headerRow: ["Name", "Role", "Status", "Action"],
                     flex: [2, 2, 1, 1],
-                    child: (false)
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            primary: false,
-                            itemCount: 1,
-                            itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                                  dataTableListTile(flex: 2, title: widget.guard!["name"], subtitle: widget.guard!["email"]),
-                                  dataTableSingleInfo(flex: 2, title: "Guard Device App"),
-                                  dataTableChip(flex: 1, label: "Active"),
-                                  dataTableIcon(
-                                      flex: 1, toolTip: "Reset Password", icon: Icons.lock_reset, onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${widget.guard!["userId"]}")),
-                                  //todo: Need Reset Password
-                                ]))),
+                    child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        primary: false,
+                        itemCount: 1,
+                        itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                              dataTableListTile(flex: 2, title: widget.guard!["name"], subtitle: widget.guard!["email"]),
+                              dataTableSingleInfo(flex: 2, title: "Guard Device App"),
+                              dataTableChip(flex: 1, label: "Active"),
+                              dataTableIcon(flex: 1, toolTip: "Reset Password", icon: Icons.lock_reset, onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${widget.guard!["userId"]}")),
+                              //todo: Need Reset Password
+                            ]))),
               //endregion
 
               //region Manager

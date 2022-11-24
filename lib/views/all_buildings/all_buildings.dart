@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/views/all_buildings/add_building.dart';
 import 'package:hi_society_admin/views/sign_in.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -137,7 +138,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                 headerRow: ["Building Name", "Status", "Unique ID", "Total Flats", "Acton"],
                 flex: [6, 2, 2, 2, 2],
                 entryCount: apiResult.length,
-                primaryButtonOnTap: () {},
+                primaryButtonOnTap: () => route(context, const AddBuilding()),
                 child: apiResult.isEmpty
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
@@ -170,7 +171,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                                                     onSuccess: () async {
                                                       routeBack(context);
                                                       await defaultInit();
-                                                      showDialog(
+                                                      await showDialog(
                                                           context: context,
                                                           builder: (BuildContext context) => viewGuardCredentials(
                                                               buildingName: apiResult[index]["buildingName"], context: context, password: guardAccess["password"], email: guardAccess["email"]));

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
+import 'package:hi_society_admin/views/all_buildings/update_building.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'views/sign_in.dart';
 
@@ -31,6 +32,14 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.light,
             appBarTheme: AppBarTheme(backgroundColor: Colors.blue.shade50, centerTitle: true)),
         home: accessToken.isEmpty ? const SignIn() : const AllBuildings());
+        // home: accessToken.isEmpty ? const SignIn() : const UpdateBuilding(buildingID: 1, buildingName: "buildingName", guard: {
+        //   "userId": 5,
+        //   "name": "Guard BGLH22R",
+        //   "phone": "q8ZQuf",
+        //   "email": "BGLH22R@hisociety.com",
+        //   "gender": "transgender"
+        // })
+    // );
   }
 }
 //endregion

@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'views/all_buildings/all_buildings.dart';
 import 'views/contacts.dart';
 import 'views/home.dart';
 import 'views/security_alert.dart';
 import 'views/sign_in.dart';
 import 'views/utility_contact.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
-//Static Values
-//region
+//region Static Values
 String placeholderImage = "https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=";
 Color themeOf = const Color(0xFFe8f5ff);
 Color primaryColor = const Color(0xff2196f3);
 //endregion
 
-//Components
-//region
+//region Components
 AppBar primaryAppBar({required BuildContext context, String? title}) {
   return AppBar(title: Text(title ?? "Hi Society"), actions: [
     IconButton(
@@ -39,7 +37,7 @@ Container dashboardHeader({required BuildContext context, String? title}) {
       color: Colors.white,
       width: double.maxFinite,
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           SelectableText(title.toString(), style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black.withOpacity(.75))),
           SelectableText("Logged in as Super-Admin", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
         ]),
@@ -178,6 +176,31 @@ Padding primaryTextField(
       ));
 }
 
+Padding primaryDropdown(
+    {double? width, double? paddingLeft, double? paddingRight, required String title, required List<String> options, required dynamic value, required void Function(Object? value) onChanged}) {
+  return Padding(
+      padding: EdgeInsets.fromLTRB(paddingLeft ?? 12, 0, paddingRight ?? 12, 12 * 1.5),
+      child: DropdownButton2(
+        underline: const SizedBox(),
+        iconEnabledColor: Colors.black.withOpacity(.5),
+        buttonElevation: 0,
+        dropdownElevation: 1,
+        selectedItemHighlightColor: themeOf,
+        isExpanded: true,
+        enableFeedback: true,
+        buttonPadding: const EdgeInsets.only(left: 12, right: 12),
+        buttonDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: themeOf),
+        dropdownPadding: EdgeInsets.zero,
+        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.white),
+        hint: Text(title, style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w500)),
+        items: options.map((item) => DropdownMenuItem<String>(value: item, child: Text(item, style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w500)))).toList(),
+        selectedItemBuilder: (context) => List.generate(options.length, (index) => Align(alignment: const Alignment(-1, 0), child: Text("$title: ${options[index]}"))),
+        value: value,
+        onChanged: onChanged,
+        buttonWidth: width ?? double.maxFinite,
+      ));
+}
+
 Widget primaryButton(
     {double paddingTop = 0,
     double paddingLeft = 12,
@@ -253,21 +276,19 @@ Padding sidebarMenuItem({String pageName = "", required BuildContext context, Wi
 
 Theme sidebarMenuHead({required BuildContext context, required String title, required List<Widget> children}) {
   return Theme(
-    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-    child: ExpansionTile(
-      initiallyExpanded: true,
-      maintainState: true,
-      iconColor: Colors.white,
-      collapsedIconColor: Colors.white,
-      tilePadding: const EdgeInsets.symmetric(horizontal: 28),
-      title: sidebarMenuItem(context: context, label: title, isHeader: true),
-      children: children,
-    ),
-  );
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+          initiallyExpanded: true,
+          maintainState: true,
+          iconColor: Colors.white,
+          collapsedIconColor: Colors.white,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 28),
+          title: sidebarMenuItem(context: context, label: title, isHeader: true),
+          children: children));
 }
 
-Row includeDashboard({required Widget child, required BuildContext context, String? header, required String pageName}) {
-  return Row(children: [
+Row includeDashboard({bool isScrollablePage = false, required Widget child, required BuildContext context, String? header, required String pageName}) {
+  return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Container(
         width: 280,
         color: primaryColor,
@@ -283,13 +304,23 @@ Row includeDashboard({required Widget child, required BuildContext context, Stri
           ]),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
         ])),
-    Expanded(child: Column(children: [dashboardHeader(context: context, title: header), Expanded(child: child)]))
+    Expanded(
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [dashboardHeader(context: context, title: header), Expanded(child: isScrollablePage ? SingleChildScrollView(child: child) : child)]))
   ]);
 }
 
+//endregion
+
+//region DataTable Components
 Container dataTableContainer(
     {required String title,
     required Widget child,
+    double paddingBottom = 12,
+    double headerPadding = 16,
+    bool isScrollableWidget = true,
     int entryCount = 0,
     String primaryButtonText = "Add New",
     VoidCallback? primaryButtonOnTap,
@@ -298,9 +329,9 @@ Container dataTableContainer(
     List<int> flex = const [],
     VoidCallback? secondaryButtonOnTap}) {
   return Container(
-      margin: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(12).copyWith(bottom: paddingBottom),
       decoration: BoxDecoration(border: Border.all(color: Colors.black12), borderRadius: BorderRadius.circular(12), color: Colors.white),
-      child: Column(children: [
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
         Padding(
             padding: const EdgeInsets.all(18),
             child: Row(children: [
@@ -313,39 +344,39 @@ Container dataTableContainer(
                     label: SelectableText("$entryCount Entries", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
               const Expanded(child: SizedBox()),
               if (primaryButtonOnTap != null) primaryButton(title: primaryButtonText, onTap: primaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add),
-              if (secondaryButtonOnTap != null) primaryButton(title: primaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add)
+              if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add)
             ])),
         const Divider(height: 1),
-        Expanded(
-            child: Column(children: [
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                  children: List.generate(
-                      headerRow.length,
-                      (index) => Expanded(
-                          flex: flex[index],
-                          child: SelectableText(headerRow[index], textAlign: index == 0 ? TextAlign.start : TextAlign.center, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))))),
-          Expanded(child: child)
-        ]))
+        Padding(
+            padding: EdgeInsets.all(headerPadding),
+            child: Row(
+                children: List.generate(
+                    headerRow.length,
+                    (index) => Expanded(
+                        flex: flex[index],
+                        child: SelectableText(headerRow[index], textAlign: index == 0 ? TextAlign.start : TextAlign.center, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))))),
+        isScrollableWidget ? Expanded(child: child) : child
       ]));
 }
 
-ColoredBox dataTableAlternativeColorCells({required int index, required Widget child}) => ColoredBox(color: index % 2 == 0 ? themeOf.withOpacity(.4) : Colors.transparent, child: child);
+ColoredBox dataTableAlternativeColorCells({required int index, required List<Widget> children}) =>
+    ColoredBox(color: index % 2 == 0 ? themeOf.withOpacity(.4) : Colors.transparent, child: Row(children: children));
 
-Expanded dataTableListTile({required String title, String? subtitle, int flex = 1, bool hideImage = false}) {
+Expanded dataTableListTile({required String title, String? subtitle, int flex = 1, bool hideImage = false, String? img}) {
   return Expanded(
       flex: flex,
       child: Padding(
           padding: const EdgeInsets.all(18),
           child: Row(children: [
-            if (!hideImage) CircleAvatar(backgroundImage: NetworkImage(placeholderImage), radius: 24, backgroundColor: Colors.grey.shade50),
+            if (!hideImage) CircleAvatar(backgroundImage: NetworkImage(img ?? placeholderImage), radius: 24, backgroundColor: Colors.grey.shade50),
             if (!hideImage) const SizedBox(width: 12),
-            Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SelectableText(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              if (subtitle != null) const SizedBox(height: 3),
-              if (subtitle != null) SelectableText(subtitle, style: const TextStyle(color: Colors.black87))
-            ])
+            Expanded(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                SelectableText(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                if (subtitle != null) const SizedBox(height: 3),
+                if (subtitle != null) SelectableText(subtitle, style: const TextStyle(color: Colors.black87))
+              ]),
+            )
           ])));
 }
 
@@ -357,14 +388,13 @@ Expanded dataTableChip({required String label, Color color = const Color(0xff219
   return Expanded(
       flex: flex,
       child: Align(
-        alignment: alignment,
-        child: Chip(
-            label: SelectableText(label.toUpperCase(), style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 14, height: 0)),
-            backgroundColor: color.withOpacity(.08),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            labelPadding: const EdgeInsets.only(right: 14),
-            avatar: CircleAvatar(backgroundColor: color, radius: 4)),
-      ));
+          alignment: alignment,
+          child: Chip(
+              label: SelectableText(label.toUpperCase(), style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 14, height: 0)),
+              backgroundColor: color.withOpacity(.08),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              labelPadding: const EdgeInsets.only(right: 14),
+              avatar: CircleAvatar(backgroundColor: color, radius: 4))));
 }
 
 Expanded dataTableIcon({required VoidCallback onTap, int flex = 1, required IconData icon, Color color = const Color(0xff2196f3), String toolTip = "Edit"}) {
@@ -383,5 +413,4 @@ Expanded dataTableIcon({required VoidCallback onTap, int flex = 1, required Icon
 }
 
 Expanded dataTableNull({int flex = 1}) => Expanded(flex: flex, child: const SizedBox());
-
 //endregion

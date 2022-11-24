@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/views/all_buildings/add_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api.dart';
 import '../../components.dart';
@@ -7,10 +7,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class UpdateBuilding extends StatefulWidget {
-  const UpdateBuilding({Key? key, required this.buildingID, required this.buildingName, required this.guard}) : super(key: key);
+  const UpdateBuilding({Key? key, required this.buildingID, required this.buildingName, this.guard}) : super(key: key);
   final int buildingID;
   final String buildingName;
-  final Map guard;
+  final Map? guard;
 
   @override
   State<UpdateBuilding> createState() => _UpdateBuildingState();
@@ -20,71 +20,21 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   //Variables
   String accessToken = "";
   dynamic apiResult;
+  Map<String, dynamic> buildingExecutiveUsers = {};
+  List buildingCommittee = [];
+  List flatOwners = [];
 
 //APIs
-  Future<void> createGuardAccess({required String accessToken, required int buildingID}) async {
+  Future<void> readBuildingExecutiveUserList({required String accessToken, required int buildingID}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/building/account/create/guard?bid=$buildingID"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/building/info/contacts/list/for-admin?buildingId=$buildingID"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
-      if (kDebugMode) print(result);
+      print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
-        setState(() => apiResult = result["data"]);
-        //todo: if success
-      } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
-      }
-    } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
-    }
-  }
-
-  Future<void> createManagerAccount({required String accessToken, required int buildingID, required int userID}) async {
-    try {
-      var response = await http.post(Uri.parse("$baseUrl/building/test/manager/add?buildingId=$buildingID&userId=$userID"), headers: authHeader(accessToken));
-      Map result = jsonDecode(response.body);
-      if (kDebugMode) print(result);
-      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
-        setState(() => apiResult = result["data"]);
-        //todo: if success
-      } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
-      }
-    } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
-    }
-  }
-
-  Future<void> createCommitteeAccount({required String accessToken, required int buildingID, required int userID, required String isHead}) async {
-    try {
-      var response = await http.post(Uri.parse("$baseUrl/building/test/committee/add?buildingId=$buildingID&userId=$userID&isHead=$isHead"), headers: authHeader(accessToken));
-      Map result = jsonDecode(response.body);
-      if (kDebugMode) print(result);
-      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
-        setState(() => apiResult = result["data"]);
-        //todo: if success
-      } else {
-        showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
-      }
-    } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
-    }
-  }
-
-  Future<void> createFlatOwnerAccount({required String accessToken, required int flatID, required int userID}) async {
-    try {
-      var response = await http.post(Uri.parse("$baseUrl/building/test/flat-owner/add?buildingId=$flatID&userId=$userID"), headers: authHeader(accessToken));
-      Map result = jsonDecode(response.body);
-      if (kDebugMode) print(result);
-      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
-        setState(() => apiResult = result["data"]);
-        //todo: if success
+        setState(() => buildingExecutiveUsers = result["data"]);
+        setState(() => buildingCommittee = result["data"]["committeeHeads"] + result["data"]["committeeMembers"]);
+        setState(() => flatOwners = result["data"]["flatOwners"]);
       } else {
         showSnackBar(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
@@ -98,6 +48,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
+    await readBuildingExecutiveUserList(accessToken: accessToken, buildingID: widget.buildingID);
   }
 
 //Initiate
@@ -111,43 +62,123 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
+            isScrollablePage: true,
             pageName: "All Buildings",
             header: "Information: ${widget.buildingName}",
-            child: dataTableContainer(title: "Prime Users", child: FlutterLogo()),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+
+              //region Guard
+              if (widget.guard != null)
+                dataTableContainer(
+                    isScrollableWidget: false,
+                    paddingBottom: 0,
+                    title: "Guard Device Access",
+                    headerRow: ["Name", "Role", "Status", "Action"],
+                    flex: [2, 2, 1, 1],
+                    child: (false)
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            primary: false,
+                            itemCount: 1,
+                            itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                                  dataTableListTile(flex: 2, title: widget.guard!["name"], subtitle: widget.guard!["email"]),
+                                  dataTableSingleInfo(flex: 2, title: "Guard Device App"),
+                                  dataTableChip(flex: 1, label: "Active"),
+                                  dataTableIcon(
+                                      flex: 1, toolTip: "Reset Password", icon: Icons.lock_reset, onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${widget.guard!["userId"]}")),
+                                  //todo: Need Reset Password
+                                ]))),
+              //endregion
+
+              //region Manager
+              dataTableContainer(
+                  isScrollableWidget: false,
+                  paddingBottom: 0,
+                  title: "Building Manager",
+                  primaryButtonText: "Add Manager",
+                  primaryButtonOnTap:
+                      buildingExecutiveUsers["manager"] == null ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Building_Manager", buildingName: widget.buildingName)) : null,
+                  headerRow: ["Name", "Role", "Status", "Action"],
+                  flex: [2, 2, 1, 1],
+                  child: (buildingExecutiveUsers["manager"] == null)
+                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Manager Found")))
+                      : ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: 1,
+                          itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                                dataTableListTile(flex: 2, title: buildingExecutiveUsers["manager"]["name"], subtitle: buildingExecutiveUsers["manager"]["email"]),
+                                dataTableSingleInfo(flex: 2, title: "Building Manager"),
+                                dataTableChip(flex: 1, label: "Active"),
+                                dataTableIcon(
+                                    flex: 1,
+                                    toolTip: "Reset Password",
+                                    icon: Icons.lock_reset,
+                                    onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${buildingExecutiveUsers["manager"]["userId"]}")) //todo: Need Reset Password
+                              ]))),
+              //endregion
+
+              //region Committee
+              dataTableContainer(
+                  isScrollableWidget: false,
+                  paddingBottom: 0,
+                  title: "Building Committee",
+                  primaryButtonText: "Add Head",
+                  secondaryButtonText: "Add Member",
+                  primaryButtonOnTap:
+                      (buildingExecutiveUsers["committeeHeads"] == null) ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Head", buildingName: widget.buildingName)) : null,
+                  secondaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Member", buildingName: widget.buildingName)),
+                  headerRow: ["Name", "Role", "Status", "Action"],
+                  flex: [2, 2, 1, 1],
+                  child: (buildingCommittee.isEmpty)
+                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Committee Found")))
+                      : ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: buildingCommittee.length,
+                          itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                                dataTableListTile(flex: 2, title: buildingCommittee[index]["member"]["name"], subtitle: buildingCommittee[index]["member"]["email"]),
+                                dataTableSingleInfo(flex: 2, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
+                                dataTableChip(flex: 1, label: "Active"),
+                                dataTableIcon(
+                                    flex: 1,
+                                    toolTip: "Reset Password",
+                                    icon: Icons.lock_reset,
+                                    onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${buildingCommittee[index]['member']['userId']}")) //todo: Need Reset Password
+                              ]))),
+              //endregion
+
+              //region Flat Owner
+              dataTableContainer(
+                  isScrollableWidget: false,
+                  title: "Building Flat Owners",
+                  primaryButtonText: "Flat Owner",
+                  primaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Flat_Owner", buildingName: widget.buildingName)),
+                  headerRow: ["Name", "Role", "Status", "Action"],
+                  flex: [2, 2, 1, 1],
+                  child: (flatOwners.isEmpty)
+                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Flat Owner Found")))
+                      : ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: flatOwners.length,
+                          itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                                dataTableListTile(flex: 2, title: flatOwners[index]["user"]["name"], subtitle: flatOwners[index]["user"]["email"]),
+                                dataTableSingleInfo(flex: 2, title: "Flat Owner: F5"),
+                                dataTableChip(flex: 1, label: "Active"),
+                                dataTableIcon(
+                                    flex: 1,
+                                    toolTip: "Reset Password",
+                                    icon: Icons.lock_reset,
+                                    onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${flatOwners[index]['user']['userId']}")) //todo: Need Reset Password
+                              ]))),
+              //endregion
+            ]),
             context: context));
   }
 }
-
-
-// @override
-// Widget build(BuildContext context) {
-//   return Scaffold(
-//       body: includeDashboard(
-//           pageName: "All Buildings",
-//           header: "Information: ${widget.buildingName}",
-//           child: Center(
-//               child: Column(mainAxisSize: MainAxisSize.min, children: [
-//                 SelectableText(widget.guard.toString()),
-//                 (widget.guard["result"] == "null")
-//                     ? primaryButton(width: 400, title: "Create Device Access", onTap: () async => await createGuardAccess(accessToken: accessToken, buildingID: widget.buildingID))
-//                     : basicListTile(context: context, title: widget.guard["name"], subTitle: widget.guard["email"]),
-//                 primaryButton(width: 400, title: "Create Building Manager Account", onTap: () async => await createManagerAccount(accessToken: accessToken, buildingID: widget.buildingID, userID: 16)), //todo
-//                 primaryButton(
-//                     width: 400,
-//                     title: "Create Building Committee Head Account",
-//                     onTap: () async => await createCommitteeAccount(accessToken: accessToken, buildingID: widget.buildingID, userID: 15, isHead: "y")), //todo:
-//                 primaryButton(
-//                     width: 400,
-//                     title: "Create Building Committee Member Account",
-//                     onTap: () async => await createCommitteeAccount(accessToken: accessToken, buildingID: widget.buildingID, userID: 15, isHead: "n")),
-//                 primaryButton(width: 400, title: "Create Flat Owner Account", onTap: () async => await createFlatOwnerAccount(accessToken: accessToken, flatID: widget.buildingID, userID: 15)), //todo:
-//                 if (apiResult != null) const SizedBox(height: 36),
-//                 if (apiResult != null) const Text("Guard App Created"),
-//                 if (apiResult != null) const SizedBox(height: 12),
-//                 if (apiResult != null) const Text("Email"),
-//                 if (apiResult != null) SelectableText(apiResult["email"], textScaleFactor: 1.5),
-//                 if (apiResult != null) const Text("Password"),
-//                 if (apiResult != null) SelectableText(apiResult["password"], textScaleFactor: 1.5)
-//               ])),
-//           context: context));
-// }

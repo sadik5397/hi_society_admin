@@ -33,7 +33,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -51,7 +51,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -70,7 +70,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -87,7 +87,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 

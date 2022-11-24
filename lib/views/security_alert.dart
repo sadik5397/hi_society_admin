@@ -34,7 +34,7 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -52,7 +52,7 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 

@@ -45,6 +45,10 @@ dependencies:
   intl: ^0.17.0
   lottie:
   quickalert: ^1.0.0
+  dotted_border: ^2.0.0+3
+  image_picker:
+  flutter_image_compress:
+  image_picker_web: ^3.0.0+1
 
 
 

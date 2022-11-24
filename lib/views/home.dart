@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
       await pref.setString("buildingUniqueID", apiResult["uniqueId"]);
       await pref.setString("buildingImg", "https://source.unsplash.com/random/?building");
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 

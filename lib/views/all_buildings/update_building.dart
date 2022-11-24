@@ -41,7 +41,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -84,7 +84,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                               dataTableListTile(flex: 2, title: widget.guard!["name"], subtitle: widget.guard!["email"]),
                               dataTableSingleInfo(flex: 2, title: "Guard Device App"),
                               dataTableChip(flex: 1, label: "Active"),
-                              dataTableIcon(flex: 1, toolTip: "Reset Password", icon: Icons.lock_reset, onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${widget.guard!["userId"]}")),
+                              dataTableIcon(flex: 1, toolTip: "Reset Password", icon: Icons.lock_reset, onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${widget.guard!["userId"]}")),
                               //todo: Need Reset Password
                             ]))),
               //endregion
@@ -114,7 +114,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     flex: 1,
                                     toolTip: "Reset Password",
                                     icon: Icons.lock_reset,
-                                    onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${buildingExecutiveUsers["manager"]["userId"]}")) //todo: Need Reset Password
+                                    onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${buildingExecutiveUsers["manager"]["userId"]}")) //todo: Need Reset Password
                               ]))),
               //endregion
 
@@ -145,7 +145,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     flex: 1,
                                     toolTip: "Reset Password",
                                     icon: Icons.lock_reset,
-                                    onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${buildingCommittee[index]['member']['userId']}")) //todo: Need Reset Password
+                                    onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${buildingCommittee[index]['member']['userId']}")) //todo: Need Reset Password
                               ]))),
               //endregion
 
@@ -172,7 +172,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     flex: 1,
                                     toolTip: "Reset Password",
                                     icon: Icons.lock_reset,
-                                    onTap: () => showSnackBar(context: context, label: "Reset Password: User ID ${flatOwners[index]['user']['userId']}")) //todo: Need Reset Password
+                                    onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${flatOwners[index]['user']['userId']}")) //todo: Need Reset Password
                               ]))),
               //endregion
             ]),

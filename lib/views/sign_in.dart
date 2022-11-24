@@ -39,7 +39,7 @@ class _SignInState extends State<SignIn> {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 

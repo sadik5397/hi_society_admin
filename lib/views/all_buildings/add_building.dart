@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api.dart';
 import '../../components.dart';
@@ -19,18 +24,23 @@ class _AddBuildingState extends State<AddBuilding> {
   bool loadingWait = false;
   List<String> buildingFlatList = [];
   final TextEditingController buildingNameController = TextEditingController();
-  final TextEditingController buildingHeaderPhotoController = TextEditingController();
   final TextEditingController buildingAddressController = TextEditingController();
   final TextEditingController buildingFlatListController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   dynamic apiResult;
   FocusNode focusNode = FocusNode();
+  late File _image = File("");
+  String base64img = "";
+  final ImagePicker _picker = ImagePicker();
 
 //APIs
   Future<void> createBuilding({required String name, required String photo, required String address, required List<String> flats, required String accessToken, required VoidCallback successRoute}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building"), headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats}));
       Map result = jsonDecode(response.body);
+      print(jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats}));
+      print(result);
+      if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         setState(() => apiResult = result["data"]);
         successRoute.call();
@@ -38,7 +48,7 @@ class _AddBuildingState extends State<AddBuilding> {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -46,6 +56,19 @@ class _AddBuildingState extends State<AddBuilding> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
+  }
+
+  Future getImage() async {
+    XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() => _image = File(image!.path));
+    var result = await FlutterImageCompress.compressWithFile(_image.absolute.path, minWidth: 800, minHeight: 800, quality: 70, rotate: 0);
+    setState(() => base64img = (base64Encode(List<int>.from(result!)))); //error: The method 'readAsBytesSync' can't be unconditionally invoked because the receiver can be 'null'.
+  }
+
+  Future getWebImage() async {
+    Uint8List? bytesFromPicker = await ImagePickerWeb.getImageAsBytes();
+    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0);
+    setState(() => base64img = (base64Encode(List<int>.from(bytesFromPicker!)))); //error: The method 'readAsBytesSync' can't be unconditionally invoked because the receiver can be 'null'.
   }
 
 //Initiate
@@ -120,6 +143,11 @@ class _AddBuildingState extends State<AddBuilding> {
                                       deleteIconColor: Colors.black87,
                                       onDeleted: () => setState(() => buildingFlatList.removeAt(index)),
                                       label: Text(buildingFlatList[index]))))),
+                      //region Photo
+                      const Padding(padding: EdgeInsets.only(top: 12, left: 14, bottom: 6), child: Text("Upload Building Photo")),
+                      Padding(
+                          padding: const EdgeInsets.only(left: 12, bottom: 16), child: photoUploaderPro(width: 400, height: 250, onTap: () async => kIsWeb ? getWebImage() : getImage(), base64img: base64img)),
+                      //endregion Photo
                       Padding(
                           padding: const EdgeInsets.only(top: 6),
                           child: primaryButton(
@@ -141,8 +169,8 @@ class _AddBuildingState extends State<AddBuilding> {
                                       flats: buildingFlatList,
                                       name: buildingNameController.text,
                                       address: buildingAddressController.text,
-                                      photo: buildingHeaderPhotoController.text,
-                                      successRoute: showSuccess(context: context, label: "${buildingNameController.text} Added Successfully", onTap: () => route(context, const AllBuildings())));
+                                      photo: (base64img == "") ? "" : "data:image/png;base64,$base64img",
+                                      successRoute: () => showSuccess(context: context, label: "${buildingNameController.text} Added Successfully", onTap: () => route(context, const AllBuildings())));
                                 } else {
                                   showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                 }

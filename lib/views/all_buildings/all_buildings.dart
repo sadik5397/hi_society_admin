@@ -47,7 +47,7 @@ class _AllBuildingsState extends State<AllBuildings> {
         }
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -64,7 +64,7 @@ class _AllBuildingsState extends State<AllBuildings> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -90,7 +90,7 @@ class _AllBuildingsState extends State<AllBuildings> {
         showSnackBar(context: context, label: result1["message"][0].toString().length == 1 ? result1["message"].toString() : result1["message"][0].toString());
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -106,7 +106,7 @@ class _AllBuildingsState extends State<AllBuildings> {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -144,7 +144,11 @@ class _AllBuildingsState extends State<AllBuildings> {
                         padding: EdgeInsets.zero,
                         itemCount: apiResult.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              dataTableListTile(flex: 6, title: apiResult[index]["buildingName"], subtitle: 'Address: ${apiResult[index]["address"]}', img: apiResult[index]["photo"]),
+                              dataTableListTile(
+                                  flex: 6,
+                                  title: apiResult[index]["buildingName"],
+                                  subtitle: 'Address: ${apiResult[index]["address"]}',
+                                  img: apiResult[index]["photo"] != null ? '$baseUrl/photos/${apiResult[index]["photo"]}' : null),
                               dataTableChip(
                                   flex: 2,
                                   label: apiResult[index]["approvalStatus"] == "accepted" ? "active" : apiResult[index]["approvalStatus"],

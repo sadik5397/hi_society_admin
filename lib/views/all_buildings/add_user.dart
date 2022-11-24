@@ -62,16 +62,15 @@ class _AddUserState extends State<AddUser> {
         Map result2 = jsonDecode(response2.body);
         if (kDebugMode) print(result2);
         if (result2["statusCode"] == 200 || result2["statusCode"] == 201) {
-          showSnackBar(context: context, label: result2["message"]);
           onSuccess.call();
         } else {
-          showSnackBar(context: context, label: result2["message"][0].toString().length == 1 ? result2["message"].toString() : result2["message"][0].toString());
+          showError(context: context, label: result2["message"][0].toString().length == 1 ? result2["message"].toString() : result2["message"][0].toString());
         }
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -109,7 +108,7 @@ class _AddUserState extends State<AddUser> {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 
@@ -130,7 +129,7 @@ class _AddUserState extends State<AddUser> {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 

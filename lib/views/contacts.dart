@@ -32,7 +32,7 @@ class _UtilityContactsState extends State<UtilityContacts> {
         //todo: if error
       }
     } on Exception catch (e) {
-      showSnackBar(context: context, label: e.toString());
+      showError(context: context, label: e.toString());
     }
   }
 

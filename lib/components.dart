@@ -1,10 +1,11 @@
+import 'dart:convert';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'views/all_buildings/all_buildings.dart';
 import 'views/contacts.dart';
-import 'views/home.dart';
 import 'views/security_alert.dart';
 import 'views/sign_in.dart';
 import 'views/utility_contact.dart';
@@ -53,10 +54,15 @@ Container dashboardHeader({required BuildContext context, String? title}) {
           SelectableText("Logged in as Super-Admin", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
         ]),
         IconButton(
-            onPressed: () async {
-              route(context, const Home());
-              final pref = await SharedPreferences.getInstance();
-              pref.clear();
+            onPressed: () {
+              showPrompt(
+                  context: context,
+                  label: "You Will Be Logged Out",
+                  onTap: () async {
+                    route(context, const SignIn());
+                    final pref = await SharedPreferences.getInstance();
+                    pref.clear();
+                  });
             },
             icon: const Icon(Icons.power_settings_new_rounded),
             tooltip: "Sign Out")
@@ -106,6 +112,26 @@ showSuccess({required BuildContext context, String action = "OKAY", String? labe
       title: title ?? 'SUCCESS',
       text: capitalizeAllWord(label ?? "Progress Complete"),
       confirmBtnText: action,
+      backgroundColor: Colors.white,
+      titleColor: primaryColor,
+      textColor: Colors.black87,
+      autoCloseDuration: seconds != null ? Duration(seconds: seconds) : null);
+}
+
+showPrompt({required BuildContext context, String action = "YES", String cancel = "NO", String? label, String? title, int? seconds, VoidCallback? onTap}) {
+  return QuickAlert.show(
+      context: context,
+      onConfirmBtnTap: onTap,
+      onCancelBtnTap: () => routeBack(context),
+      width: 400,
+      type: QuickAlertType.warning,
+      borderRadius: 16,
+      animType: QuickAlertAnimType.slideInUp,
+      title: title ?? 'Are You Sure?',
+      text: capitalizeAllWord(label ?? "Click Yes/No"),
+      confirmBtnText: action,
+      showCancelBtn: true,
+      cancelBtnText: cancel,
       backgroundColor: Colors.white,
       titleColor: primaryColor,
       textColor: Colors.black87,
@@ -338,7 +364,9 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
         color: primaryColor,
         child: Column(children: [
           InkWell(
-              onTap: () => route(context, const AllBuildings()),
+              onTap: () {
+                route(context, const AllBuildings());
+              },
               child: Container(padding: const EdgeInsets.all(24), height: 84, width: 280, color: Colors.blueAccent, child: Image.asset("assets/logo.png", fit: BoxFit.fitHeight))),
           const SizedBox(height: 6),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
@@ -457,4 +485,32 @@ Expanded dataTableIcon({required VoidCallback onTap, int flex = 1, required Icon
 }
 
 Expanded dataTableNull({int flex = 1}) => Expanded(flex: flex, child: const SizedBox());
+
+Padding photoUploaderPro({required VoidCallback onTap, required String base64img, double? width, double? height}) {
+  return Padding(
+    padding: const EdgeInsets.only(right: 12),
+    child: Material(
+        color: themeOf,
+        borderRadius: BorderRadius.circular(16) / 2,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16) / 2,
+          child: AnimatedContainer(
+              width: width ?? 100,
+              height: height ?? 100,
+              duration: const Duration(milliseconds: 500),
+              padding: (base64img == "") ? const EdgeInsets.all(12 * 1.5) : EdgeInsets.zero,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
+              child: (base64img == "")
+                  ? DottedBorder(
+                      dashPattern: const [3, 6],
+                      color: Colors.black26,
+                      strokeWidth: 1,
+                      child: Container(height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
+                  : Container(
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
+                      child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),
+        )),
+  );
+}
 //endregion

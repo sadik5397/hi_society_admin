@@ -38,8 +38,7 @@ class _AddBuildingState extends State<AddBuilding> {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building"), headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats}));
       Map result = jsonDecode(response.body);
-      print(jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats}));
-      print(result);
+      if (kDebugMode) print(result);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         setState(() => apiResult = result["data"]);
@@ -67,8 +66,8 @@ class _AddBuildingState extends State<AddBuilding> {
 
   Future getWebImage() async {
     Uint8List? bytesFromPicker = await ImagePickerWeb.getImageAsBytes();
-    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0);
-    setState(() => base64img = (base64Encode(List<int>.from(bytesFromPicker!)))); //error: The method 'readAsBytesSync' can't be unconditionally invoked because the receiver can be 'null'.
+    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0); //todo:
+    setState(() => base64img = (base64Encode(List<int>.from(bytesFromPicker!))));
   }
 
 //Initiate

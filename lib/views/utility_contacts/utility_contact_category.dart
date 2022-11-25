@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api.dart';
-import '../components.dart';
+import '../../api.dart';
+import '../../components.dart';
 
-class UtilityContactSubGroup extends StatefulWidget {
-  const UtilityContactSubGroup({Key? key}) : super(key: key);
+class UtilityContactCategory extends StatefulWidget {
+  const UtilityContactCategory({Key? key}) : super(key: key);
 
   @override
-  State<UtilityContactSubGroup> createState() => _UtilityContactSubGroupState();
+  State<UtilityContactCategory> createState() => _UtilityContactCategoryState();
 }
 
-class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
+class _UtilityContactCategoryState extends State<UtilityContactCategory> {
 //Variables
   String accessToken = "";
   List utilityCategoryList = [];
@@ -44,7 +44,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
       if (kDebugMode) print(name);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
+        showSuccess(context: context, label: "$name Added");
         setState(() => utilityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
@@ -62,7 +62,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
       if (kDebugMode) print(name);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
+        showSuccess(context: context, label: "Updated to $name");
         setState(() => utilityCategoryList = result["data"]);
         Navigator.pop(context);
       } else {
@@ -80,7 +80,7 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
+        showSuccess(context: context, label: "Category Deleted");
         setState(() => utilityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
@@ -109,61 +109,62 @@ class _UtilityContactSubGroupState extends State<UtilityContactSubGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            pageName: "Contact Group",
+            pageName: "Utility Contacts",
             context: context,
-            header: "Utility Contact Group",
-            child: Column(children: [
-              const SizedBox(height: 12),
-              Container(
-                alignment: Alignment.centerRight,
-                child: primaryButton(
-                    width: 200,
-                    title: "Add New Category",
-                    onTap: () => showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return addNewCategory(
-                              context: context,
-                              onSubmit: () async {
-                                addUtilityCategory(accessToken: accessToken, name: categoryController.text);
-                                Navigator.pop(context);
-                                setState(() {
-                                  utilityCategoryList.add({"name": categoryController.text});
-                                });
-                                categoryController.clear();
-                              });
-                        })),
-              ),
-              if (utilityCategoryList.isEmpty)
-                const Padding(padding: EdgeInsets.all(48), child: Center(child: CircularProgressIndicator()))
-              else
-                ListView.builder(
-                    primary: false,
-                    shrinkWrap: true,
-                    itemCount: utilityCategoryList.length,
-                    itemBuilder: (context, index) => smartListTile(
-                        context: context,
-                        title: utilityCategoryList[index]["name"],
-                        onDelete: () {
-                          deleteUtilityCategory(accessToken: accessToken, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
-                          setState(() => utilityCategoryList.removeAt(index));
-                        },
-                        onEdit: () {
-                          setState(() => categoryController = TextEditingController(text: utilityCategoryList[index]["name"]));
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) => updateCategory(
-                                  context: context,
-                                  onSubmit: () async {
-                                    updateUtilityCategory(accessToken: accessToken, name: categoryController.text, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
-                                    Navigator.pop(context);
-                                    setState(() {
-                                      utilityCategoryList[index]["name"] = categoryController.text;
-                                    });
-                                    categoryController.clear();
-                                  }));
-                        }))
-            ])));
+            header: "Utility Contact Management",
+            child: dataTableContainer(
+                entryCount: utilityCategoryList.length,
+                headerRow: ["Category Name", "Status", "Actions"],
+                flex: [4, 2, 2],
+                primaryButtonOnTap: () => showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return addNewCategory(
+                          context: context,
+                          onSubmit: () async {
+                            addUtilityCategory(accessToken: accessToken, name: categoryController.text);
+                            Navigator.pop(context);
+                            setState(() {
+                              utilityCategoryList.add({"name": categoryController.text});
+                            });
+                            categoryController.clear();
+                          });
+                    }),
+                title: "Category",
+                child: (utilityCategoryList.isEmpty)
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemCount: utilityCategoryList.length,
+                        itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                              dataTableListTile(flex: 4, title: utilityCategoryList[index]["name"]),
+                              dataTableChip(flex: 2, label: "Active"),
+                              dataTableIcon(
+                                  onTap: () => showPrompt(
+                                      context: context,
+                                      onTap: () async {
+                                        routeBack(context);
+                                        await deleteUtilityCategory(accessToken: accessToken, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
+                                        setState(() => utilityCategoryList.removeAt(index));
+                                      }),
+                                  icon: Icons.delete),
+                              dataTableIcon(
+                                  onTap: () {
+                                    setState(() => categoryController = TextEditingController(text: utilityCategoryList[index]["name"]));
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) => updateCategory(
+                                            context: context,
+                                            onSubmit: () async {
+                                              updateUtilityCategory(accessToken: accessToken, name: categoryController.text, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
+                                              Navigator.pop(context);
+                                              setState(() {
+                                                utilityCategoryList[index]["name"] = categoryController.text;
+                                              });
+                                              categoryController.clear();
+                                            }));
+                                  },
+                                  icon: Icons.edit),
+                            ])))));
   }
 
   AlertDialog addNewCategory({required BuildContext context, required VoidCallback onSubmit}) {

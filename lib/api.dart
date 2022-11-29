@@ -19,3 +19,6 @@ Map<String, String> authHeader(String accessToken) {
 
 // to deploy release build web
 // flutter build web --web-renderer html
+
+//flutter run -d chrome --web-renderer html // to run the app
+//flutter build web --web-renderer html --release // to generate a production build

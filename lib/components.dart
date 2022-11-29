@@ -1,15 +1,17 @@
 import 'dart:convert';
+
 import 'package:dotted_border/dotted_border.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/amenities/amenity_category.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'views/all_buildings/all_buildings.dart';
 import 'views/security_alerts/security_alert.dart';
 import 'views/sign_in.dart';
 import 'views/utility_contacts/utility_contact_category.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 
 //region Static Values
 String placeholderImage = "https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=";
@@ -418,7 +420,8 @@ Container dataTableContainer(
                     backgroundColor: Colors.black.withOpacity(.05),
                     label: SelectableText("$entryCount Entries", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
               const Expanded(child: SizedBox()),
-              if (primaryButtonOnTap != null) primaryButton(title: primaryButtonText, onTap: primaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add),
+              if (primaryButtonOnTap != null)
+                primaryButton(title: primaryButtonText, onTap: primaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: primaryButtonText == "Edit" ? Icons.edit : Icons.add),
               if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add)
             ])),
         const Divider(height: 1),
@@ -455,8 +458,8 @@ Expanded dataTableListTile({required String title, String? subtitle, int flex = 
           ])));
 }
 
-Expanded dataTableSingleInfo({required String title, int flex = 1, Color color = Colors.black87}) {
-  return Expanded(flex: flex, child: SelectableText(title, textAlign: TextAlign.center, style: TextStyle(color: color, fontWeight: FontWeight.normal, fontSize: 16, height: 0)));
+Expanded dataTableSingleInfo({required String title, int flex = 1, Color color = Colors.black87, TextAlign alignment = TextAlign.center}) {
+  return Expanded(flex: flex, child: SelectableText(title, textAlign: alignment, style: TextStyle(color: color, fontWeight: FontWeight.normal, fontSize: 16, height: 1.5)));
 }
 
 Expanded dataTableChip({required String label, Color color = const Color(0xff2196f3), int flex = 1, Alignment alignment = Alignment.center}) {
@@ -489,7 +492,7 @@ Expanded dataTableIcon({required VoidCallback onTap, int flex = 1, required Icon
 
 Expanded dataTableNull({int flex = 1}) => Expanded(flex: flex, child: const SizedBox());
 
-Padding photoUploaderPro({required VoidCallback onTap, required String base64img, double? width, double? height}) {
+Padding photoUploaderPro({required VoidCallback onTap, required String base64img, double? width, double? height, String networkImage = ""}) {
   return Padding(
     padding: const EdgeInsets.only(right: 12),
     child: Material(
@@ -504,15 +507,17 @@ Padding photoUploaderPro({required VoidCallback onTap, required String base64img
               duration: const Duration(milliseconds: 500),
               padding: (base64img == "") ? const EdgeInsets.all(12 * 1.5) : EdgeInsets.zero,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
-              child: (base64img == "")
-                  ? DottedBorder(
-                      dashPattern: const [3, 6],
-                      color: Colors.black26,
-                      strokeWidth: 1,
-                      child: Container(height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
-                  : Container(
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
-                      child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),
+              child: (networkImage != "" && base64img == "")
+                  ? Image.network(networkImage, fit: BoxFit.cover)
+                  : (base64img == "")
+                      ? DottedBorder(
+                          dashPattern: const [3, 6],
+                          color: Colors.black26,
+                          strokeWidth: 1,
+                          child: Container(height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
+                      : Container(
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
+                          child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),
         )),
   );
 }

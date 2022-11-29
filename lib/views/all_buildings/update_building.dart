@@ -1,16 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/add_user.dart';
+import 'package:hi_society_admin/views/all_buildings/update_building_info.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../api.dart';
 import '../../components.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class UpdateBuilding extends StatefulWidget {
-  const UpdateBuilding({Key? key, required this.buildingID, required this.buildingName, this.guard}) : super(key: key);
+  const UpdateBuilding({Key? key, required this.buildingID, required this.buildingPhoto, required this.buildingName, required this.buildingAddress, this.guard}) : super(key: key);
   final int buildingID;
-  final String buildingName;
+  final String buildingName, buildingAddress, buildingPhoto;
   final Map? guard;
 
   @override
@@ -20,7 +23,7 @@ class UpdateBuilding extends StatefulWidget {
 class _UpdateBuildingState extends State<UpdateBuilding> {
   //Variables
   String accessToken = "";
-  dynamic apiResult;
+  Map<String, dynamic> buildingInfo = {};
   Map<String, dynamic> buildingExecutiveUsers = {};
   List buildingCommittee = [];
   List flatOwners = [];
@@ -45,10 +48,27 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
+  Future<void> readBuildingInfo({required String accessToken, required int buildingID}) async {
+    try {
+      var response = await http.get(Uri.parse("$baseUrl/building/info?bid=$buildingID"), headers: authHeader(accessToken));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+        setState(() => buildingInfo = result["data"]);
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
 //Functions
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
+    await readBuildingInfo(accessToken: accessToken, buildingID: widget.buildingID);
     await readBuildingExecutiveUserList(accessToken: accessToken, buildingID: widget.buildingID);
   }
 
@@ -67,6 +87,27 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
             pageName: "All Buildings",
             header: "Information: ${widget.buildingName}",
             child: Column(mainAxisSize: MainAxisSize.min, children: [
+              //region Building Info
+              dataTableContainer(
+                  isScrollableWidget: false,
+                  paddingBottom: 0,
+                  headerPadding: buildingInfo == {} ? 8 : 0,
+                  title: "Building Information",
+                  primaryButtonText: "Edit",
+                  primaryButtonOnTap: () =>
+                      route(context, UpdateBuildingInfo(buildingID: widget.buildingID, buildingName: widget.buildingName, buildingNameAddress: widget.buildingAddress, buildingPhoto: widget.buildingPhoto)),
+                  child: (buildingInfo == {})
+                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
+                      : Row(
+                          children: [
+                            dataTableListTile(flex: 2, title: 'Building Name: ${buildingInfo["buildingName"]}', img: '$baseUrl/photos/${buildingInfo["photo"]}'),
+                            dataTableChip(label: buildingInfo["approvalStatus"]),
+                            dataTableSingleInfo(flex: 2, title: 'Address:\n${buildingInfo["address"]}', alignment: TextAlign.start),
+                            dataTableNull()
+                          ],
+                        )),
+              //endregion
+
               //region Guard
               if (widget.guard != null)
                 dataTableContainer(

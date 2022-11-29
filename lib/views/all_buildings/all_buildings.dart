@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/add_building.dart';
 import 'package:hi_society_admin/views/sign_in.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../api.dart';
 import '../../components.dart';
 import 'update_building.dart';
@@ -191,7 +193,14 @@ class _AllBuildingsState extends State<AllBuildings> {
                                       icon: Icons.call_rounded)
                                   : dataTableNull(),
                               dataTableIcon(
-                                  onTap: () => route(context, UpdateBuilding(buildingName: apiResult[index]["buildingName"], buildingID: apiResult[index]["buildingId"], guard: apiResult[index]["guard"])),
+                                  onTap: () => route(
+                                      context,
+                                      UpdateBuilding(
+                                          buildingName: apiResult[index]["buildingName"],
+                                          buildingAddress: apiResult[index]["address"],
+                                          buildingID: apiResult[index]["buildingId"],
+                                          buildingPhoto: apiResult[index]["photo"] != null ? '$baseUrl/photos/${apiResult[index]["photo"]}' : "",
+                                          guard: apiResult[index]["guard"])),
                                   icon: Icons.edit),
                             ])))));
   }

@@ -175,7 +175,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                                                     buildingID: apiResult[index]["buildingId"],
                                                     onSuccess: () async {
                                                       routeBack(context);
-                                                      await defaultInit();
+                                                      // await defaultInit();
                                                       await showDialog(
                                                           context: context,
                                                           builder: (BuildContext context) => viewGuardCredentials(

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -42,25 +41,13 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
 //APIs
   Future<void> updateBuilding({required String name, required String photo, required String address, required List<String> flats, required String accessToken, required VoidCallback successRoute}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/building/info/update"),
-          headers: authHeader(accessToken),
-          body: jsonEncode({
-            "name": name,
-            "photo": photo,
-            "address": address,
-            "flats": flats,
-            "buildingId": {widget.buildingID}
-          }));
-      Map result = jsonDecode(response.body);
       if (kDebugMode) {
-        print(jsonEncode({
-          "name": name,
-          "photo": photo,
-          "address": address,
-          "flats": flats,
-          "buildingId": {widget.buildingID}
-        }));
+        print(jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats, "buildingId": widget.buildingID}));
       }
+      var response = await http.post(Uri.parse("$baseUrl/building/info/update"),
+          headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo != "" ? photo : null, "address": address, "flats": flats, "buildingId": widget.buildingID}));
+      Map result = jsonDecode(response.body);
+
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         setState(() => apiResult = result["data"]);
@@ -204,7 +191,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                               width: 200,
                               icon: Icons.done_all_rounded,
                               // loadingWait: loadingWait,
-                              title: "Create Building",
+                              title: "Update Building",
                               onTap: () async {
                                 FocusManager.instance.primaryFocus?.unfocus();
                                 // setState(() => loadingWait = true);

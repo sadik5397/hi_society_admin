@@ -163,11 +163,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
               dataTableContainer(
                   isScrollableWidget: false,
                   paddingBottom: 0,
+                  // title: buildingExecutiveUsers["committeeHeads"].toString(),
                   title: "Building Committee",
                   primaryButtonText: "Add Head",
                   secondaryButtonText: "Add Member",
-                  primaryButtonOnTap:
-                      (buildingExecutiveUsers["committeeHeads"] == null) ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Head", buildingName: widget.buildingName)) : null,
+                  primaryButtonOnTap: (buildingExecutiveUsers["committeeHeads"] == null || buildingExecutiveUsers["committeeHeads"].length == 0)
+                      ? () => route(
+                          context,
+                          AddUser(
+                              buildingId: widget.buildingID,
+                              role: "Committee_He"
+                                  "ad",
+                              buildingName: widget.buildingName))
+                      : null,
                   secondaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Member", buildingName: widget.buildingName)),
                   headerRow: ["Name", "Role", "Status", "Action"],
                   flex: [2, 2, 1, 1],

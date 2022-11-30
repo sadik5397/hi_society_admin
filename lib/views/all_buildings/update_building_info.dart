@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -203,7 +204,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                   }
                                   await updateBuilding(
                                       accessToken: accessToken,
-                                      flats: buildingFlatList,
+                                      flats: buildingFlatList, //todo: flats are not updating
                                       name: buildingNameController.text,
                                       address: buildingAddressController.text,
                                       photo: (base64img == "") ? "" : "data:image/png;base64,$base64img",

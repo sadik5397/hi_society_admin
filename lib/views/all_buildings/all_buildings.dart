@@ -232,7 +232,7 @@ class _AllBuildingsState extends State<AllBuildings> {
 
   AlertDialog viewGuardCredentials({required String buildingName, required BuildContext context, required String password, required String email}) {
     return AlertDialog(
-        title: const Center(child: Text("Guard Device Access Created", textAlign: TextAlign.center)),
+        title: const Center(child: Text("Guard Access Point Created", textAlign: TextAlign.center)),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
         content: Column(mainAxisSize: MainAxisSize.min, children: [

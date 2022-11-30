@@ -113,7 +113,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                 dataTableContainer(
                     isScrollableWidget: false,
                     paddingBottom: 0,
-                    title: "Guard Device Access",
+                    title: "Guard Device Access Point",
                     headerRow: ["Name", "Role", "Status", "Action"],
                     flex: [2, 2, 1, 1],
                     child: ListView.builder(
@@ -123,7 +123,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                         itemCount: 1,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                               dataTableListTile(flex: 2, title: widget.guard!["name"], subtitle: widget.guard!["email"]),
-                              dataTableSingleInfo(flex: 2, title: "Guard Device App"),
+                              dataTableSingleInfo(flex: 2, title: "Guard Device Access Point"),
                               dataTableChip(flex: 1, label: "Active"),
                               dataTableIcon(flex: 1, toolTip: "Reset Password", icon: Icons.lock_reset, onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${widget.guard!["userId"]}")),
                               //todo: Need Reset Password

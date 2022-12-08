@@ -23,30 +23,21 @@ class _AllBuildingsState extends State<AllBuildings> {
   String accessToken = "";
   List apiResult = [];
   dynamic guardAccess = {};
+  bool isVerified = true;
 
 //APIs
-  Future<void> verifyMyself({required String accessToken}) async {
+  Future<void> verifyMyself({required String accessToken, required VoidCallback ifError}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/user/me"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
-        if (result["data"]["role"] != "admin") {
-          // ignore: use_build_context_synchronously
-          route(context, const SignIn());
-          showSnackBar(context: context, label: "You're NOT ALLOWED to login as ADMIN", seconds: 10);
-          final pref = await SharedPreferences.getInstance();
-          pref.clear();
-        }
       } else {
-        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        if (result["data"]["role"] != "admin") {
-          // ignore: use_build_context_synchronously
-          route(context, const SignIn());
-          showSnackBar(context: context, label: "You're NOT ALLOWED to login as ADMIN", seconds: 10);
-          final pref = await SharedPreferences.getInstance();
-          pref.clear();
-        }
+        setState(() => isVerified = false);
+        ifError.call();
+        showError(context: context, label: "Please Login Again", seconds: 10);
+        final pref = await SharedPreferences.getInstance();
+        pref.clear();
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -116,8 +107,8 @@ class _AllBuildingsState extends State<AllBuildings> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    await verifyMyself(accessToken: accessToken);
-    await readAllBuilding(accessToken: accessToken);
+    await verifyMyself(accessToken: accessToken, ifError: () => route(context, const SignIn()));
+    if (!isVerified) await readAllBuilding(accessToken: accessToken);
   }
 
 //Initiate
@@ -232,8 +223,8 @@ class _AllBuildingsState extends State<AllBuildings> {
 
   AlertDialog viewGuardCredentials({required String buildingName, required BuildContext context, required String password, required String email}) {
     return AlertDialog(
-        title: const Center(child: Text("Guard Access Point Created", textAlign: TextAlign.center)),
-        insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
+        title: const Center(child: Text("Guard Device Access Point Created", textAlign: TextAlign.center)),
+        insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 150),
         buttonPadding: EdgeInsets.zero,
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           const SelectableText("Building Name"),

@@ -4,6 +4,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/amenities/amenity_category.dart';
+import 'package:hi_society_admin/views/users/users.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -373,6 +374,7 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
               child: Container(padding: const EdgeInsets.all(24), height: 84, width: 280, color: Colors.blueAccent, child: Image.asset("assets/logo.png", fit: BoxFit.fitHeight))),
           const SizedBox(height: 6),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
+          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Users", toPage: const Users()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
           // sidebarMenuHead(context: context, title: "Utility Contacts", children: [
           //   sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Contact Group", toPage: const UtilityContactSubGroup(), isSubMenu: true),

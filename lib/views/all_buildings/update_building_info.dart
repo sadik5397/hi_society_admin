@@ -65,7 +65,6 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
     try {
       var response = await http.get(Uri.parse("$baseUrl/building/list/flats?bid=${widget.buildingID}"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
-      print(result);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         setState(() => flatObject = result["data"]);

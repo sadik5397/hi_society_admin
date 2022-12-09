@@ -27,6 +27,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   Map<String, dynamic> buildingExecutiveUsers = {};
   List buildingCommittee = [];
   List flatOwners = [];
+  TextEditingController newPasswordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
 
 //APIs
   Future<void> readBuildingExecutiveUserList({required String accessToken, required int buildingID}) async {
@@ -39,6 +41,24 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         setState(() => buildingExecutiveUsers = result["data"]);
         setState(() => buildingCommittee = result["data"]["committeeHeads"] + result["data"]["committeeMembers"]);
         setState(() => flatOwners = result["data"]["flatOwners"]);
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        //todo: if error
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
+  Future<void> updateUserPassword({required String accessToken, required String newPassword, required String confirmPassword, required int userId}) async {
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"),
+          headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(newPassword);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSuccess(context: context, label: "Password Updated", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
         //todo: if error
@@ -125,7 +145,23 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                               dataTableListTile(flex: 2, title: widget.guard!["name"], subtitle: widget.guard!["email"]),
                               dataTableSingleInfo(flex: 2, title: "Guard Device Access Point"),
                               dataTableChip(flex: 1, label: "Active"),
-                              dataTableIcon(flex: 1, toolTip: "Reset Password", icon: Icons.lock_reset, onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${widget.guard!["userId"]}")),
+                              dataTableIcon(
+                                  toolTip: "Change Password",
+                                  onTap: () {
+                                    setState(() => newPasswordController.clear());
+                                    setState(() => confirmPasswordController.clear());
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) => updatePassword(
+                                            userId: widget.guard!["userId"],
+                                            context: context,
+                                            onSubmit: () async {
+                                              updateUserPassword(
+                                                  accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: widget.guard!["userId"]);
+                                              Navigator.pop(context);
+                                            }));
+                                  },
+                                  icon: Icons.lock_reset),
                               //todo: Need Reset Password
                             ]))),
               //endregion
@@ -152,29 +188,38 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                 dataTableSingleInfo(flex: 2, title: "Building Manager"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(
-                                    flex: 1,
-                                    toolTip: "Reset Password",
-                                    icon: Icons.lock_reset,
-                                    onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${buildingExecutiveUsers["manager"]["userId"]}")) //todo: Need Reset Password
+                                    toolTip: "Change Password",
+                                    onTap: () {
+                                      setState(() => newPasswordController.clear());
+                                      setState(() => confirmPasswordController.clear());
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) => updatePassword(
+                                              userId: buildingExecutiveUsers["manager"]["userId"],
+                                              context: context,
+                                              onSubmit: () async {
+                                                updateUserPassword(
+                                                    accessToken: accessToken,
+                                                    confirmPassword: confirmPasswordController.text,
+                                                    newPassword: newPasswordController.text,
+                                                    userId: buildingExecutiveUsers["manager"]["userId"]);
+                                                Navigator.pop(context);
+                                              }));
+                                    },
+                                    icon: Icons.lock_reset)
                               ]))),
+
               //endregion
 
               //region Committee
               dataTableContainer(
                   isScrollableWidget: false,
                   paddingBottom: 0,
-                  // title: buildingExecutiveUsers["committeeHeads"].toString(),
                   title: "Building Committee",
                   primaryButtonText: "Add Head",
                   secondaryButtonText: "Add Member",
                   primaryButtonOnTap: (buildingExecutiveUsers["committeeHeads"] == null || buildingExecutiveUsers["committeeHeads"].length == 0)
-                      ? () => route(
-                          context,
-                          AddUser(
-                              buildingId: widget.buildingID,
-                              role: "Committee_He"
-                                  "ad",
-                              buildingName: widget.buildingName))
+                      ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Head", buildingName: widget.buildingName))
                       : null,
                   secondaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Member", buildingName: widget.buildingName)),
                   headerRow: ["Name", "Role", "Status", "Action"],
@@ -191,10 +236,25 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                 dataTableSingleInfo(flex: 2, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(
-                                    flex: 1,
-                                    toolTip: "Reset Password",
-                                    icon: Icons.lock_reset,
-                                    onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${buildingCommittee[index]['member']['userId']}")) //todo: Need Reset Password
+                                    toolTip: "Change Password",
+                                    onTap: () {
+                                      setState(() => newPasswordController.clear());
+                                      setState(() => confirmPasswordController.clear());
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) => updatePassword(
+                                              userId: buildingCommittee[index]["member"]["userId"],
+                                              context: context,
+                                              onSubmit: () async {
+                                                updateUserPassword(
+                                                    accessToken: accessToken,
+                                                    confirmPassword: confirmPasswordController.text,
+                                                    newPassword: newPasswordController.text,
+                                                    userId: buildingCommittee[index]["member"]["userId"]);
+                                                Navigator.pop(context);
+                                              }));
+                                    },
+                                    icon: Icons.lock_reset)
                               ]))),
               //endregion
 
@@ -218,13 +278,44 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                 dataTableSingleInfo(flex: 2, title: "Flat Owner: F5"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(
-                                    flex: 1,
-                                    toolTip: "Reset Password",
-                                    icon: Icons.lock_reset,
-                                    onTap: () => showPrompt(context: context, label: "Reset Password: User ID ${flatOwners[index]['user']['userId']}")) //todo: Need Reset Password
+                                    toolTip: "Change Password",
+                                    onTap: () {
+                                      setState(() => newPasswordController.clear());
+                                      setState(() => confirmPasswordController.clear());
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) => updatePassword(
+                                              userId: flatOwners[index]["user"]["userId"],
+                                              context: context,
+                                              onSubmit: () async {
+                                                updateUserPassword(
+                                                    accessToken: accessToken,
+                                                    confirmPassword: confirmPasswordController.text,
+                                                    newPassword: newPasswordController.text,
+                                                    userId: flatOwners[index]["user"]["userId"]);
+                                                Navigator.pop(context);
+                                              }));
+                                    },
+                                    icon: Icons.lock_reset)
                               ]))),
               //endregion
             ]),
             context: context));
+  }
+
+  AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {
+    return AlertDialog(
+      title: const Center(child: Text("Update User Password")),
+      insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
+      buttonPadding: EdgeInsets.zero,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          primaryTextField(labelText: "New Password", controller: newPasswordController),
+          primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0),
+        ],
+      ),
+      actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)],
+    );
   }
 }

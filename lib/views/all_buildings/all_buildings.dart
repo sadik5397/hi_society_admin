@@ -108,7 +108,7 @@ class _AllBuildingsState extends State<AllBuildings> {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
     await verifyMyself(accessToken: accessToken, ifError: () => route(context, const SignIn()));
-    if (!isVerified) await readAllBuilding(accessToken: accessToken);
+    if (isVerified) await readAllBuilding(accessToken: accessToken);
   }
 
 //Initiate

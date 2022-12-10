@@ -15,7 +15,7 @@ import 'views/sign_in.dart';
 import 'views/utility_contacts/utility_contact_category.dart';
 
 //region Static Values
-String placeholderImage = "https://media.istockphoto.com/vectors/thumbnail-image-vector-graphic-vector-id1147544807?k=20&m=1147544807&s=612x612&w=0&h=pBhz1dkwsCMq37Udtp9sfxbjaMl27JUapoyYpQm0anc=";
+String placeholderImage = "https://i.ibb.co/NSDmSZ0/Sqr-hi-Society-Placeholder.png";
 Color themeOf = const Color(0xFFe8f5ff);
 Color primaryColor = const Color(0xff2196f3);
 //endregion

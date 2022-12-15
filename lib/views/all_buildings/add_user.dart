@@ -1,11 +1,13 @@
+import 'dart:convert';
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/components.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../api.dart';
 
 class AddUser extends StatefulWidget {
@@ -23,7 +25,7 @@ class _AddUserState extends State<AddUser> {
   String accessToken = "";
   String newRandomPassword = "";
   TextEditingController existingUserEmailController = TextEditingController();
-  List<String> roles = ["Resident", "Building_Manager", "Flat_Owner", "Committee_Head", "Committee_Member", "Resident_Head"];
+  List<String> roles = ["Building_Manager", "Flat_Owner", "Committee_Head", "Committee_Member"];
   List<String> flats = [];
   List<int> flatIds = [];
   late String selectedNewUserRole = widget.role;

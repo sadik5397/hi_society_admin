@@ -121,7 +121,14 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                       : Row(
                           children: [
                             dataTableListTile(flex: 2, title: 'Building Name: ${buildingInfo["buildingName"]}', img: '$baseUrl/photos/${buildingInfo["photo"]}'),
-                            dataTableChip(label: buildingInfo["approvalStatus"]),
+                            dataTableChip(
+                                flex: 2,
+                                label: buildingInfo["approvalStatus"] == "accepted" ? "active" : buildingInfo["approvalStatus"],
+                                color: buildingInfo["approvalStatus"] == "pending"
+                                    ? const Color(0xFFE67E22)
+                                    : buildingInfo["approvalStatus"] == "rejected"
+                                        ? const Color(0xFFFF2C2C)
+                                        : const Color(0xFF3498DB)),
                             dataTableSingleInfo(flex: 2, title: 'Address:\n${buildingInfo["address"]}', alignment: TextAlign.start),
                             dataTableNull()
                           ],

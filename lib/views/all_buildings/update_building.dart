@@ -282,7 +282,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           itemCount: flatOwners.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                                 dataTableListTile(flex: 2, title: flatOwners[index]["user"]["name"], subtitle: flatOwners[index]["user"]["email"]),
-                                dataTableSingleInfo(flex: 2, title: "Flat Owner: F5"),
+                                dataTableSingleInfo(flex: 2, title: "Flat Owner"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(
                                     toolTip: "Change Password",

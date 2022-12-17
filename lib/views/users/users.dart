@@ -96,7 +96,11 @@ class _UsersState extends State<Users> {
                                   title: userList[index]["name"].toString(),
                                   subtitle: 'Role: ${userList[index]["role"] == null ? "N/A" : capitalizeAllWord(userList[index]["role"]["role"].toString().replaceAll("_", " "))}'),
                               dataTableChip(flex: 1, label: "Active"),
-                              dataTableListTile(flex: 3, title: 'Email: ${userList[index]["email"]}', subtitle: 'Phone: ${userList[index]["phone"]}', hideImage: true),
+                              dataTableListTile(
+                                  flex: 3,
+                                  title: 'Email: ${userList[index]["email"]}',
+                                  subtitle: 'Phone: ${(userList[index]["phone"] == "00000000000" || userList[index]["phone"] == "___________") ? "" : userList[index]["phone"]}',
+                                  hideImage: true),
                               // dataTableIcon(
                               //     onTap: () => showPrompt(
                               //         context: context,

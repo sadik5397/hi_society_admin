@@ -127,7 +127,7 @@ class _AllBuildingsState extends State<AllBuildings> {
             header: "All Registered Buildings",
             child: dataTableContainer(
                 title: "All Buildings",
-                headerRow: ["Building Name", "Status", "Unique ID", "Total Flats", "Action"],
+                headerRow: ["Building Name", "Status", "Unique ID", "Total Flats", "Actions"],
                 flex: [6, 2, 2, 2, 2],
                 entryCount: apiResult.length,
                 primaryButtonOnTap: () => route(context, const AddBuilding()),

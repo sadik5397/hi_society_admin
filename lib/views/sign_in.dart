@@ -18,8 +18,8 @@ class _SignInState extends State<SignIn> {
   String accessToken = "";
   bool loadingWait = false;
   bool showPassword = false;
-  final TextEditingController emailController = TextEditingController(text: "admin@lh.com");
-  final TextEditingController passwordController = TextEditingController(text: "1234");
+  final TextEditingController emailController = TextEditingController(text: "admin@hisocietybd.com");
+  final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   dynamic apiResult = {};
 
@@ -84,13 +84,14 @@ class _SignInState extends State<SignIn> {
                                         controller: emailController,
                                         labelText: "Enter Email or Username",
                                         keyboardType: TextInputType.emailAddress,
-                                        autoFocus: true,
+
                                         required: true,
                                         errorText: "Username/Email required",
                                         textCapitalization: TextCapitalization.none),
                                     primaryTextField(
                                         autofillHints: AutofillHints.password,
                                         width: 400,
+                                        autoFocus: true,
                                         controller: passwordController,
                                         labelText: "Enter Password",
                                         isPassword: true,

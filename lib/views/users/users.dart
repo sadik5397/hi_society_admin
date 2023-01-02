@@ -63,18 +63,13 @@ class _UsersState extends State<Users> {
 
   Future<void> sendNotification({required String accessToken, required String title, required String body, required int userId}) async {
     Map payload = {
-      "notification": {
-        "title": title,
-        "body": body
-      },
-      "data": {
-        "topic": "announcement"
-      }
+      "notification": {"title": title, "body": body},
+      "data": {"topic": "announcement"}
     };
     String base64Str = payload.toString();
     try {
-      var response = await http.post(Uri.parse("$baseUrl/push/send/by-user"),
-          headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "payload": base64Str}));
+      if (kDebugMode) print(jsonEncode({"userId": userId, "payload": base64Str}));
+      var response = await http.post(Uri.parse("$baseUrl/push/send/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "payload": base64Str}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -90,8 +85,7 @@ class _UsersState extends State<Users> {
 
   Future<void> unAssignBuilding({required String accessToken, required int userId, required String role}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/building/remove/building/by-user"),
-          headers: authHeader(accessToken), body: jsonEncode({"userId": userId}));
+      var response = await http.post(Uri.parse("$baseUrl/building/remove/building/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -142,7 +136,8 @@ class _UsersState extends State<Users> {
                               dataTableListTile(
                                   flex: 4,
                                   title: userList[index]["name"].toString(),
-                                  subtitle: 'Role: ${userList[index]["role"] == null ? "Not Available" :userList[index]["role"]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(userList[index]["role"]["role"].toString().replaceAll("_", " "))}'),
+                                  subtitle:
+                                      'Role: ${userList[index]["role"] == null ? "Not Available" : userList[index]["role"]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(userList[index]["role"]["role"].toString().replaceAll("_", " "))}'),
                               dataTableChip(flex: 2, label: "Active"),
                               dataTableListTile(
                                   flex: 4,
@@ -168,13 +163,12 @@ class _UsersState extends State<Users> {
                                         builder: (BuildContext context) => createNotification(
                                             context: context,
                                             onSubmit: () async {
-                                              sendNotification(
-                                                  accessToken: accessToken, title: notificationTitle.text, body: notificationBody.text, userId: userList[index]["userId"]);
+                                              sendNotification(accessToken: accessToken, title: notificationTitle.text, body: notificationBody.text, userId: userList[index]["userId"]);
                                               Navigator.pop(context);
                                             }));
                                   },
                                   icon: Icons.notification_add_outlined),
-                          dataTableIcon(
+                              dataTableIcon(
                                   toolTip: "Change Password",
                                   onTap: () {
                                     setState(() => newPasswordController.clear());
@@ -190,13 +184,16 @@ class _UsersState extends State<Users> {
                                               Navigator.pop(context);
                                             }));
                                   },
-                                  icon: Icons.lock_reset),dataTableIcon(
+                                  icon: Icons.lock_reset),
+                              dataTableIcon(
                                   toolTip: "Un-assign Building",
-                                  onTap: () async{
-                                    await showPrompt(context: context, onTap: ()async{
-                                      routeBack(context);
-                                      await unAssignBuilding(accessToken: accessToken,role: userList[index]["role"]["role"].toString(), userId: userList[index]["userId"]);
-                                    });
+                                  onTap: () async {
+                                    await showPrompt(
+                                        context: context,
+                                        onTap: () async {
+                                          routeBack(context);
+                                          await unAssignBuilding(accessToken: accessToken, role: userList[index]["role"]["role"].toString(), userId: userList[index]["userId"]);
+                                        });
                                   },
                                   icon: Icons.block_outlined),
                             ])))));

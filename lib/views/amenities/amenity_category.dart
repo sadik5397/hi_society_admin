@@ -149,7 +149,8 @@ class _AmenityCategoryState extends State<AmenityCategory> {
                                         await deleteAmenityCategory(accessToken: accessToken, cid: amenityCategoryList[index]["amenityCategoryId"]);
                                         setState(() => amenityCategoryList.removeAt(index));
                                       }),
-                                  icon: Icons.delete),
+                                  icon: Icons.delete_outline_rounded,
+                                  color: Colors.redAccent),
                               dataTableIcon(
                                   onTap: () {
                                     setState(() => categoryController = TextEditingController(text: amenityCategoryList[index]["categoryName"]));

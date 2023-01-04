@@ -9,14 +9,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../api.dart';
 import '../../components.dart';
 
-class Users extends StatefulWidget {
-  const Users({Key? key}) : super(key: key);
+class RentSellAds extends StatefulWidget {
+  const RentSellAds({Key? key}) : super(key: key);
 
   @override
-  State<Users> createState() => _UsersState();
+  State<RentSellAds> createState() => _RentSellAdsState();
 }
 
-class _UsersState extends State<Users> {
+class _RentSellAdsState extends State<RentSellAds> {
 //Variables
   String accessToken = "";
   List userList = [];
@@ -26,9 +26,9 @@ class _UsersState extends State<Users> {
   TextEditingController notificationBody = TextEditingController();
 
 //APIs
-  Future<void> readUserList({required String accessToken}) async {
+  Future<void> readAdList({required String accessToken}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/user/list?limit=300"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/apartment-ads/list?limit=30"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -105,7 +105,7 @@ class _UsersState extends State<Users> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    await readUserList(accessToken: accessToken);
+    await readAdList(accessToken: accessToken);
   }
 
 //Initiate
@@ -119,87 +119,78 @@ class _UsersState extends State<Users> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            pageName: "Users",
+            pageName: "Rent/Sell Ads",
             context: context,
-            header: "User Management",
+            header: "Apartment Rent/Sell Ads Moderation",
             child: dataTableContainer(
                 entryCount: userList.length,
                 headerRow: ["Name", "Status", "Email" "Phone", "Actions"],
                 flex: [4, 2, 4, 3],
                 title: "All Users",
-                child: (userList.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                        itemCount: userList.length,
-                        itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              // dataTableListTile(flex: 1, title: userList[index]["userId"].toString(), hideImage: true),
-                              dataTableListTile(
-                                  flex: 4,
-                                  title: userList[index]["name"].toString(),
-                                  subtitle:
-                                      'Role: ${userList[index]["role"] == null ? "Not Available" : userList[index]["role"]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(userList[index]["role"]["role"].toString().replaceAll("_", " "))}'),
-                              dataTableChip(flex: 2, label: "Active"),
-                              dataTableListTile(
-                                  flex: 4,
-                                  title: 'Email: ${userList[index]["email"]}',
-                                  subtitle: 'Phone: ${(userList[index]["phone"] == "00000000000" || userList[index]["phone"] == "___________") ? "" : userList[index]["phone"]}',
-                                  hideImage: true),
-                              // dataTableIcon(
-                              //     onTap: () => showPrompt(
-                              //         context: context,
-                              //         onTap: () async {
-                              //           routeBack(context);
-                              //           await deleteAmenityCategory(accessToken: accessToken, cid: userList[index]["userId"]);
-                              //           setState(() => userList.removeAt(index));
-                              //         }),
-                              //     icon: Icons.delete),
-                              dataTableIcon(
-                                  toolTip: "Send Instant Notification",
-                                  onTap: () {
-                                    setState(() => notificationTitle.clear());
-                                    setState(() => notificationBody.clear());
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) => createNotification(
-                                            context: context,
-                                            onSubmit: () async {
-                                              sendNotification(accessToken: accessToken, title: notificationTitle.text, body: notificationBody.text, userId: userList[index]["userId"]);
-                                              Navigator.pop(context);
-                                            }));
-                                  },
-                                  icon: Icons.notification_add_outlined),
-                              dataTableIcon(
-                                  toolTip: "Change Password",
-                                  onTap: () {
-                                    setState(() => newPasswordController.clear());
-                                    setState(() => confirmPasswordController.clear());
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) => updatePassword(
-                                            userId: userList[index]["userId"],
-                                            context: context,
-                                            onSubmit: () async {
-                                              updateUserPassword(
-                                                  accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: userList[index]["userId"]);
-                                              Navigator.pop(context);
-                                            }));
-                                  },
-                                  icon: Icons.lock_reset),
-                              dataTableIcon(
-                                  toolTip: "Un-assign Building",
-                                  onTap: () async {
-                                    if (userList[index]["role"]["role"] != "homeless") {
-                                      await showPrompt(
-                                          context: context,
-                                          onTap: () async {
-                                            routeBack(context);
-                                            await unAssignBuilding(accessToken: accessToken, role: userList[index]["role"]["role"].toString(), userId: userList[index]["userId"]);
-                                          });
-                                    }
-                                  },
-                                  icon: Icons.domain_disabled_rounded,
-                                  color: userList[index]["role"]["role"] == "homeless" ? Colors.black12 : Colors.redAccent),
-                            ])))));
+                child: (userList.isEmpty) ? const Center(child: CircularProgressIndicator()) : SelectableText(userList.toString())
+                // ListView.builder(
+                //         itemCount: userList.length,
+                //         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                //               // dataTableListTile(flex: 1, title: userList[index]["userId"].toString(), hideImage: true),
+                //               dataTableListTile(
+                //                   flex: 4,
+                //                   title: userList[index]["name"].toString(),
+                //                   subtitle:
+                //                       'Role: ${userList[index]["role"] == null ? "Not Available" : userList[index]["role"]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(userList[index]["role"]["role"].toString().replaceAll("_", " "))}'),
+                //               dataTableChip(flex: 2, label: "Active"),
+                //               dataTableListTile(
+                //                   flex: 4,
+                //                   title: 'Email: ${userList[index]["email"]}',
+                //                   subtitle: 'Phone: ${(userList[index]["phone"] == "00000000000" || userList[index]["phone"] == "___________") ? "" : userList[index]["phone"]}',
+                //                   hideImage: true),
+                //               dataTableIcon(
+                //                   toolTip: "Send Instant Notification",
+                //                   onTap: () {
+                //                     setState(() => notificationTitle.clear());
+                //                     setState(() => notificationBody.clear());
+                //                     showDialog(
+                //                         context: context,
+                //                         builder: (BuildContext context) => createNotification(
+                //                             context: context,
+                //                             onSubmit: () async {
+                //                               sendNotification(accessToken: accessToken, title: notificationTitle.text, body: notificationBody.text, userId: userList[index]["userId"]);
+                //                               Navigator.pop(context);
+                //                             }));
+                //                   },
+                //                   icon: Icons.notification_add_outlined),
+                //               dataTableIcon(
+                //                   toolTip: "Change Password",
+                //                   onTap: () {
+                //                     setState(() => newPasswordController.clear());
+                //                     setState(() => confirmPasswordController.clear());
+                //                     showDialog(
+                //                         context: context,
+                //                         builder: (BuildContext context) => updatePassword(
+                //                             userId: userList[index]["userId"],
+                //                             context: context,
+                //                             onSubmit: () async {
+                //                               updateUserPassword(
+                //                                   accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: userList[index]["userId"]);
+                //                               Navigator.pop(context);
+                //                             }));
+                //                   },
+                //                   icon: Icons.lock_reset),
+                //               dataTableIcon(
+                //                   toolTip: "Un-assign Building",
+                //                   onTap: () async {
+                //                     if (userList[index]["role"]["role"] != "homeless") {
+                //                       await showPrompt(
+                //                           context: context,
+                //                           onTap: () async {
+                //                             routeBack(context);
+                //                             await unAssignBuilding(accessToken: accessToken, role: userList[index]["role"]["role"].toString(), userId: userList[index]["userId"]);
+                //                           });
+                //                     }
+                //                   },
+                //                   icon: Icons.domain_disabled_rounded,
+                //                   color: userList[index]["role"]["role"] == "homeless" ? Colors.black12 : Colors.redAccent),
+                //             ]))
+                )));
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {

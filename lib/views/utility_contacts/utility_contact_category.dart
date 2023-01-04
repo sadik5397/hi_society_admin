@@ -149,7 +149,8 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
                                         await deleteUtilityCategory(accessToken: accessToken, cid: utilityCategoryList[index]["utilityContactCategoryId"]);
                                         setState(() => utilityCategoryList.removeAt(index));
                                       }),
-                                  icon: Icons.delete),
+                                  icon: Icons.delete_outline_rounded,
+                                  color: Colors.redAccent),
                               dataTableIcon(
                                   onTap: () {
                                     setState(() => categoryController = TextEditingController(text: utilityCategoryList[index]["name"]));

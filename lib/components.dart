@@ -4,6 +4,8 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/amenities/amenity_category.dart';
+import 'package:hi_society_admin/views/home.dart';
+import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ads.dart';
 import 'package:hi_society_admin/views/users/users.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickalert/quickalert.dart';
@@ -375,6 +377,8 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
           const SizedBox(height: 6),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Users", toPage: const Users()),
+          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Rent/Sell Ads", toPage: const RentSellAds()),
+          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Social Media Posts", toPage: const Home()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
           // sidebarMenuHead(context: context, title: "Utility Contacts", children: [
           //   sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Contact Group", toPage: const UtilityContactSubGroup(), isSubMenu: true),

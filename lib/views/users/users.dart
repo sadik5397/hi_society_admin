@@ -195,7 +195,7 @@ class _UsersState extends State<Users> {
                                           await unAssignBuilding(accessToken: accessToken, role: userList[index]["role"]["role"].toString(), userId: userList[index]["userId"]);
                                         });
                                   },
-                                  icon: Icons.block_outlined),
+                                  icon: Icons.domain_disabled_rounded),
                             ])))));
   }
 

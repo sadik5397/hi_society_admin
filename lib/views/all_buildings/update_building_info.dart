@@ -28,6 +28,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
   late String thisBuildingPhoto = widget.buildingPhoto;
   bool loadingWait = false;
   List<String> buildingFlatList = [];
+  List<int> buildingFlatListId = [];
   late TextEditingController buildingNameController = TextEditingController(text: widget.buildingName);
   late TextEditingController buildingAddressController = TextEditingController(text: widget.buildingNameAddress);
   final TextEditingController buildingFlatListController = TextEditingController();
@@ -74,8 +75,9 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
         setState(() => flatObject = result["data"]);
         for (int i = 0; i < flatObject.length; i++) {
           setState(() => buildingFlatList.add(flatObject[i]["flatName"]));
+          setState(() => buildingFlatListId.add(flatObject[i]["flatId"]));
         }
-        setState(() => buildingFlatList.sort((a, b) => a.toString().compareTo(b.toString())));
+        // setState(() => buildingFlatList.sort((a, b) => a.toString().compareTo(b.toString())));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -87,6 +89,22 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
   Future<void> addFlat({required String flatName, required VoidCallback successRoute}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/create/flat"), headers: authHeader(accessToken), body: jsonEncode({"flatName": flatName, "buildingId": widget.buildingID}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        setState(() => apiResult = result["data"]);
+        successRoute.call();
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
+  Future<void> removeFlat({required int flatId, required VoidCallback successRoute}) async {
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/building/remove/flat"), headers: authHeader(accessToken), body: jsonEncode({"flatId": flatId, "buildingId": widget.buildingID}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -154,7 +172,9 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                       key: _formKey,
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          Expanded(flex: 1, child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required")),
+                          Expanded(
+                              flex: 1,
+                              child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required")),
                           Expanded(
                             flex: 2,
                             child: primaryTextField(controller: buildingAddressController, labelText: "Full Address", required: true, errorText: "Building address required"),
@@ -224,7 +244,8 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                         name: buildingNameController.text,
                                         address: buildingAddressController.text,
                                         photo: (base64img == "") ? "" : "data:image/png;base64,$base64img",
-                                        successRoute: () => showSuccess(context: context, label: "${buildingNameController.text} Updated Successfully", onTap: () => route(context, const AllBuildings())));
+                                        successRoute: () =>
+                                            showSuccess(context: context, label: "${buildingNameController.text} Updated Successfully", onTap: () => route(context, const AllBuildings())));
                                   } else {
                                     showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                   }
@@ -244,16 +265,27 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                             padding: const EdgeInsets.only(top: 6),
                                             child: Chip(
                                                 backgroundColor: primaryColor.withOpacity(.2),
-                                                // deleteIcon: const Icon(Icons.cancel_outlined, size: 18),
+                                                deleteIcon: const Icon(Icons.cancel_outlined, size: 18),
                                                 visualDensity: VisualDensity.compact,
                                                 deleteIconColor: Colors.black87,
-                                                // onDeleted: () => setState(() => buildingFlatList.removeAt(index)),
-                                                label: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2), child: Text(buildingFlatList[index], textScaleFactor: 1.1))),
+                                                onDeleted: () async => await showPrompt(
+                                                    context: context,
+                                                    onTap: () async {
+                                                      routeBack(context);
+                                                      await removeFlat(
+                                                          flatId: buildingFlatListId[index],
+                                                          successRoute: () async => await showSuccess(context: context, title: "Flat Removed", label: "Now un-assign all residents of this flat"));
+                                                      setState(() => buildingFlatList.removeAt(index));
+                                                    }),
+                                                label: Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 2).copyWith(right: 6), child: Text(buildingFlatList[index], textScaleFactor: 1.1))),
                                           )))),
                         Padding(
                             padding: const EdgeInsets.only(top: 12, bottom: 12),
                             child: Row(children: [
-                              SizedBox(width: 200, child: primaryTextField(labelText: "Add New Flat", controller: newFlatListController, bottomPadding: 12, textCapitalization: TextCapitalization.characters)),
+                              SizedBox(
+                                  width: 200,
+                                  child: primaryTextField(labelText: "Add New Flat", controller: newFlatListController, bottomPadding: 12, textCapitalization: TextCapitalization.characters)),
                               SizedBox(
                                   width: 150,
                                   child: primaryButton(

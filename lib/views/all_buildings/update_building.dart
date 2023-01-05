@@ -196,7 +196,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     flex: 2,
                                     title: buildingExecutiveUsers["manager"]["name"],
                                     subtitle: buildingExecutiveUsers["manager"]["email"],
-                                    img: residents[index]["manager"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${residents[index]["manager"]["photo"]}'),
+                                    img: buildingExecutiveUsers["manager"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingExecutiveUsers["manager"]["photo"]}'),
                                 dataTableSingleInfo(flex: 2, title: "Building Manager"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(
@@ -248,7 +248,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     flex: 2,
                                     title: buildingCommittee[index]["member"]["name"],
                                     subtitle: buildingCommittee[index]["member"]["email"],
-                                    img: residents[index]["member"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${residents[index]["member"]["photo"]}'),
+                                    img: buildingCommittee[index]["member"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingCommittee[index]["member"]["photo"]}'),
                                 dataTableSingleInfo(flex: 2, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(
@@ -294,7 +294,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     flex: 2,
                                     title: flatOwners[index]["user"]["name"],
                                     subtitle: flatOwners[index]["user"]["email"],
-                                    img: residents[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${residents[index]["user"]["photo"]}'),
+                                    img: flatOwners[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${flatOwners[index]["user"]["photo"]}'),
                                 dataTableSingleInfo(flex: 2, title: "Flat Owner"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(

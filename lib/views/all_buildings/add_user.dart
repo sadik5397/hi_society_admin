@@ -25,12 +25,15 @@ class _AddUserState extends State<AddUser> {
   String accessToken = "";
   String newRandomPassword = "";
   TextEditingController existingUserEmailController = TextEditingController();
-  List<String> roles = ["Building_Manager", "Flat_Owner", "Committee_Head", "Committee_Member"];
+
+  // List<String> roles = ["Building_Manager", "Flat_Owner", "Committee_Head", "Committee_Member"];
   List<String> flats = [];
   List<int> flatIds = [];
-  late String selectedNewUserRole = widget.role;
+
+  // late String selectedNewUserRole = widget.role;
   String? selectedFlat;
-  late String selectedExistingUserRole = widget.role;
+
+  // late String selectedExistingUserRole = widget.role;
   bool showPassword = false;
   bool showConfirmPassword = false;
   dynamic signedUpApiResult;
@@ -174,8 +177,8 @@ class _AddUserState extends State<AddUser> {
                         flex: 1,
                         child: primaryDropdown(
                             title: "Role",
-                            options: roles,
-                            value: selectedNewUserRole,
+                            options: [capitalizeAllWord(widget.role.toString().replaceAll("_", " ").toString())],
+                            value: capitalizeAllWord(widget.role.toString().replaceAll("_", " ").toString()),
                             onChanged: (value) => showSnackBar(context: context, label: "Here, you shouldn't change the value of dropdown", seconds: 6))),
                     if (widget.role == "Flat_Owner")
                       Expanded(flex: 1, child: primaryDropdown(title: "Flat", options: flats, value: selectedFlat, onChanged: (value) => setState(() => selectedFlat = value.toString()))),
@@ -187,6 +190,7 @@ class _AddUserState extends State<AddUser> {
                             paddingTop: 4,
                             title: "Confirm",
                             onTap: () async {
+                              if (widget.role == "Flat_Owner" && selectedFlat == null) showError(context: context, label: "Select a flat");
                               await assignUserToRole(
                                   flatId: widget.role == "Flat_Owner" ? flatIds[flats.indexOf(selectedFlat!)] : 0,
                                   accessToken: accessToken,
@@ -197,11 +201,9 @@ class _AddUserState extends State<AddUser> {
                                       builder: (BuildContext context) {
                                         return viewInformationAfterAssign(
                                             context: context,
-                                            onSubmit: () async {
-                                              route(context, const AllBuildings());
-                                            },
+                                            onSubmit: () async => route(context, const AllBuildings()),
                                             email: existingUserEmailController.text,
-                                            role: selectedExistingUserRole.toLowerCase());
+                                            role: capitalizeAllWord(widget.role.replaceAll("_", " ")));
                                       }));
                             }))
                   ])),
@@ -216,8 +218,8 @@ class _AddUserState extends State<AddUser> {
                           flex: 2,
                           child: primaryDropdown(
                               title: "Role",
-                              options: roles,
-                              value: selectedNewUserRole,
+                              options: [capitalizeAllWord(widget.role.toString().replaceAll("_", " ").toString())],
+                              value: capitalizeAllWord(widget.role.toString().replaceAll("_", " ").toString()),
                               onChanged: (value) => showSnackBar(context: context, label: "Here, you shouldn't change the value of dropdown", seconds: 6))),
                       if (widget.role == "Flat_Owner")
                         Expanded(flex: 2, child: primaryDropdown(title: "Flat", options: flats, value: selectedFlat, onChanged: (value) => setState(() => selectedFlat = value.toString()))),
@@ -233,6 +235,7 @@ class _AddUserState extends State<AddUser> {
                               paddingTop: 4,
                               title: "Confirm",
                               onTap: () async {
+                                if (widget.role == "Flat_Owner" && selectedFlat == null) showError(context: context, label: "Select a flat");
                                 await doSignUp(
                                     flatId: widget.role == "Flat_Owner" ? flatIds[flats.indexOf(selectedFlat!)] : 0,
                                     email: emailController.text,
@@ -243,15 +246,13 @@ class _AddUserState extends State<AddUser> {
                                           return viewInformationAfterSignUp(
                                               password: newRandomPassword,
                                               name: nameController.text,
-                                              role: selectedNewUserRole,
+                                              role: capitalizeAllWord(widget.role.replaceAll("_", " ")),
                                               context: context,
                                               email: emailController.text,
-                                              onSubmit: () async {
-                                                route(context, const AllBuildings());
-                                              });
+                                              onSubmit: () async => route(context, const AllBuildings()));
                                         }),
                                     phone: phoneController.text,
-                                    role: selectedNewUserRole.toLowerCase());
+                                    role: widget.role.toLowerCase());
                               }))
                     ])
                   ]))
@@ -291,7 +292,7 @@ class _AddUserState extends State<AddUser> {
           const SizedBox(height: 6),
           const SelectableText("From"),
           SelectableText(widget.buildingName.toString(), style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: primaryColor)),
-          const SizedBox(height: 6),
+          const SizedBox(height: 6)
         ]),
         actions: [
           Column(children: [primaryButton(icon: Icons.done, title: "Done", onTap: onSubmit)])

@@ -406,6 +406,7 @@ Container dataTableContainer(
     double headerPadding = 16,
     bool isScrollableWidget = true,
     int entryCount = 0,
+    String entryStrng = "",
     String primaryButtonText = "Add New",
     bool showPlusButton = true,
     VoidCallback? primaryButtonOnTap,
@@ -427,6 +428,11 @@ Container dataTableContainer(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     backgroundColor: Colors.black.withOpacity(.05),
                     label: SelectableText("$entryCount Entries", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
+              if (entryStrng != "")
+                Chip(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    backgroundColor: Colors.black.withOpacity(.05),
+                    label: SelectableText(entryStrng, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
               const Expanded(child: SizedBox()),
               if (primaryButtonOnTap != null)
                 primaryButton(
@@ -499,12 +505,12 @@ Expanded dataTableNetworkImages({int flex = 1, Alignment alignment = Alignment.c
           alignment: alignment,
           child: images.isNotEmpty
               ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Padding(padding: const EdgeInsets.all(3), child: Image.network('$baseUrl/photos/${images[0]["photoPath"]}', height: 200, width: 160, fit: BoxFit.cover)),
-                    if (images.length > 1) Padding(padding: const EdgeInsets.all(3), child: Image.network('$baseUrl/photos/${images[1]["photoPath"]}', height: 200, width: 160, fit: BoxFit.cover)),
+                    Padding(padding: const EdgeInsets.all(3), child: Image.network('$baseUrl/photos/${images[0]["photoPath"]}', height: 200, width: 150, fit: BoxFit.cover)),
+                    if (images.length > 1) Padding(padding: const EdgeInsets.all(3), child: Image.network('$baseUrl/photos/${images[1]["photoPath"]}', height: 200, width: 150, fit: BoxFit.cover)),
                     if (images.length > 2)
-                      InkWell(onTap: onTap, child: SelectableText("+ ${images.length - 2} More", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600, fontSize: 14, height: 0))),
+                      InkWell(onTap: onTap, child: SelectableText("+${images.length - 2}", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 18, height: 0))),
                   ],
                 )
               : const SelectableText("No Image")));

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ad_details.dart';
 import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_disabled_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -150,7 +151,7 @@ class _RentSellAdsState extends State<RentSellAds> {
                 primaryButtonText: "Disabled Ad",
                 entryCount: adList.length,
                 headerRow: ["Title", "Created by", "Photos", "Status", "Actions"],
-                flex: [3, 3, 6, 2, 2],
+                flex: [2, 2, 4, 2, 2],
                 title: "All Active Ads",
                 showPlusButton: false,
                 child: (adList.isEmpty)
@@ -158,11 +159,20 @@ class _RentSellAdsState extends State<RentSellAds> {
                     : ListView.builder(
                         itemCount: adList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              dataTableListTile(flex: 3, title: adList[index]["title"].toString(), subtitle: 'Type: ${(adList[index]["adType"].toString().toUpperCase())}', hideImage: true),
-                              dataTableListTile(flex: 3, title: adList[index]["createdBy"]["name"], subtitle: 'Posted on: ${adList[index]["updatedAt"].toString().split("T")[0]}', hideImage: true),
-                              dataTableNetworkImages(flex: 6, images: adList[index]["photos"], onTap: () {}),
+                              dataTableListTile(flex: 2, title: adList[index]["title"].toString(), subtitle: 'Type: ${(adList[index]["adType"].toString().toUpperCase())}', hideImage: true),
+                              dataTableListTile(flex: 2, title: adList[index]["createdBy"]["name"], subtitle: 'Posted on: ${adList[index]["updatedAt"].toString().split("T")[0]}', hideImage: true),
+                              dataTableNetworkImages(flex: 4, images: adList[index]["photos"], onTap: () {}),
                               dataTableChip(flex: 2, label: adList[index]["inactive"] ? "Disabled" : "Active"),
-                              dataTableIcon(toolTip: "View Details", onTap: () {}, icon: Icons.open_in_new_rounded),
+                              dataTableIcon(
+                                  toolTip: "View Details",
+                                  onTap: () => route(
+                                      context,
+                                      RentSellAdDetails(
+                                          adId: adList[index]["advertId"],
+                                          status: (adList[index]["inactive"] ? "Disabled" : "Active").toUpperCase(),
+                                          title: adList[index]["title"].toString(),
+                                          imageList: adList[index]["photos"])),
+                                  icon: Icons.open_in_new_rounded),
                               dataTableIcon(
                                   toolTip: "Remove Ad",
                                   onTap: () async => await showPrompt(

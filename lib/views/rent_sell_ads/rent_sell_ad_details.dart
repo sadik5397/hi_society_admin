@@ -8,12 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../api.dart';
 import '../../components.dart';
-import 'rent_sell_ads.dart';
-import 'rent_sell_disabled_ads.dart';
 
 class RentSellAdDetails extends StatefulWidget {
-  const RentSellAdDetails({Key? key, required this.adId, required this.title, required this.imageList, required this.status}) : super(key: key);
+  const RentSellAdDetails({Key? key, required this.adId, required this.title, required this.imageList, required this.status, required this.userId}) : super(key: key);
   final int adId;
+  final int userId;
   final String title;
   final String status;
   final List imageList;
@@ -44,7 +43,29 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
     }
   }
 
-  Future<void> reActiveAd({required String accessToken, required int adId}) async {
+  Future<void> sendNotification({required String accessToken, required String title, required String body, required int userId}) async {
+    Map payload = {
+      "notification": {"title": title, "body": body},
+      "data": {"topic": "announcement"}
+    };
+    String base64Str = payload.toString();
+    try {
+      if (kDebugMode) print(jsonEncode({"userId": userId, "payload": base64Str}));
+      var response = await http.post(Uri.parse("$baseUrl/push/send/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "payload": base64Str}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSuccess(context: context, label: "Notification Sent!", onTap: () => routeBack(context));
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        //todo: if error
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
+  Future<void> reActiveAd({required String accessToken, required int adId, required int userId}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/reactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -56,8 +77,9 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
             title: "Ad Enabled",
             onTap: () async {
               routeBack(context);
-              route(context, const RentSellAds());
+              await defaultInit();
             });
+        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' re-activated", body: "Your ad is now visible to every user", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -66,7 +88,7 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
     }
   }
 
-  Future<void> disableAd({required String accessToken, required int adId}) async {
+  Future<void> disableAd({required String accessToken, required int adId, required int userId}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/deactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -78,8 +100,9 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
             title: "Ad Disabled",
             onTap: () async {
               routeBack(context);
-              route(context, const RentSellDisabledAds());
+              await defaultInit();
             });
+        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' taken down", body: "Your ad removed because it is marked as inappropriate", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -110,7 +133,9 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
             context: context,
             header: "Apartment Rent/Sell Ad",
             child: dataTableContainer(
-                primaryButtonOnTap: () async => widget.status == "ACTIVE" ? await disableAd(accessToken: accessToken, adId: widget.adId) : await reActiveAd(accessToken: accessToken, adId: widget.adId),
+                primaryButtonOnTap: () async => widget.status == "ACTIVE"
+                    ? await disableAd(accessToken: accessToken, adId: widget.adId, userId: widget.userId)
+                    : await reActiveAd(accessToken: accessToken, adId: widget.adId, userId: widget.userId),
                 primaryButtonText: widget.status == "ACTIVE" ? "Disable Ad" : "Enable Ad",
                 title: widget.title,
                 entryStrng: widget.status,

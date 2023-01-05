@@ -80,7 +80,7 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
     }
   }
 
-  Future<void> reActiveAd({required String accessToken, required int adId}) async {
+  Future<void> reActiveAd({required String accessToken, required int adId, required int userId}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/reactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -94,6 +94,7 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
               routeBack(context);
               await defaultInit();
             });
+        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' re-activated", body: "Your ad is now visible to every user", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -102,7 +103,7 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
     }
   }
 
-  Future<void> disableAd({required String accessToken, required int adId}) async {
+  Future<void> disableAd({required String accessToken, required int adId, required int userId}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/deactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -116,6 +117,7 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
               routeBack(context);
               await defaultInit();
             });
+        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' taken down", body: "Your ad removed because it is marked as inappropriate", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -169,6 +171,7 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
                                   onTap: () => route(
                                       context,
                                       RentSellAdDetails(
+                                          userId: adList[index]["createdBy"]["userId"],
                                           adId: adList[index]["advertId"],
                                           status: (adList[index]["inactive"] ? "Disabled" : "Active").toUpperCase(),
                                           title: adList[index]["title"].toString(),
@@ -181,8 +184,8 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
                                       onTap: () async {
                                         routeBack(context);
                                         adList[index]["inactive"]
-                                            ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"])
-                                            : await disableAd(accessToken: accessToken, adId: adList[index]["advertId"]);
+                                            ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"])
+                                            : await disableAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"]);
                                       }),
                                   icon: adList[index]["inactive"] ? Icons.visibility_outlined : Icons.disabled_visible_rounded,
                                   color: adList[index]["inactive"] ? Colors.green : Colors.redAccent)

@@ -41,24 +41,6 @@ class _RentSellAdsState extends State<RentSellAds> {
     }
   }
 
-  Future<void> updateUserPassword({required String accessToken, required String newPassword, required String confirmPassword, required int userId}) async {
-    try {
-      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"),
-          headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
-      Map result = jsonDecode(response.body);
-      if (kDebugMode) print(newPassword);
-      if (kDebugMode) print(result);
-      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSuccess(context: context, label: "Password Updated", onTap: () => routeBack(context));
-      } else {
-        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
-      }
-    } on Exception catch (e) {
-      showError(context: context, label: e.toString());
-    }
-  }
-
   Future<void> sendNotification({required String accessToken, required String title, required String body, required int userId}) async {
     Map payload = {
       "notification": {"title": title, "body": body},
@@ -81,7 +63,7 @@ class _RentSellAdsState extends State<RentSellAds> {
     }
   }
 
-  Future<void> reActiveAd({required String accessToken, required int adId}) async {
+  Future<void> reActiveAd({required String accessToken, required int adId, required int userId}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/reactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -95,6 +77,7 @@ class _RentSellAdsState extends State<RentSellAds> {
               routeBack(context);
               await defaultInit();
             });
+        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' re-activated", body: "Your ad is now visible to every user", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -103,7 +86,7 @@ class _RentSellAdsState extends State<RentSellAds> {
     }
   }
 
-  Future<void> disableAd({required String accessToken, required int adId}) async {
+  Future<void> disableAd({required String accessToken, required int adId, required int userId}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/deactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -117,6 +100,7 @@ class _RentSellAdsState extends State<RentSellAds> {
               routeBack(context);
               await defaultInit();
             });
+        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' taken down", body: "Your ad removed because it is marked as inappropriate", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -168,6 +152,7 @@ class _RentSellAdsState extends State<RentSellAds> {
                                   onTap: () => route(
                                       context,
                                       RentSellAdDetails(
+                                          userId: adList[index]["createdBy"]["userId"],
                                           adId: adList[index]["advertId"],
                                           status: (adList[index]["inactive"] ? "Disabled" : "Active").toUpperCase(),
                                           title: adList[index]["title"].toString(),
@@ -180,8 +165,8 @@ class _RentSellAdsState extends State<RentSellAds> {
                                       onTap: () async {
                                         routeBack(context);
                                         adList[index]["inactive"]
-                                            ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"])
-                                            : await disableAd(accessToken: accessToken, adId: adList[index]["advertId"]);
+                                            ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"])
+                                            : await disableAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"]);
                                       }),
                                   icon: adList[index]["inactive"] ? Icons.visibility_outlined : Icons.disabled_visible_rounded,
                                   color: adList[index]["inactive"] ? Colors.green : Colors.redAccent)

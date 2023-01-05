@@ -3,29 +3,28 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_disabled_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../api.dart';
 import '../../components.dart';
 
-class RentSellAds extends StatefulWidget {
-  const RentSellAds({Key? key}) : super(key: key);
+class RentSellDisabledAds extends StatefulWidget {
+  const RentSellDisabledAds({Key? key}) : super(key: key);
 
   @override
-  State<RentSellAds> createState() => _RentSellAdsState();
+  State<RentSellDisabledAds> createState() => _RentSellDisabledAdsState();
 }
 
-class _RentSellAdsState extends State<RentSellAds> {
+class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
 //Variables
   String accessToken = "";
   List adList = [];
 
 //APIs
-  Future<void> readAdList({required String accessToken}) async {
+  Future<void> readDisabledAdList({required String accessToken}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/apartment-ads/list?limit=30"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/apartment-ads/list/deactivated"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -128,7 +127,7 @@ class _RentSellAdsState extends State<RentSellAds> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    await readAdList(accessToken: accessToken);
+    await readDisabledAdList(accessToken: accessToken);
   }
 
 //Initiate
@@ -146,25 +145,27 @@ class _RentSellAdsState extends State<RentSellAds> {
             context: context,
             header: "Apartment Rent/Sell Ads Moderation",
             child: dataTableContainer(
-                primaryButtonOnTap: () => route(context, const RentSellDisabledAds()),
-                primaryButtonText: "Disabled Ad",
                 entryCount: adList.length,
+                secondaryButtonOnTap: () => routeBack(context),
+                secondaryButtonText: "Active Ad",
+                showPlusButton: false,
                 headerRow: ["Title", "Created by", "Photos", "Status", "Actions"],
                 flex: [3, 3, 6, 2, 2],
-                title: "All Active Ads",
-                showPlusButton: false,
+                title: "All Disabled Ads",
                 child: (adList.isEmpty)
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
                         itemCount: adList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              dataTableListTile(flex: 3, title: adList[index]["title"].toString(), subtitle: 'Type: ${(adList[index]["adType"].toString().toUpperCase())}', hideImage: true),
-                              dataTableListTile(flex: 3, title: adList[index]["createdBy"]["name"], subtitle: 'Posted on: ${adList[index]["updatedAt"].toString().split("T")[0]}', hideImage: true),
+                              dataTableListTile(
+                                  flex: 3, title: adList[index]["title"].toString(), subtitle: 'Type: ${(adList[index]["adType"].toString().toUpperCase())}', hideImage: true, color: Colors.redAccent),
+                              dataTableListTile(
+                                  flex: 3, title: adList[index]["createdBy"]["name"], subtitle: 'Posted on: ${adList[index]["updatedAt"].toString().split("T")[0]}', hideImage: true, color: Colors.redAccent),
                               dataTableNetworkImages(flex: 6, images: adList[index]["photos"], onTap: () {}),
-                              dataTableChip(flex: 2, label: adList[index]["inactive"] ? "Disabled" : "Active"),
+                              dataTableChip(flex: 2, label: adList[index]["inactive"] ? "Disabled" : "Active", color: Colors.redAccent),
                               dataTableIcon(toolTip: "View Details", onTap: () {}, icon: Icons.open_in_new_rounded),
                               dataTableIcon(
-                                  toolTip: "Remove Ad",
+                                  toolTip: "Enable Ad",
                                   onTap: () async => await showPrompt(
                                       context: context,
                                       onTap: () async {

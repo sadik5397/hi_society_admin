@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/api.dart';
 import 'package:hi_society_admin/views/amenities/amenity_category.dart';
 import 'package:hi_society_admin/views/home.dart';
 import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ads.dart';
@@ -406,6 +407,7 @@ Container dataTableContainer(
     bool isScrollableWidget = true,
     int entryCount = 0,
     String primaryButtonText = "Add New",
+    bool showPlusButton = true,
     VoidCallback? primaryButtonOnTap,
     String secondaryButtonText = "Add New",
     List<String> headerRow = const [],
@@ -427,8 +429,18 @@ Container dataTableContainer(
                     label: SelectableText("$entryCount Entries", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
               const Expanded(child: SizedBox()),
               if (primaryButtonOnTap != null)
-                primaryButton(title: primaryButtonText, onTap: primaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: primaryButtonText == "Edit" ? Icons.edit : Icons.add),
-              if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: Icons.add)
+                primaryButton(
+                    title: primaryButtonText,
+                    onTap: primaryButtonOnTap,
+                    width: 160,
+                    paddingBottom: 0,
+                    paddingRight: 0,
+                    icon: primaryButtonText == "Edit"
+                        ? Icons.edit
+                        : showPlusButton
+                            ? Icons.add
+                            : null),
+              if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
             ])),
         const Divider(height: 1),
         Padding(
@@ -446,7 +458,7 @@ Container dataTableContainer(
 ColoredBox dataTableAlternativeColorCells({required int index, required List<Widget> children}) =>
     ColoredBox(color: index % 2 == 0 ? themeOf.withOpacity(.4) : Colors.transparent, child: Row(children: children));
 
-Expanded dataTableListTile({required String title, String? subtitle, int flex = 1, bool hideImage = false, String? img}) {
+Expanded dataTableListTile({required String title, String? subtitle, int flex = 1, bool hideImage = false, String? img, Color? color}) {
   return Expanded(
       flex: flex,
       child: Padding(
@@ -455,12 +467,11 @@ Expanded dataTableListTile({required String title, String? subtitle, int flex = 
             if (!hideImage) CircleAvatar(backgroundImage: NetworkImage(img ?? placeholderImage), radius: 24, backgroundColor: Colors.grey.shade50),
             if (!hideImage) const SizedBox(width: 12),
             Expanded(
-              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                SelectableText(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                if (subtitle != null) const SizedBox(height: 3),
-                if (subtitle != null) SelectableText(subtitle, style: const TextStyle(color: Colors.black87))
-              ]),
-            )
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SelectableText(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+              if (subtitle != null) const SizedBox(height: 3),
+              if (subtitle != null) SelectableText(subtitle, style: const TextStyle(color: Colors.black87))
+            ]))
           ])));
 }
 
@@ -479,6 +490,24 @@ Expanded dataTableChip({required String label, Color color = const Color(0xff219
               padding: const EdgeInsets.symmetric(horizontal: 4),
               labelPadding: const EdgeInsets.only(right: 14),
               avatar: CircleAvatar(backgroundColor: color, radius: 4))));
+}
+
+Expanded dataTableNetworkImages({int flex = 1, Alignment alignment = Alignment.center, required List<dynamic> images, required VoidCallback onTap}) {
+  return Expanded(
+      flex: flex,
+      child: Align(
+          alignment: alignment,
+          child: images.isNotEmpty
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(padding: const EdgeInsets.all(3), child: Image.network('$baseUrl/photos/${images[0]["photoPath"]}', height: 200, width: 160, fit: BoxFit.cover)),
+                    if (images.length > 1) Padding(padding: const EdgeInsets.all(3), child: Image.network('$baseUrl/photos/${images[1]["photoPath"]}', height: 200, width: 160, fit: BoxFit.cover)),
+                    if (images.length > 2)
+                      InkWell(onTap: onTap, child: SelectableText("+ ${images.length - 2} More", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600, fontSize: 14, height: 0))),
+                  ],
+                )
+              : const SelectableText("No Image")));
 }
 
 Expanded dataTableIcon({required VoidCallback onTap, int flex = 1, required IconData icon, Color color = const Color(0xff2196f3), String toolTip = "Edit"}) {

@@ -15,7 +15,6 @@ import 'package:http/http.dart' as http;
         //todo: if success
       }else{
         showSnackBar(context: context, label: result["message"][0].toString().length==1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());

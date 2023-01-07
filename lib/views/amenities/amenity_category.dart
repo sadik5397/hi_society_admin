@@ -32,7 +32,6 @@ class _AmenityCategoryState extends State<AmenityCategory> {
         setState(() => amenityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -50,7 +49,6 @@ class _AmenityCategoryState extends State<AmenityCategory> {
         setState(() => amenityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -69,7 +67,6 @@ class _AmenityCategoryState extends State<AmenityCategory> {
         Navigator.pop(context);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -86,7 +83,6 @@ class _AmenityCategoryState extends State<AmenityCategory> {
         setState(() => amenityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());

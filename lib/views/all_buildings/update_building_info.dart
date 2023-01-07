@@ -42,8 +42,6 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
   String base64img = "";
   final ImagePicker _picker = ImagePicker();
 
-  final _pickedImages = <Image>[];
-
 //APIs
   Future<void> updateBuilding({required String name, required String photo, required String address, required String accessToken, required VoidCallback successRoute}) async {
     try {
@@ -134,18 +132,8 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
 
   Future getWebImage() async {
     Uint8List? bytesFromPicker = await ImagePickerWeb.getImageAsBytes();
-    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0); //todo:
+    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0); //todo: Image Compressor
     setState(() => base64img = (base64Encode(List<int>.from(bytesFromPicker!))));
-  }
-
-  Future<void> _pickImage() async {
-    final fromPicker = await ImagePickerWeb.getImageAsWidget();
-    if (fromPicker != null) {
-      setState(() {
-        _pickedImages.clear();
-        _pickedImages.add(fromPicker);
-      });
-    }
   }
 
 //Initiate
@@ -164,7 +152,6 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
             context: context,
             header: "Update Building Info",
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              SelectableText("data:image/png;base64,$base64img", style: TextStyle(fontSize: 7)),
               dataTableContainer(
                   title: "${widget.buildingName} Information",
                   isScrollableWidget: false,
@@ -172,42 +159,12 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                       key: _formKey,
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          Expanded(
-                              flex: 1,
-                              child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required")),
+                          Expanded(flex: 1, child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required")),
                           Expanded(
                             flex: 2,
                             child: primaryTextField(controller: buildingAddressController, labelText: "Full Address", required: true, errorText: "Building address required"),
                           )
                         ]),
-                        // Row(children: [
-                        //   Expanded(
-                        //       flex: 3,
-                        //       child: primaryTextField(
-                        //           focusNode: focusNode,
-                        //           hasSubmitButton: true,
-                        //           controller: buildingFlatListController,
-                        //           onFieldSubmittedAlternate: () {
-                        //             if (buildingFlatListController.text.isNotEmpty) {
-                        //               setState(() => buildingFlatList.addAll(buildingFlatListController.text.toString().replaceAll(' ', '').toUpperCase().split(",")));
-                        //             }
-                        //             buildingFlatListController.clear();
-                        //             focusNode.requestFocus();
-                        //           },
-                        //           onFieldSubmitted: (value) {
-                        //             if (buildingFlatListController.text.isNotEmpty) {
-                        //               setState(() => buildingFlatList.addAll(buildingFlatListController.text.toString().replaceAll(' ', '').toUpperCase().split(",")));
-                        //             }
-                        //             buildingFlatListController.clear();
-                        //             focusNode.requestFocus();
-                        //           },
-                        //           bottomPadding: 12,
-                        //           labelText: "Flat Number List",
-                        //           hintText: "Type then tap submit to add more",
-                        //           required: buildingFlatList.isEmpty,
-                        //           errorText: "Flat number list required",
-                        //           textCapitalization: TextCapitalization.characters)),
-                        // ]),
                         //region Photo
                         const Padding(padding: EdgeInsets.only(top: 12, left: 14, bottom: 6), child: Text("Upload Building Photo")),
                         Padding(
@@ -244,8 +201,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                         name: buildingNameController.text,
                                         address: buildingAddressController.text,
                                         photo: (base64img == "") ? "" : "data:image/png;base64,$base64img",
-                                        successRoute: () =>
-                                            showSuccess(context: context, label: "${buildingNameController.text} Updated Successfully", onTap: () => route(context, const AllBuildings())));
+                                        successRoute: () => showSuccess(context: context, label: "${buildingNameController.text} Updated Successfully", onTap: () => route(context, const AllBuildings())));
                                   } else {
                                     showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                   }
@@ -277,15 +233,12 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                                           successRoute: () async => await showSuccess(context: context, title: "Flat Removed", label: "Now un-assign all residents of this flat"));
                                                       setState(() => buildingFlatList.removeAt(index));
                                                     }),
-                                                label: Padding(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 2).copyWith(right: 6), child: Text(buildingFlatList[index], textScaleFactor: 1.1))),
+                                                label: Padding(padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 2).copyWith(right: 6), child: Text(buildingFlatList[index], textScaleFactor: 1.1))),
                                           )))),
                         Padding(
                             padding: const EdgeInsets.only(top: 12, bottom: 12),
                             child: Row(children: [
-                              SizedBox(
-                                  width: 200,
-                                  child: primaryTextField(labelText: "Add New Flat", controller: newFlatListController, bottomPadding: 12, textCapitalization: TextCapitalization.characters)),
+                              SizedBox(width: 200, child: primaryTextField(labelText: "Add New Flat", controller: newFlatListController, bottomPadding: 12, textCapitalization: TextCapitalization.characters)),
                               SizedBox(
                                   width: 150,
                                   child: primaryButton(

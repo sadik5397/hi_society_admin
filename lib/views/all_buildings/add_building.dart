@@ -68,7 +68,7 @@ class _AddBuildingState extends State<AddBuilding> {
 
   Future getWebImage() async {
     Uint8List? bytesFromPicker = await ImagePickerWeb.getImageAsBytes();
-    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0); //todo:
+    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0); //todo: Image Compressor
     setState(() => base64img = (base64Encode(List<int>.from(bytesFromPicker!))));
   }
 

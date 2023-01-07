@@ -3,29 +3,28 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hi_society_admin/views/social_media/social_media_disabled_posts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../api.dart';
 import '../../components.dart';
 
-class SocialMediaPosts extends StatefulWidget {
-  const SocialMediaPosts({Key? key}) : super(key: key);
+class SocialMediaDisabledPosts extends StatefulWidget {
+  const SocialMediaDisabledPosts({Key? key}) : super(key: key);
 
   @override
-  State<SocialMediaPosts> createState() => _SocialMediaPostsState();
+  State<SocialMediaDisabledPosts> createState() => _SocialMediaDisabledPostsState();
 }
 
-class _SocialMediaPostsState extends State<SocialMediaPosts> {
+class _SocialMediaDisabledPostsState extends State<SocialMediaDisabledPosts> {
 //Variables
   String accessToken = "";
   List postList = [];
 
 //APIs
-  Future<void> readPostList({required String accessToken}) async {
+  Future<void> readDisabledPostList({required String accessToken}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/social-media/list/post?limit=30"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/social-media/mod/list/post?limit=30"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -110,7 +109,7 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    await readPostList(accessToken: accessToken);
+    await readDisabledPostList(accessToken: accessToken);
   }
 
 //Initiate
@@ -128,12 +127,12 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
             context: context,
             header: "Social Media Posts Moderation",
             child: dataTableContainer(
-                primaryButtonOnTap: () => route(context, const SocialMediaDisabledPosts()),
-                primaryButtonText: "Removed Posts",
+                primaryButtonOnTap: () => routeBack(context),
+                primaryButtonText: "Active Posts",
                 entryCount: postList.length,
-                headerRow: ["Created by", "Photo", "Post", "Status", "Actions"],
+                headerRow: ["Time Log", "Photo", "Post", "Status", "Actions"],
                 flex: [2, 3, 2, 2, 1],
-                title: "All Active Posts",
+                title: "All Disabled Posts",
                 showPlusButton: false,
                 child: (postList.isEmpty)
                     ? const Center(child: CircularProgressIndicator())
@@ -142,23 +141,22 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                               dataTableListTile(
                                   flex: 2,
-                                  title: postList[index]["user"]["name"],
+                                  title: 'Removed on: ${postList[index]["deletedAt"].toString().split("T")[0]}',
                                   subtitle: 'Posted on: ${postList[index]["createdAt"].toString().split("T")[0]}',
-                                  hideImage: false,
-                                  img: postList[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${postList[index]["user"]["photo"]}'),
+                                  hideImage: true),
                               dataTableNetworkImagesForSocialMedia(flex: 3, images: postList[index]["photos"] ?? []),
-                              dataTableSingleInfo(flex: 2, title: postList[index]["miniContent"]),
-                              dataTableChip(flex: 2, label: "Active"),
+                              dataTableSingleInfo(flex: 2, title: postList[index]["content"]),
+                              dataTableChip(flex: 2, label: "Disabled", color: Colors.redAccent),
                               dataTableIcon(
-                                  toolTip: "Remove Post",
+                                  toolTip: "Enable Post",
                                   onTap: () async => await showPrompt(
                                       context: context,
                                       onTap: () async {
                                         routeBack(context);
-                                        await disablePost(accessToken: accessToken, postId: postList[index]["postId"], userId: postList[index]["user"]["userId"]);
+                                        await reActivePost(accessToken: accessToken, postId: postList[index]["postId"], userId: postList[index]["postedById"]);
                                       }),
-                                  icon: Icons.disabled_visible_rounded,
-                                  color: Colors.redAccent)
+                                  icon: Icons.visibility_outlined,
+                                  color: Colors.green)
                             ])))));
   }
 }

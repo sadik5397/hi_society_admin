@@ -498,7 +498,7 @@ Expanded dataTableChip({required String label, Color color = const Color(0xff219
               avatar: CircleAvatar(backgroundColor: color, radius: 4))));
 }
 
-Expanded dataTableNetworkImages({int flex = 1, Alignment alignment = Alignment.center, required List<dynamic> images, required VoidCallback onTap}) {
+Expanded dataTableNetworkImagesForAds({int flex = 1, Alignment alignment = Alignment.center, required List<dynamic> images, required VoidCallback onTap}) {
   return Expanded(
       flex: flex,
       child: Align(
@@ -513,6 +513,16 @@ Expanded dataTableNetworkImages({int flex = 1, Alignment alignment = Alignment.c
                       InkWell(onTap: onTap, child: SelectableText("+${images.length - 2}", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 18, height: 0))),
                   ],
                 )
+              : const SelectableText("No Image")));
+}
+
+Expanded dataTableNetworkImagesForSocialMedia({int flex = 1, Alignment alignment = Alignment.center, required List<dynamic> images}) {
+  return Expanded(
+      flex: flex,
+      child: Align(
+          alignment: alignment,
+          child: images.isNotEmpty
+              ? Padding(padding: const EdgeInsets.all(3), child: Image.network('$baseUrl/photos/${images[0]}', height: 200, width: 150, fit: BoxFit.cover))
               : const SelectableText("No Image")));
 }
 

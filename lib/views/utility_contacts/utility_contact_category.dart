@@ -32,7 +32,6 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
         setState(() => utilityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -50,7 +49,6 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
         setState(() => utilityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -69,7 +67,6 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
         Navigator.pop(context);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -86,7 +83,6 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
         setState(() => utilityCategoryList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());

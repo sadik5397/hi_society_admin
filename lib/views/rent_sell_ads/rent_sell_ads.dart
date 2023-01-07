@@ -34,7 +34,6 @@ class _RentSellAdsState extends State<RentSellAds> {
         setState(() => adList = result["data"].reversed.toList());
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -46,17 +45,16 @@ class _RentSellAdsState extends State<RentSellAds> {
       "notification": {"title": title, "body": body},
       "data": {"topic": "announcement"}
     };
-    String base64Str = payload.toString();
+    String base64Str = json.encode(payload);
     try {
       if (kDebugMode) print(jsonEncode({"userId": userId, "payload": base64Str}));
       var response = await http.post(Uri.parse("$baseUrl/push/send/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "payload": base64Str}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSuccess(context: context, label: "Notification Sent!", onTap: () => routeBack(context));
+        // showSuccess(context: context, label: "Notification Sent!", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -77,7 +75,7 @@ class _RentSellAdsState extends State<RentSellAds> {
               routeBack(context);
               await defaultInit();
             });
-        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' re-activated", body: "Your ad is now visible to every user", userId: userId);
+        await sendNotification(accessToken: accessToken, title: "Your Apartment Rent-Sell Ad re-activated", body: "Your ad is now visible to every user", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -100,7 +98,7 @@ class _RentSellAdsState extends State<RentSellAds> {
               routeBack(context);
               await defaultInit();
             });
-        await sendNotification(accessToken: accessToken, title: "Your 'Apartment Rent/Sell Ad' taken down", body: "Your ad removed because it is marked as inappropriate", userId: userId);
+        await sendNotification(accessToken: accessToken, title: "Your Apartment Rent-Sell Ad taken down", body: "Your ad removed because it is marked as inappropriate", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -132,7 +130,7 @@ class _RentSellAdsState extends State<RentSellAds> {
             header: "Apartment Rent/Sell Ads Moderation",
             child: dataTableContainer(
                 primaryButtonOnTap: () => route(context, const RentSellDisabledAds()),
-                primaryButtonText: "Disabled Ad",
+                primaryButtonText: "Disabled Ads",
                 entryCount: adList.length,
                 headerRow: ["Title", "Created by", "Photos", "Status", "Actions"],
                 flex: [2, 2, 4, 2, 2],
@@ -144,8 +142,8 @@ class _RentSellAdsState extends State<RentSellAds> {
                         itemCount: adList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                               dataTableListTile(flex: 2, title: adList[index]["title"].toString(), subtitle: 'Type: ${(adList[index]["adType"].toString().toUpperCase())}', hideImage: true),
-                              dataTableListTile(flex: 2, title: adList[index]["createdBy"]["name"], subtitle: 'Posted on: ${adList[index]["updatedAt"].toString().split("T")[0]}', hideImage: true),
-                              dataTableNetworkImages(flex: 4, images: adList[index]["photos"], onTap: () {}),
+                              dataTableListTile(flex: 2, title: adList[index]["createdBy"]["name"], subtitle: 'Posted on: ${adList[index]["createdAt"].toString().split("T")[0]}', hideImage: true),
+                              dataTableNetworkImagesForAds(flex: 4, images: adList[index]["photos"] ?? [], onTap: () {}),
                               dataTableChip(flex: 2, label: adList[index]["inactive"] ? "Disabled" : "Active"),
                               dataTableIcon(
                                   toolTip: "View Details",

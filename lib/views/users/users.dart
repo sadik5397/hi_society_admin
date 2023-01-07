@@ -36,7 +36,6 @@ class _UsersState extends State<Users> {
         setState(() => userList = result["data"].reversed.toList());
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -54,7 +53,6 @@ class _UsersState extends State<Users> {
         showSuccess(context: context, label: "Password Updated", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -66,7 +64,7 @@ class _UsersState extends State<Users> {
       "notification": {"title": title, "body": body},
       "data": {"topic": "announcement"}
     };
-    String base64Str = payload.toString();
+    String base64Str = json.encode(payload);
     try {
       if (kDebugMode) print(jsonEncode({"userId": userId, "payload": base64Str}));
       var response = await http.post(Uri.parse("$baseUrl/push/send/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "payload": base64Str}));
@@ -76,7 +74,6 @@ class _UsersState extends State<Users> {
         showSuccess(context: context, label: "Notification Sent!", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -89,12 +86,11 @@ class _UsersState extends State<Users> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        print("$role-------------------------------$userId");
+        if (kDebugMode) print("$role-------------------------------$userId");
         if (role == "resident_head" || role == "resident") await http.post(Uri.parse("$baseUrl/auth/test/role/assign?uid=$userId&role=homeless"));
         showSuccess(context: context, label: "This user just became homeless 😢", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());

@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/add_user.dart';
-import 'package:hi_society_admin/views/all_buildings/update_building_info.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../api.dart';
 import '../../components.dart';
+import 'update_building_info.dart';
 
 class UpdateBuilding extends StatefulWidget {
   const UpdateBuilding({Key? key, required this.buildingID, required this.buildingPhoto, required this.buildingName, required this.buildingAddress, this.guard}) : super(key: key);
@@ -45,7 +45,6 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         setState(() => residents = result["data"]["residents"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -63,7 +62,6 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         showSuccess(context: context, label: "Password Updated", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-        //todo: if error
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());

@@ -194,7 +194,7 @@ class _UsersState extends State<Users> {
                                     }
                                   },
                                   icon: Icons.domain_disabled_rounded,
-                                  color: userList[index]["role"]["role"] == "homeless" ? Colors.black12 : Colors.redAccent),
+                                  color: (userList[index]["role"] == null || userList[index]["role"]["role"] == "homeless") ? Colors.black12 : Colors.redAccent),
                             ])))));
   }
 

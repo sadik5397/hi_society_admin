@@ -7,6 +7,7 @@ import 'package:hi_society_admin/api.dart';
 import 'package:hi_society_admin/views/amenities/amenity_category.dart';
 import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ads.dart';
 import 'package:hi_society_admin/views/social_media/social_media_posts.dart';
+import 'package:hi_society_admin/views/test.dart';
 import 'package:hi_society_admin/views/users/users.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickalert/quickalert.dart';
@@ -387,6 +388,7 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
           // ]),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Export Data", toPage: const ExportData()),
         ])),
     Expanded(
         child: Column(

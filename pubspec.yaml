@@ -50,6 +50,7 @@ dependencies:
   flutter_image_compress:
   image_picker_web: ^3.0.0+1
   carousel_slider:
+  excel:
 
 
 dev_dependencies:

@@ -137,7 +137,7 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
                     : await reActiveAd(accessToken: accessToken, adId: widget.adId, userId: widget.userId),
                 primaryButtonText: widget.status == "ACTIVE" ? "Disable Ad" : "Enable Ad",
                 title: widget.title,
-                entryStrng: widget.status,
+                entryString: widget.status,
                 headerPadding: 0,
                 showPlusButton: false,
                 child: (ListView(shrinkWrap: true, children: [

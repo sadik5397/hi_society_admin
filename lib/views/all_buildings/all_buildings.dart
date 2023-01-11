@@ -1,11 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../api.dart';
 import '../../components.dart';
 import 'add_building.dart';
@@ -22,8 +20,11 @@ class _AllBuildingsState extends State<AllBuildings> {
   //Variables
   String accessToken = "";
   List apiResult = [];
+  List foundBuildings = [];
   dynamic guardAccess = {};
   bool isVerified = true;
+  TextEditingController searchController = TextEditingController();
+  final Debouncer onSearchDebouncer = Debouncer(delay: const Duration(milliseconds: 500));
 
 //APIs
   Future<void> verifyMyself({required String accessToken, required VoidCallback ifError}) async {
@@ -108,6 +109,16 @@ class _AllBuildingsState extends State<AllBuildings> {
     setState(() => accessToken = pref.getString("accessToken")!);
     await verifyMyself(accessToken: accessToken, ifError: () => route(context, const SignIn()));
     if (isVerified) await readAllBuilding(accessToken: accessToken);
+    if (isVerified) foundBuildings = apiResult;
+  }
+
+  void runSearch(String enteredKeyword) {
+    List searchResults = [];
+    enteredKeyword.isEmpty
+        ? searchResults = apiResult
+        : searchResults =
+            (apiResult.where((data) => (data["buildingName"].toLowerCase().contains(enteredKeyword.toLowerCase()) || data["address"].toLowerCase().contains(enteredKeyword.toLowerCase())))).toList();
+    setState(() => foundBuildings = searchResults);
   }
 
 //Initiate
@@ -128,52 +139,62 @@ class _AllBuildingsState extends State<AllBuildings> {
                 title: "All Buildings",
                 headerRow: ["Building Name", "Status", "Unique ID", "Total Flats", "Actions"],
                 flex: [6, 2, 2, 2, 2],
-                entryCount: apiResult.length,
+                entryCount: foundBuildings.length,
                 primaryButtonOnTap: () => route(context, const AddBuilding()),
-                child: apiResult.isEmpty
+                searchWidget: primaryTextField(
+                    bottomPadding: 0,
+                    labelText: "Search Building",
+                    icon: Icons.search_rounded,
+                    controller: searchController,
+                    width: 250,
+                    hasSubmitButton: true,
+                    textCapitalization: TextCapitalization.words,
+                    onFieldSubmitted: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
+                    onFieldSubmittedAlternate: () => runSearch(searchController.text)),
+                child: foundBuildings.isEmpty
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
                         padding: EdgeInsets.zero,
-                        itemCount: apiResult.length,
+                        itemCount: foundBuildings.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                               dataTableListTile(
                                   flex: 6,
-                                  title: apiResult[index]["buildingName"],
-                                  subtitle: 'Address: ${apiResult[index]["address"]}',
-                                  img: apiResult[index]["photo"] != null ? '$baseUrl/photos/${apiResult[index]["photo"]}' : null),
+                                  title: foundBuildings[index]["buildingName"],
+                                  subtitle: 'Address: ${foundBuildings[index]["address"]}',
+                                  img: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : null),
                               dataTableChip(
                                   flex: 2,
-                                  label: apiResult[index]["approvalStatus"] == "accepted" ? "active" : apiResult[index]["approvalStatus"],
-                                  color: apiResult[index]["approvalStatus"] == "pending"
+                                  label: foundBuildings[index]["approvalStatus"] == "accepted" ? "active" : foundBuildings[index]["approvalStatus"],
+                                  color: foundBuildings[index]["approvalStatus"] == "pending"
                                       ? const Color(0xFFE67E22)
-                                      : apiResult[index]["approvalStatus"] == "rejected"
+                                      : foundBuildings[index]["approvalStatus"] == "rejected"
                                           ? const Color(0xFFFF2C2C)
                                           : const Color(0xFF3498DB)),
-                              dataTableSingleInfo(flex: 2, title: apiResult[index]["uniqueId"]),
-                              dataTableSingleInfo(flex: 2, title: apiResult[index]["flats"].length.toString()),
-                              apiResult[index]["createdBy"] != null
+                              dataTableSingleInfo(flex: 2, title: foundBuildings[index]["uniqueId"]),
+                              dataTableSingleInfo(flex: 2, title: foundBuildings[index]["flats"].length.toString()),
+                              foundBuildings[index]["createdBy"] != null
                                   ? dataTableIcon(
                                       onTap: () => showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
                                             return viewContactInformation(
-                                                isPending: apiResult[index]["approvalStatus"] == "pending",
+                                                isPending: foundBuildings[index]["approvalStatus"] == "pending",
                                                 context: context,
-                                                contactInformation: apiResult[index]["createdBy"],
+                                                contactInformation: foundBuildings[index]["createdBy"],
                                                 onActive: () async => await activateBuildingAndCreateGuardDeviceAccess(
                                                     accessToken: accessToken,
-                                                    buildingID: apiResult[index]["buildingId"],
+                                                    buildingID: foundBuildings[index]["buildingId"],
                                                     onSuccess: () async {
                                                       routeBack(context);
                                                       // await defaultInit();
                                                       await showDialog(
                                                           context: context,
                                                           builder: (BuildContext context) => viewGuardCredentials(
-                                                              buildingName: apiResult[index]["buildingName"], context: context, password: guardAccess["password"], email: guardAccess["email"]));
+                                                              buildingName: foundBuildings[index]["buildingName"], context: context, password: guardAccess["password"], email: guardAccess["email"]));
                                                     }),
                                                 onReject: () async => await rejectBuilding(
                                                     accessToken: accessToken,
-                                                    buildingID: apiResult[index]["buildingId"],
+                                                    buildingID: foundBuildings[index]["buildingId"],
                                                     onSuccess: () async {
                                                       routeBack(context);
                                                       await defaultInit();
@@ -186,11 +207,11 @@ class _AllBuildingsState extends State<AllBuildings> {
                                   onTap: () => route(
                                       context,
                                       UpdateBuilding(
-                                          buildingName: apiResult[index]["buildingName"],
-                                          buildingAddress: apiResult[index]["address"],
-                                          buildingID: apiResult[index]["buildingId"],
-                                          buildingPhoto: apiResult[index]["photo"] != null ? '$baseUrl/photos/${apiResult[index]["photo"]}' : "",
-                                          guard: apiResult[index]["guard"])),
+                                          buildingName: foundBuildings[index]["buildingName"],
+                                          buildingAddress: foundBuildings[index]["address"],
+                                          buildingID: foundBuildings[index]["buildingId"],
+                                          buildingPhoto: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : "",
+                                          guard: foundBuildings[index]["guard"])),
                                   icon: Icons.edit),
                             ])))));
   }

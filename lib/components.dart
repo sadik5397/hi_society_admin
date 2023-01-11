@@ -17,6 +17,7 @@ import 'views/all_buildings/all_buildings.dart';
 import 'views/security_alerts/security_alert.dart';
 import 'views/sign_in.dart';
 import 'views/utility_contacts/utility_contact_category.dart';
+import 'dart:async';
 
 //region Static Values
 String placeholderImage = "https://i.ibb.co/NSDmSZ0/Sqr-hi-Society-Placeholder.png";
@@ -31,6 +32,29 @@ String capitalizeAllWord(String value) {
     (value[i - 1] == " ") ? result = result + value[i].toUpperCase() : result = result + value[i];
   }
   return result;
+}
+
+class Debouncer {
+  Duration delay;
+  Timer? _timer;
+  VoidCallback? _callback;
+
+  Debouncer({this.delay = const Duration(milliseconds: 500)});
+
+  void debounce(VoidCallback callback) {
+    _callback = callback;
+    cancel();
+    _timer = Timer(delay, flush);
+  }
+
+  void cancel() {
+    if (_timer != null) _timer?.cancel();
+  }
+
+  void flush() {
+    _callback!();
+    cancel();
+  }
 }
 //endregion
 
@@ -172,6 +196,7 @@ Padding primaryTextField(
     double? bottomPadding,
     bool isDate = false,
     bool hasSubmitButton = false,
+    IconData icon = Icons.arrow_downward_sharp,
     TextInputType keyboardType = TextInputType.text,
     String hintText = "Type Here",
     required TextEditingController controller,
@@ -193,6 +218,7 @@ Padding primaryTextField(
       child: SizedBox(
         width: width,
         child: TextFormField(
+            onChanged: onFieldSubmitted,
             initialValue: initialValue,
             autofillHints: [autofillHints],
             focusNode: focusNode,
@@ -238,7 +264,7 @@ Padding primaryTextField(
                         : (hasSubmitButton)
                             ? IconButton(
                                 onPressed: onFieldSubmittedAlternate,
-                                icon: const Icon(Icons.arrow_downward_sharp),
+                                icon: Icon(icon),
                                 iconSize: 18,
                                 color: Colors.grey.shade500,
                               )
@@ -310,7 +336,9 @@ ListTile basicListTile({required BuildContext context, required String title, re
       tileColor: Colors.grey.shade50,
       enableFeedback: true,
       dense: false,
-      trailing: isVerified ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white)) : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
+      trailing: isVerified
+          ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white))
+          : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
       title: Text(title, style: TextStyle(color: isVerified ? primaryColor : Colors.black87)),
       subtitle: Text(subTitle),
       onTap: onTap);
@@ -323,7 +351,8 @@ ListTile smartListTile({required BuildContext context, required String title, St
       enableFeedback: true,
       dense: false,
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
+        Padding(
+            padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
         Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.edit), onPressed: onEdit, color: primaryColor, iconSize: 24, visualDensity: VisualDensity.comfortable))
       ]),
       title: Text(title),
@@ -331,7 +360,8 @@ ListTile smartListTile({required BuildContext context, required String title, St
       onTap: onTap);
 }
 
-Padding sidebarMenuItem({String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
+Padding sidebarMenuItem(
+    {String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
   return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: isHeader
@@ -348,7 +378,9 @@ Padding sidebarMenuItem({String pageName = "", required BuildContext context, Wi
               onPressed: () => route(context, toPage ?? const AllBuildings()),
               child: Padding(
                 padding: EdgeInsets.only(left: isSubMenu ? 36 : 0),
-                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
               )));
 }
 
@@ -408,7 +440,8 @@ Container dataTableContainer(
     double headerPadding = 16,
     bool isScrollableWidget = true,
     int entryCount = 0,
-    String entryStrng = "",
+    String entryString = "",
+    Widget? searchWidget,
     String primaryButtonText = "Add New",
     bool showPlusButton = true,
     VoidCallback? primaryButtonOnTap,
@@ -430,12 +463,13 @@ Container dataTableContainer(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     backgroundColor: Colors.black.withOpacity(.05),
                     label: SelectableText("$entryCount Entries", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
-              if (entryStrng != "")
+              if (entryString != "")
                 Chip(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     backgroundColor: Colors.black.withOpacity(.05),
-                    label: SelectableText(entryStrng, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
+                    label: SelectableText(entryString, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
               const Expanded(child: SizedBox()),
+              if (searchWidget != null) searchWidget,
               if (primaryButtonOnTap != null)
                 primaryButton(
                     title: primaryButtonText,
@@ -448,7 +482,8 @@ Container dataTableContainer(
                         : showPlusButton
                             ? Icons.add
                             : null),
-              if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
+              if (secondaryButtonOnTap != null)
+                primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
             ])),
         const Divider(height: 1),
         Padding(
@@ -567,7 +602,8 @@ Padding photoUploaderPro({required VoidCallback onTap, required String base64img
                           dashPattern: const [3, 6],
                           color: Colors.black26,
                           strokeWidth: 1,
-                          child: Container(height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
+                          child: Container(
+                              height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
                       : Container(
                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
                           child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),

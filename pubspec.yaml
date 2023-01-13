@@ -52,7 +52,6 @@ dependencies:
   carousel_slider:
   excel:
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

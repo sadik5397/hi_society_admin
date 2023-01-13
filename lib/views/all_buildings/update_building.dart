@@ -293,7 +293,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     title: flatOwners[index]["user"]["name"],
                                     subtitle: flatOwners[index]["user"]["email"],
                                     img: flatOwners[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${flatOwners[index]["user"]["photo"]}'),
-                                dataTableSingleInfo(flex: 2, title: "Flat Owner"),
+                                dataTableSingleInfo(flex: 2, title: "Flat Owner - ${flatOwners[index]["flat"]["flatName"]}"),
                                 dataTableChip(flex: 1, label: "Active"),
                                 dataTableIcon(
                                     toolTip: "Change Password",

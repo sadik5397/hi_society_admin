@@ -1,9 +1,11 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../api.dart';
 import '../../components.dart';
 import 'add_building.dart';
@@ -226,7 +228,7 @@ class _AllBuildingsState extends State<AllBuildings> {
           SelectableText(contactInformation["name"], style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: primaryColor)),
           const SizedBox(height: 6),
           const SelectableText("Phone"),
-          SelectableText(contactInformation["phone"], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36, color: primaryColor)),
+          SelectableText(contactInformation["phone"] == "00000000000" ? "No Phone Number" : contactInformation["phone"], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36, color: primaryColor)),
           const SelectableText("Email"),
           SelectableText(contactInformation["email"], style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: primaryColor)),
           const SizedBox(height: 6)

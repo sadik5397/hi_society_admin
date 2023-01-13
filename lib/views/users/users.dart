@@ -134,8 +134,8 @@ class _UsersState extends State<Users> {
             header: "User Management",
             child: dataTableContainer(
                 entryCount: foundUsers.length,
-                headerRow: ["Name", "Status", "Email" "Phone", "Actions"],
-                flex: [4, 2, 4, 3],
+                headerRow: ["Name", "Status", "Contact", "Building", "Actions"],
+                flex: [4, 2, 4, 4, 4],
                 title: "All Users",
                 searchWidget: primaryTextField(
                     bottomPadding: 0,
@@ -164,15 +164,7 @@ class _UsersState extends State<Users> {
                                   title: 'Email: ${foundUsers[index]["email"]}',
                                   subtitle: 'Phone: ${(foundUsers[index]["phone"] == "00000000000" || foundUsers[index]["phone"] == "___________") ? "" : foundUsers[index]["phone"]}',
                                   hideImage: true),
-                              // dataTableIcon(
-                              //     onTap: () => showPrompt(
-                              //         context: context,
-                              //         onTap: () async {
-                              //           routeBack(context);
-                              //           await deleteAmenityCategory(accessToken: accessToken, cid: foundUsers[index]["userId"]);
-                              //           setState(() => foundUsers.removeAt(index));
-                              //         }),
-                              //     icon: Icons.delete),
+                              dataTableListTile(flex: 4, title: 'Name: ${'null'}', subtitle: 'Address: ${'null'}', hideImage: true),
                               dataTableIcon(
                                   toolTip: "Send Instant Notification",
                                   onTap: () {
@@ -200,10 +192,7 @@ class _UsersState extends State<Users> {
                                             context: context,
                                             onSubmit: () async {
                                               updateUserPassword(
-                                                  accessToken: accessToken,
-                                                  confirmPassword: confirmPasswordController.text,
-                                                  newPassword: newPasswordController.text,
-                                                  userId: foundUsers[index]["userId"]);
+                                                  accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: foundUsers[index]["userId"]);
                                               Navigator.pop(context);
                                             }));
                                   },
@@ -230,10 +219,9 @@ class _UsersState extends State<Users> {
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          primaryTextField(labelText: "New Password", controller: newPasswordController),
-          primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)
-        ]),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)]);
   }
 
@@ -242,10 +230,9 @@ class _UsersState extends State<Users> {
         title: const Center(child: Text("Send Instant Push Notification")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          primaryTextField(labelText: "Notification Title", controller: notificationTitle),
-          primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)
-        ]),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [primaryTextField(labelText: "Notification Title", controller: notificationTitle), primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Send Now", onTap: onSubmit)]);
   }
 }

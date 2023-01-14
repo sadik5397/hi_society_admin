@@ -19,6 +19,7 @@ class SocialMediaDisabledPosts extends StatefulWidget {
 class _SocialMediaDisabledPostsState extends State<SocialMediaDisabledPosts> {
 //Variables
   String accessToken = "";
+  String myRole = "";
   List postList = [];
 
 //APIs
@@ -109,6 +110,7 @@ class _SocialMediaDisabledPostsState extends State<SocialMediaDisabledPosts> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
+    setState(() => myRole = pref.getString("role") ?? "");
     await readDisabledPostList(accessToken: accessToken);
   }
 
@@ -123,6 +125,7 @@ class _SocialMediaDisabledPostsState extends State<SocialMediaDisabledPosts> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
+            isAdmin: myRole == "admin",
             pageName: "Social Media Posts",
             context: context,
             header: "Social Media Posts Moderation",

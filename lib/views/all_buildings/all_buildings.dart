@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ads.dart';
 import 'package:hi_society_admin/views/sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,6 +26,7 @@ class _AllBuildingsState extends State<AllBuildings> {
   List foundBuildings = [];
   dynamic guardAccess = {};
   bool isVerified = true;
+  String myRole = "";
   TextEditingController searchController = TextEditingController();
   final Debouncer onSearchDebouncer = Debouncer(delay: const Duration(milliseconds: 500));
 
@@ -34,6 +36,18 @@ class _AllBuildingsState extends State<AllBuildings> {
       var response = await http.post(Uri.parse("$baseUrl/user/me"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        setState(() => myRole = result["data"]["role"]);
+        if (myRole == "admin" || myRole == "moderator") {
+          final pref = await SharedPreferences.getInstance();
+          pref.setString("role", myRole);
+          if (myRole == "moderator") route(context, const RentSellAds());
+        } else {
+          setState(() => isVerified = false);
+          ifError.call();
+          showError(context: context, label: "Please Login Again", seconds: 10);
+          final pref = await SharedPreferences.getInstance();
+          pref.clear();
+        }
         showSnackBar(context: context, label: result["message"]);
       } else {
         setState(() => isVerified = false);
@@ -109,6 +123,7 @@ class _AllBuildingsState extends State<AllBuildings> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
+    setState(() => myRole = pref.getString("role") ?? "");
     await verifyMyself(accessToken: accessToken, ifError: () => route(context, const SignIn()));
     if (isVerified) await readAllBuilding(accessToken: accessToken);
     if (isVerified) foundBuildings = apiResult;
@@ -134,6 +149,7 @@ class _AllBuildingsState extends State<AllBuildings> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
+            isAdmin: myRole == "admin",
             pageName: "All Buildings",
             context: context,
             header: "All Registered Buildings",
@@ -152,6 +168,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                     hasSubmitButton: true,
                     textCapitalization: TextCapitalization.words,
                     onFieldSubmitted: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
+                    onChanged: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
                     onFieldSubmittedAlternate: () => runSearch(searchController.text)),
                 child: foundBuildings.isEmpty
                     ? const Center(child: CircularProgressIndicator())

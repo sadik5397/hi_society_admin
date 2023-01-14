@@ -134,7 +134,7 @@ class _UsersState extends State<Users> {
             header: "User Management",
             child: dataTableContainer(
                 entryCount: foundUsers.length,
-                headerRow: ["Name", "Status", "Contact", "Building", "Actions"],
+                headerRow: ["Name", "Status", "Contact", "Actions"],
                 flex: [4, 2, 4, 4, 4],
                 title: "All Users",
                 searchWidget: primaryTextField(
@@ -146,6 +146,7 @@ class _UsersState extends State<Users> {
                     hasSubmitButton: true,
                     textCapitalization: TextCapitalization.words,
                     onFieldSubmitted: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
+                    onChanged: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
                     onFieldSubmittedAlternate: () => runSearch(searchController.text)),
                 child: (foundUsers.isEmpty)
                     ? const Center(child: CircularProgressIndicator())
@@ -164,7 +165,7 @@ class _UsersState extends State<Users> {
                                   title: 'Email: ${foundUsers[index]["email"]}',
                                   subtitle: 'Phone: ${(foundUsers[index]["phone"] == "00000000000" || foundUsers[index]["phone"] == "___________") ? "" : foundUsers[index]["phone"]}',
                                   hideImage: true),
-                              dataTableListTile(flex: 4, title: 'Name: ${'null'}', subtitle: 'Address: ${'null'}', hideImage: true),
+                              // dataTableListTile(flex: 4, title: 'Name: ${'null'}', subtitle: 'Address: ${'null'}', hideImage: true),
                               dataTableIcon(
                                   toolTip: "Send Instant Notification",
                                   onTap: () {

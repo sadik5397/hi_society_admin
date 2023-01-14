@@ -5,6 +5,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/api.dart';
 import 'package:hi_society_admin/views/amenities/amenity_category.dart';
+import 'package:hi_society_admin/views/moderators/moderators.dart';
 import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ads.dart';
 import 'package:hi_society_admin/views/social_media/social_media_posts.dart';
 import 'package:hi_society_admin/views/test.dart';
@@ -72,7 +73,7 @@ AppBar primaryAppBar({required BuildContext context, String? title}) {
   ]);
 }
 
-Container dashboardHeader({required BuildContext context, String? title}) {
+Container dashboardHeader({required BuildContext context, String? title, String? role = "Super-Admin"}) {
   return Container(
       padding: const EdgeInsets.all(12),
       height: 84,
@@ -82,7 +83,7 @@ Container dashboardHeader({required BuildContext context, String? title}) {
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           SelectableText(title.toString(), style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black.withOpacity(.75))),
-          SelectableText("Logged in as Super-Admin", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
+          SelectableText("Logged in as $role", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
         ]),
         IconButton(
             onPressed: () {
@@ -211,6 +212,7 @@ Padding primaryTextField(
     VoidCallback? showPasswordPressed,
     VoidCallback? onFieldSubmittedAlternate,
     Function(String value)? onFieldSubmitted,
+    Function(String value)? onChanged,
     String? initialValue,
     bool isDisable = false}) {
   return Padding(
@@ -218,7 +220,7 @@ Padding primaryTextField(
       child: SizedBox(
         width: width,
         child: TextFormField(
-            onChanged: onFieldSubmitted,
+            onChanged: onChanged,
             initialValue: initialValue,
             autofillHints: [autofillHints],
             focusNode: focusNode,
@@ -336,9 +338,7 @@ ListTile basicListTile({required BuildContext context, required String title, re
       tileColor: Colors.grey.shade50,
       enableFeedback: true,
       dense: false,
-      trailing: isVerified
-          ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white))
-          : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
+      trailing: isVerified ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white)) : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
       title: Text(title, style: TextStyle(color: isVerified ? primaryColor : Colors.black87)),
       subtitle: Text(subTitle),
       onTap: onTap);
@@ -351,8 +351,7 @@ ListTile smartListTile({required BuildContext context, required String title, St
       enableFeedback: true,
       dense: false,
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-        Padding(
-            padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
+        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
         Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.edit), onPressed: onEdit, color: primaryColor, iconSize: 24, visualDensity: VisualDensity.comfortable))
       ]),
       title: Text(title),
@@ -360,8 +359,7 @@ ListTile smartListTile({required BuildContext context, required String title, St
       onTap: onTap);
 }
 
-Padding sidebarMenuItem(
-    {String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
+Padding sidebarMenuItem({String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
   return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: isHeader
@@ -378,9 +376,7 @@ Padding sidebarMenuItem(
               onPressed: () => route(context, toPage ?? const AllBuildings()),
               child: Padding(
                 padding: EdgeInsets.only(left: isSubMenu ? 36 : 0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
+                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
               )));
 }
 
@@ -397,36 +393,31 @@ Theme sidebarMenuHead({required BuildContext context, required String title, req
           children: children));
 }
 
-Row includeDashboard({bool isScrollablePage = false, required Widget child, required BuildContext context, String? header, required String pageName}) {
+Row includeDashboard({bool isScrollablePage = false, required Widget child, required BuildContext context, String? header, required String pageName, bool isAdmin = true}) {
   return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Container(
         width: 280,
         color: primaryColor,
         child: Column(children: [
           InkWell(
-              onTap: () {
-                route(context, const AllBuildings());
-              },
+              onTap: () => route(context, const AllBuildings()),
               child: Container(padding: const EdgeInsets.all(24), height: 84, width: 280, color: Colors.blueAccent, child: Image.asset("assets/logo.png", fit: BoxFit.fitHeight))),
           const SizedBox(height: 6),
-          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
-          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Users", toPage: const Users()),
+          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
+          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Users", toPage: const Users()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Rent/Sell Ads", toPage: const RentSellAds()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Social Media Posts", toPage: const SocialMediaPosts()),
-          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
-          // sidebarMenuHead(context: context, title: "Utility Contacts", children: [
-          //   sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Contact Group", toPage: const UtilityContactSubGroup(), isSubMenu: true),
-          //   sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Contacts", toPage: const UtilityContacts(), isSubMenu: true),
-          // ]),
-          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
-          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
-          sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Export Data", toPage: const ExportData()),
+          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
+          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
+          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Moderators", toPage: const Moderators()),
+          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Export Data", toPage: const ExportData()),
         ])),
     Expanded(
         child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
-            children: [dashboardHeader(context: context, title: header), Expanded(child: isScrollablePage ? SingleChildScrollView(child: child) : child)]))
+            children: [dashboardHeader(role: isAdmin ? "Super-Admin" : "Moderator", context: context, title: header), Expanded(child: isScrollablePage ? SingleChildScrollView(child: child) : child)]))
   ]);
 }
 
@@ -482,8 +473,7 @@ Container dataTableContainer(
                         : showPlusButton
                             ? Icons.add
                             : null),
-              if (secondaryButtonOnTap != null)
-                primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
+              if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
             ])),
         const Divider(height: 1),
         Padding(
@@ -602,8 +592,7 @@ Padding photoUploaderPro({required VoidCallback onTap, required String base64img
                           dashPattern: const [3, 6],
                           color: Colors.black26,
                           strokeWidth: 1,
-                          child: Container(
-                              height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
+                          child: Container(height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
                       : Container(
                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
                           child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),

@@ -21,7 +21,7 @@ import 'views/utility_contacts/utility_contact_category.dart';
 import 'dart:async';
 
 //region Static Values
-String placeholderImage = "https://i.ibb.co/NSDmSZ0/Sqr-hi-Society-Placeholder.png";
+String placeholderImage = "https://hisocietybd.com/_app_assets/placeholder.png";
 Color themeOf = const Color(0xFFe6f5ff);
 Color primaryColor = const Color(0xff0392f7);
 //endregion

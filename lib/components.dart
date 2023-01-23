@@ -525,6 +525,10 @@ Expanded dataTableChip({required String label, Color color = const Color(0xff219
               avatar: CircleAvatar(backgroundColor: color, radius: 4))));
 }
 
+Expanded dataTableCheckBox({required bool value, required Function(bool?) onChanged, int flex = 1, Alignment alignment = Alignment.center}) {
+  return Expanded(flex: flex, child: Align(alignment: alignment, child: Checkbox(value: value, onChanged: onChanged)));
+}
+
 Expanded dataTableNetworkImagesForAds({int flex = 1, Alignment alignment = Alignment.center, required List<dynamic> images, required VoidCallback onTap}) {
   return Expanded(
       flex: flex,

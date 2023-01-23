@@ -21,6 +21,8 @@ class _UsersState extends State<Users> {
   String accessToken = "";
   List userList = [];
   List foundUsers = [];
+  List selectableUsers = [];
+  List<int> selectedUsers = [];
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController notificationTitle = TextEditingController();
@@ -83,6 +85,34 @@ class _UsersState extends State<Users> {
     }
   }
 
+  Future<void> sendNotificationToManyUsers({required String accessToken, required String title, required String body, required List<int> userIds}) async {
+    Map payload = {
+      "notification": {"title": title, "body": body},
+      "data": {"topic": "announcement"}
+    };
+    String base64Str = json.encode(payload);
+    try {
+      if (kDebugMode) print(jsonEncode({"userIds": userIds, "payload": base64Str}));
+      var response = await http.post(Uri.parse("$baseUrl/push/send/to-many-user"), headers: authHeader(accessToken), body: jsonEncode({"userIds": userIds, "payload": base64Str}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSuccess(
+            context: context,
+            label: "Notification Sent to ${result["data"].length} Users",
+            onTap: () {
+              routeBack(context);
+              setState(() => selectedUsers = []);
+              setState(() => selectableUsers = List.generate(selectableUsers.length, (index) => false));
+            });
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
   Future<void> unAssignBuilding({required String accessToken, required int userId, required String role}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/remove/building/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId}));
@@ -105,17 +135,22 @@ class _UsersState extends State<Users> {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
     await readUserList(accessToken: accessToken);
-    foundUsers = userList;
+    setState(() => foundUsers = userList);
+    List selectedUserList = List.generate(foundUsers.length, (index) => false);
+    setState(() => selectableUsers = selectedUserList);
   }
 
   void runSearch(String enteredKeyword) {
     List searchResults = [];
+    selectedUsers = [];
     enteredKeyword.isEmpty
         ? searchResults = userList
         : searchResults = (userList.where((data) => (data["name"].toLowerCase().contains(enteredKeyword.toLowerCase()) ||
             data["phone"].toLowerCase().contains(enteredKeyword.toLowerCase()) ||
             data["email"].toLowerCase().contains(enteredKeyword.toLowerCase())))).toList();
     setState(() => foundUsers = searchResults);
+    List selectedUserList = List.generate(foundUsers.length, (index) => false);
+    setState(() => selectableUsers = selectedUserList);
   }
 
 //Initiate
@@ -133,13 +168,27 @@ class _UsersState extends State<Users> {
             context: context,
             header: "User Management",
             child: dataTableContainer(
+                primaryButtonOnTap: () {
+                  setState(() => notificationTitle.clear());
+                  setState(() => notificationBody.clear());
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) => createNotification(
+                          context: context,
+                          onSubmit: () async {
+                            sendNotificationToManyUsers(accessToken: accessToken, title: notificationTitle.text, body: notificationBody.text, userIds: selectedUsers);
+                            Navigator.pop(context);
+                          }));
+                },
+                primaryButtonText: "Announcement",
+                showPlusButton: false,
                 entryCount: foundUsers.length,
-                headerRow: ["Name", "Status", "Contact", "Actions"],
-                flex: [4, 2, 4, 4, 4],
+                headerRow: ["Select", "Name", "Status", "Contact", "Actions"],
+                flex: [1, 4, 2, 4, 4, 4],
                 title: "All Users",
                 searchWidget: primaryTextField(
                     bottomPadding: 0,
-                    labelText: "Search User",
+                    labelText: "Search Anything",
                     icon: Icons.search_rounded,
                     controller: searchController,
                     width: 250,
@@ -153,7 +202,14 @@ class _UsersState extends State<Users> {
                     : ListView.builder(
                         itemCount: foundUsers.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              // dataTableListTile(flex: 1, title: foundUsers[index]["userId"].toString(), hideImage: true),
+                              // dataTableCheckBox(flex: 1, value: false, onChanged: (value) => print('${foundUsers[index]["userId"]} $value')),
+                              dataTableCheckBox(
+                                  value: selectableUsers[index],
+                                  onChanged: (value) {
+                                    setState(() => selectableUsers[index] = value);
+                                    if (kDebugMode) print('${foundUsers[index]["userId"]} = ${selectableUsers[index]}');
+                                    selectableUsers[index] ? selectedUsers.add(foundUsers[index]["userId"]) : selectedUsers.remove(foundUsers[index]["userId"]);
+                                  }),
                               dataTableListTile(
                                   flex: 4,
                                   title: foundUsers[index]["name"].toString(),
@@ -210,8 +266,8 @@ class _UsersState extends State<Users> {
                                           });
                                     }
                                   },
-                                  icon: Icons.domain_disabled_rounded,
-                                  color: (foundUsers[index]["role"] == null || foundUsers[index]["role"]["role"] == "homeless") ? Colors.black12 : Colors.redAccent)
+                                  icon: Icons.domain_rounded,
+                                  color: (foundUsers[index]["role"] == null || foundUsers[index]["role"]["role"] == "homeless") ? Colors.black12.withOpacity(.05) : Colors.redAccent)
                             ])))));
   }
 

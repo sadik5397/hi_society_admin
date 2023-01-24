@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
+import 'package:hi_society_admin/views/users/users.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'views/sign_in.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: const Color(0xfff7f7f7),
             brightness: Brightness.light,
             appBarTheme: AppBarTheme(backgroundColor: Colors.blue.shade50, centerTitle: true)),
-        home: accessToken.isEmpty ? const SignIn() : const AllBuildings());
+        home: accessToken.isEmpty ? const SignIn() : const Users());
   }
 }
 //endregion

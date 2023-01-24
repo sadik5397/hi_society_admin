@@ -33,7 +33,7 @@ class _UsersState extends State<Users> {
 //APIs
   Future<void> readUserList({required String accessToken}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/user/list?limit=500"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/building/list/user/with-building?limit=500"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -145,9 +145,12 @@ class _UsersState extends State<Users> {
     selectedUsers = [];
     enteredKeyword.isEmpty
         ? searchResults = userList
-        : searchResults = (userList.where((data) => (data["name"].toLowerCase().contains(enteredKeyword.toLowerCase()) ||
-            data["phone"].toLowerCase().contains(enteredKeyword.toLowerCase()) ||
-            data["email"].toLowerCase().contains(enteredKeyword.toLowerCase())))).toList();
+        : searchResults = (userList.where((data) => (data["name"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
+            data["phone"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
+            data["buildingName"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
+            data["buildingAddress"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
+            data["role"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
+            data["email"].toString().toLowerCase().contains(enteredKeyword.toLowerCase())))).toList();
     setState(() => foundUsers = searchResults);
     List selectedUserList = List.generate(foundUsers.length, (index) => false);
     setState(() => selectableUsers = selectedUserList);
@@ -183,8 +186,8 @@ class _UsersState extends State<Users> {
                 primaryButtonText: "Announcement",
                 showPlusButton: false,
                 entryCount: foundUsers.length,
-                headerRow: ["Select", "Name", "Status", "Contact", "Actions"],
-                flex: [1, 4, 2, 4, 4, 4],
+                headerRow: ["Select", "Name", "Building", "Action"],
+                flex: [1, 4, 4, 2],
                 title: "All Users",
                 searchWidget: primaryTextField(
                     bottomPadding: 0,
@@ -202,7 +205,6 @@ class _UsersState extends State<Users> {
                     : ListView.builder(
                         itemCount: foundUsers.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              // dataTableCheckBox(flex: 1, value: false, onChanged: (value) => print('${foundUsers[index]["userId"]} $value')),
                               dataTableCheckBox(
                                   value: selectableUsers[index],
                                   onChanged: (value) {
@@ -212,62 +214,22 @@ class _UsersState extends State<Users> {
                                   }),
                               dataTableListTile(
                                   flex: 4,
+                                  img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}',
                                   title: foundUsers[index]["name"].toString(),
                                   subtitle:
-                                      'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"]["role"].toString().replaceAll("_", " "))}'),
-                              dataTableChip(flex: 2, label: "Active"),
-                              dataTableListTile(
-                                  flex: 4,
-                                  title: 'Email: ${foundUsers[index]["email"]}',
-                                  subtitle: 'Phone: ${(foundUsers[index]["phone"] == "00000000000" || foundUsers[index]["phone"] == "___________") ? "" : foundUsers[index]["phone"]}',
-                                  hideImage: true),
-                              // dataTableListTile(flex: 4, title: 'Name: ${'null'}', subtitle: 'Address: ${'null'}', hideImage: true),
+                                      'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"].toString().replaceAll("_", " "))}'),
+                              foundUsers[index]["buildingName"] != null
+                                  ? dataTableListTile(
+                                      flex: 4,
+                                      title: foundUsers[index]["buildingName"].toString(),
+                                      subtitle: foundUsers[index]["buildingAddress"].toString(),
+                                      img: foundUsers[index]["buildingPhoto"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["buildingPhoto"]}')
+                                  : dataTableNull(flex: 4),
                               dataTableIcon(
-                                  toolTip: "Send Instant Notification",
-                                  onTap: () {
-                                    setState(() => notificationTitle.clear());
-                                    setState(() => notificationBody.clear());
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) => createNotification(
-                                            context: context,
-                                            onSubmit: () async {
-                                              sendNotification(accessToken: accessToken, title: notificationTitle.text, body: notificationBody.text, userId: foundUsers[index]["userId"]);
-                                              Navigator.pop(context);
-                                            }));
-                                  },
-                                  icon: Icons.notification_add_outlined),
-                              dataTableIcon(
-                                  toolTip: "Change Password",
-                                  onTap: () {
-                                    setState(() => newPasswordController.clear());
-                                    setState(() => confirmPasswordController.clear());
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) => updatePassword(
-                                            userId: foundUsers[index]["userId"],
-                                            context: context,
-                                            onSubmit: () async {
-                                              updateUserPassword(
-                                                  accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: foundUsers[index]["userId"]);
-                                              Navigator.pop(context);
-                                            }));
-                                  },
-                                  icon: Icons.lock_reset),
-                              dataTableIcon(
-                                  toolTip: "Un-assign Building",
-                                  onTap: () async {
-                                    if (foundUsers[index]["role"]["role"] != "homeless") {
-                                      await showPrompt(
-                                          context: context,
-                                          onTap: () async {
-                                            routeBack(context);
-                                            await unAssignBuilding(accessToken: accessToken, role: foundUsers[index]["role"]["role"].toString(), userId: foundUsers[index]["userId"]);
-                                          });
-                                    }
-                                  },
-                                  icon: Icons.domain_rounded,
-                                  color: (foundUsers[index]["role"] == null || foundUsers[index]["role"]["role"] == "homeless") ? Colors.black12.withOpacity(.05) : Colors.redAccent)
+                                  flex: 2,
+                                  toolTip: "More Options",
+                                  onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
+                                  icon: Icons.read_more)
                             ])))));
   }
 
@@ -291,5 +253,122 @@ class _UsersState extends State<Users> {
             mainAxisSize: MainAxisSize.min,
             children: [primaryTextField(labelText: "Notification Title", controller: notificationTitle), primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Send Now", onTap: onSubmit)]);
+  }
+
+  AlertDialog moreUserOptions({required BuildContext context, required Map userData}) {
+    return AlertDialog(
+        title: Center(child: (Text(capitalizeAllWord(userData["name"].toString())))),
+        insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 400),
+        buttonPadding: EdgeInsets.zero,
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          Row(children: [
+            Expanded(flex: 2, child: Image.network(userData["photo"] == null ? placeholderImage : '$baseUrl/photos/${userData["photo"]}')),
+            const SizedBox(width: 12),
+            Expanded(
+                flex: 3,
+                child: DataTable(columns: [
+                  DataColumn(label: Text("Key", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor))),
+                  DataColumn(label: Text("Value", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor)))
+                ], rows: [
+                  DataRow(cells: [
+                    const DataCell(Text("User ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["userId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Profile Name", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["name"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Mobile", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText((userData["phone"] == "00000000000" || userData["phone"] == "000000000" || userData["phone"] == "___________") ? "N/A" : userData["phone"],
+                        style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["email"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Registered", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["createdAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Building", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["buildingName"] != null ? userData["buildingName"].toString() : "N/A", style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Address", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["buildingName"] != null ? userData["buildingAddress"].toString() : "N/A", style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Role", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(
+                        userData["role"] == null
+                            ? "Not Available"
+                            : userData["role"] == "homeless"
+                                ? "Not Assigned"
+                                : capitalizeAllWord(userData["role"].toString().replaceAll("_", " ")),
+                        style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Flat", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["flatName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ])
+                ]))
+          ]),
+          const SizedBox(height: 24),
+          Row(children: [
+            Expanded(
+                child: primaryButton(
+                    width: 200,
+                    paddingRight: 6,
+                    title: "Push Notification",
+                    onTap: () {
+                      setState(() => notificationTitle.clear());
+                      setState(() => notificationBody.clear());
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) => createNotification(
+                              context: context,
+                              onSubmit: () async {
+                                sendNotification(accessToken: accessToken, title: notificationTitle.text, body: notificationBody.text, userId: userData["userId"]);
+                                Navigator.pop(context);
+                              }));
+                    })),
+            Expanded(
+                child: primaryButton(
+                    width: 200,
+                    paddingRight: 6,
+                    paddingLeft: 6,
+                    title: "Change Password",
+                    onTap: () {
+                      setState(() => newPasswordController.clear());
+                      setState(() => confirmPasswordController.clear());
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) => updatePassword(
+                              userId: userData["userId"],
+                              context: context,
+                              onSubmit: () async {
+                                updateUserPassword(accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: userData["userId"]);
+                                Navigator.pop(context);
+                              }));
+                    })),
+            Expanded(
+                child: primaryButton(
+                    width: 200,
+                    paddingLeft: 6,
+                    title: "Un-assign Building",
+                    onTap: () async {
+                      if (userData["role"] != "homeless") {
+                        await showPrompt(
+                            context: context,
+                            onTap: () async {
+                              routeBack(context);
+                              await unAssignBuilding(accessToken: accessToken, role: userData["role"].toString(), userId: userData["role"]["userId"]);
+                            });
+                      }
+                    }))
+          ])
+        ]));
   }
 }

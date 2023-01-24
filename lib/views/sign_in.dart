@@ -84,7 +84,6 @@ class _SignInState extends State<SignIn> {
                                         controller: emailController,
                                         labelText: "Enter Email or Username",
                                         keyboardType: TextInputType.emailAddress,
-
                                         required: true,
                                         errorText: "Username/Email required",
                                         textCapitalization: TextCapitalization.none),

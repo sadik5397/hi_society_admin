@@ -84,6 +84,54 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
+  Future<void> removeManager({required String accessToken, required int buildingID, required int managerID}) async {
+    print({"managerId": managerID, "buildingId": buildingID}.toString());
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/building/remove/manager"), headers: authHeader(accessToken), body: jsonEncode({"managerId": managerID, "buildingId": buildingID}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
+  Future<void> removeCommitteeMember({required String accessToken, required int userID}) async {
+    print({"uid": userID, "role": "homeless"}.toString());
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/auth/test/role/assign"), headers: authHeader(accessToken), body: jsonEncode({"uid": userID, "role": "homeless"}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
+  Future<void> removeResident({required String accessToken, required int userID}) async {
+    print({"userId": userID}.toString());
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/building/remove/building/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userID}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
 //Functions
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
@@ -151,7 +199,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                               dataTableListTile(flex: 2, title: widget.guard!["name"], subtitle: widget.guard!["email"]),
                               dataTableSingleInfo(flex: 2, title: "Guard Device Access Point"),
-                              dataTableChip(flex: 1, label: "Active"),
+                              dataTableChip(label: "Active"),
                               dataTableIcon(
                                   toolTip: "Change Password",
                                   onTap: () {
@@ -168,7 +216,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               Navigator.pop(context);
                                             }));
                                   },
-                                  icon: Icons.lock_reset),
+                                  icon: Icons.lock_reset)
                             ]))),
               //endregion
 
@@ -178,8 +226,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   paddingBottom: 0,
                   title: "Building Manager",
                   primaryButtonText: "Add Manager",
-                  primaryButtonOnTap:
-                      buildingExecutiveUsers["manager"] == null ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Building_Manager", buildingName: widget.buildingName)) : null,
+                  primaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Building_Manager", buildingName: widget.buildingName)),
                   headerRow: ["Name", "Role", "Status", "Action"],
                   flex: [2, 2, 1, 1],
                   child: (buildingExecutiveUsers["manager"] == null)
@@ -191,12 +238,12 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           itemCount: 1,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                                 dataTableListTile(
-                                    flex: 2,
+                                    flex: 4,
                                     title: buildingExecutiveUsers["manager"]["name"],
                                     subtitle: buildingExecutiveUsers["manager"]["email"],
                                     img: buildingExecutiveUsers["manager"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingExecutiveUsers["manager"]["photo"]}'),
-                                dataTableSingleInfo(flex: 2, title: "Building Manager"),
-                                dataTableChip(flex: 1, label: "Active"),
+                                dataTableSingleInfo(flex: 4, title: "Building Manager"),
+                                dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
                                     toolTip: "Change Password",
                                     onTap: () {
@@ -216,7 +263,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                                 Navigator.pop(context);
                                               }));
                                     },
-                                    icon: Icons.lock_reset)
+                                    icon: Icons.lock_reset),
+                                dataTableIcon(
+                                    toolTip: "Demote Manager",
+                                    onTap: () {
+                                      showPrompt(
+                                          context: context,
+                                          onTap: () async {
+                                            Navigator.pop(context);
+                                            await removeManager(accessToken: accessToken, buildingID: widget.buildingID, managerID: buildingExecutiveUsers["manager"]["userId"]);
+                                          });
+                                    },
+                                    icon: Icons.cancel_outlined,
+                                    color: Colors.redAccent),
                               ]))),
 
               //endregion
@@ -243,13 +302,14 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           itemCount: buildingCommittee.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                                 dataTableListTile(
-                                    flex: 2,
+                                    flex: 4,
                                     title: buildingCommittee[index]["member"]["name"],
                                     subtitle: buildingCommittee[index]["member"]["email"],
                                     img: buildingCommittee[index]["member"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingCommittee[index]["member"]["photo"]}'),
-                                dataTableSingleInfo(flex: 2, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
-                                dataTableChip(flex: 1, label: "Active"),
+                                dataTableSingleInfo(flex: 4, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
+                                dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
+                                    flex: 2,
                                     toolTip: "Change Password",
                                     onTap: () {
                                       setState(() => newPasswordController.clear());
@@ -268,7 +328,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                                 Navigator.pop(context);
                                               }));
                                     },
-                                    icon: Icons.lock_reset)
+                                    icon: Icons.lock_reset),
+                                // dataTableIcon(
+                                //     toolTip: "Demote Member",
+                                //     onTap: () {
+                                //       showPrompt(
+                                //           context: context,
+                                //           onTap: () async {
+                                //             Navigator.pop(context);
+                                //             await removeCommitteeMember(accessToken: accessToken, userID: buildingCommittee[index]["member"]["userId"]);
+                                //           });
+                                //     },
+                                //     icon: Icons.cancel_outlined,
+                                //     color: Colors.redAccent)
                               ]))),
               //endregion
 
@@ -289,13 +361,14 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           itemCount: flatOwners.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                                 dataTableListTile(
-                                    flex: 2,
+                                    flex: 4,
                                     title: flatOwners[index]["user"]["name"],
                                     subtitle: flatOwners[index]["user"]["email"],
                                     img: flatOwners[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${flatOwners[index]["user"]["photo"]}'),
-                                dataTableSingleInfo(flex: 2, title: "Flat Owner - ${flatOwners[index]["flat"]["flatName"]}"),
-                                dataTableChip(flex: 1, label: "Active"),
+                                dataTableSingleInfo(flex: 4, title: "Flat Owner - ${flatOwners[index]["flat"]["flatName"]}"),
+                                dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
+                                    flex: 2,
                                     toolTip: "Change Password",
                                     onTap: () {
                                       setState(() => newPasswordController.clear());
@@ -314,7 +387,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                                 Navigator.pop(context);
                                               }));
                                     },
-                                    icon: Icons.lock_reset)
+                                    icon: Icons.lock_reset),
+                                // dataTableIcon(
+                                //     toolTip: "Demote Flat Owner",
+                                //     onTap: () {
+                                //       showPrompt(
+                                //           context: context,
+                                //           onTap: () async {
+                                //             Navigator.pop(context);
+                                //             await removeCommitteeMember(accessToken: accessToken, userID: flatOwners[index]["user"]["userId"]);
+                                //           });
+                                //     },
+                                //     icon: Icons.cancel_outlined,
+                                //     color: Colors.redAccent)
                               ]))),
               //endregion
 
@@ -333,13 +418,14 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           itemCount: residents.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                                 dataTableListTile(
-                                    flex: 2,
+                                    flex: 4,
                                     title: residents[index]["name"],
                                     subtitle: residents[index]["email"],
                                     img: residents[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${residents[index]["photo"]}'),
-                                dataTableSingleInfo(flex: 2, title: "Resident"),
-                                dataTableChip(flex: 1, label: "Active"),
+                                dataTableSingleInfo(flex: 4, title: "Resident"),
+                                dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
+                                    flex: 2,
                                     toolTip: "Change Password",
                                     onTap: () {
                                       setState(() => newPasswordController.clear());
@@ -355,7 +441,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                                 Navigator.pop(context);
                                               }));
                                     },
-                                    icon: Icons.lock_reset)
+                                    icon: Icons.lock_reset),
+                                // dataTableIcon(
+                                //     toolTip: "Demote Resident",
+                                //     onTap: () {
+                                //       showPrompt(
+                                //           context: context,
+                                //           onTap: () async {
+                                //             Navigator.pop(context);
+                                //             await removeResident(accessToken: accessToken, userID: residents[index]["userId"]);
+                                //           });
+                                //     },
+                                //     icon: Icons.cancel_outlined,
+                                //     color: Colors.redAccent)
                               ])))
               //endregion
             ]),

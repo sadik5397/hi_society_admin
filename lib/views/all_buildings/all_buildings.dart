@@ -175,7 +175,16 @@ class _AllBuildingsState extends State<AllBuildings> {
                     : ListView.builder(
                         padding: EdgeInsets.zero,
                         itemCount: foundBuildings.length,
-                        itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                        itemBuilder: (context, index) => dataTableAlternativeColorCells(
+                          onTap: () => route(
+                              context,
+                              UpdateBuilding(
+                                  buildingName: foundBuildings[index]["buildingName"],
+                                  buildingAddress: foundBuildings[index]["address"],
+                                  buildingID: foundBuildings[index]["buildingId"],
+                                  buildingPhoto: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : "",
+                                  guard: foundBuildings[index]["guard"])),
+                            index: index, children: [
                               dataTableListTile(
                                   flex: 6,
                                   title: foundBuildings[index]["buildingName"],
@@ -223,6 +232,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                                       icon: Icons.call_rounded)
                                   : dataTableNull(),
                               dataTableIcon(
+                                toolTip: "More Options",
                                   onTap: () => route(
                                       context,
                                       UpdateBuilding(
@@ -231,7 +241,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                                           buildingID: foundBuildings[index]["buildingId"],
                                           buildingPhoto: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : "",
                                           guard: foundBuildings[index]["guard"])),
-                                  icon: Icons.edit),
+                                  icon: Icons.read_more),
                             ])))));
   }
 

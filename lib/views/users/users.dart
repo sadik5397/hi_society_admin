@@ -204,33 +204,36 @@ class _UsersState extends State<Users> {
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
                         itemCount: foundUsers.length,
-                        itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              dataTableCheckBox(
-                                  value: selectableUsers[index],
-                                  onChanged: (value) {
-                                    setState(() => selectableUsers[index] = value);
-                                    if (kDebugMode) print('${foundUsers[index]["userId"]} = ${selectableUsers[index]}');
-                                    selectableUsers[index] ? selectedUsers.add(foundUsers[index]["userId"]) : selectedUsers.remove(foundUsers[index]["userId"]);
-                                  }),
-                              dataTableListTile(
-                                  flex: 4,
-                                  img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}',
-                                  title: foundUsers[index]["name"].toString(),
-                                  subtitle:
-                                      'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"].toString().replaceAll("_", " "))}'),
-                              foundUsers[index]["buildingName"] != null
-                                  ? dataTableListTile(
+                        itemBuilder: (context, index) => dataTableAlternativeColorCells(
+                                onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
+                                index: index,
+                                children: [
+                                  dataTableCheckBox(
+                                      value: selectableUsers[index],
+                                      onChanged: (value) {
+                                        setState(() => selectableUsers[index] = value);
+                                        if (kDebugMode) print('${foundUsers[index]["userId"]} = ${selectableUsers[index]}');
+                                        selectableUsers[index] ? selectedUsers.add(foundUsers[index]["userId"]) : selectedUsers.remove(foundUsers[index]["userId"]);
+                                      }),
+                                  dataTableListTile(
                                       flex: 4,
-                                      title: foundUsers[index]["buildingName"].toString(),
-                                      subtitle: foundUsers[index]["buildingAddress"].toString(),
-                                      img: foundUsers[index]["buildingPhoto"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["buildingPhoto"]}')
-                                  : dataTableNull(flex: 4),
-                              dataTableIcon(
-                                  flex: 2,
-                                  toolTip: "More Options",
-                                  onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
-                                  icon: Icons.read_more)
-                            ])))));
+                                      img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}',
+                                      title: foundUsers[index]["name"].toString(),
+                                      subtitle:
+                                          'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"].toString().replaceAll("_", " "))}'),
+                                  foundUsers[index]["buildingName"] != null
+                                      ? dataTableListTile(
+                                          flex: 4,
+                                          title: foundUsers[index]["buildingName"].toString(),
+                                          subtitle: foundUsers[index]["buildingAddress"].toString(),
+                                          img: foundUsers[index]["buildingPhoto"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["buildingPhoto"]}')
+                                      : dataTableNull(flex: 4),
+                                  dataTableIcon(
+                                      flex: 2,
+                                      toolTip: "More Options",
+                                      onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
+                                      icon: Icons.read_more)
+                                ])))));
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {
@@ -311,7 +314,7 @@ class _UsersState extends State<Users> {
                   ]),
                   DataRow(cells: [
                     const DataCell(Text("Flat", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText(userData["flatName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                    DataCell(SelectableText(userData["flatName"] == null ? "N/A" : userData["flatName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
                   ])
                 ]))
           ]),

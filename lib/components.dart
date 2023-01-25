@@ -384,7 +384,8 @@ Theme sidebarMenuHead({required BuildContext context, required String title, req
   return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
-          initiallyExpanded: true,
+          initiallyExpanded: false,
+          childrenPadding: const EdgeInsets.only(left: 36,right: 12),
           maintainState: true,
           iconColor: Colors.white,
           collapsedIconColor: Colors.white,
@@ -407,9 +408,11 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Users", toPage: const Users()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Rent/Sell Ads", toPage: const RentSellAds()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Social Media Posts", toPage: const SocialMediaPosts()),
-          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
-          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
-          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+          sidebarMenuHead(context: context, title: "Options", children: [
+            if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
+            if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
+            if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+          ]),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Moderators", toPage: const Moderators()),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Export Data", toPage: const ExportData()),
         ])),
@@ -488,8 +491,8 @@ Container dataTableContainer(
       ]));
 }
 
-ColoredBox dataTableAlternativeColorCells({required int index, required List<Widget> children}) =>
-    ColoredBox(color: index % 2 == 0 ? themeOf.withOpacity(.4) : Colors.transparent, child: Row(children: children));
+InkWell dataTableAlternativeColorCells({VoidCallback? onTap, required int index, required List<Widget> children}) =>
+    InkWell(onTap: onTap, child: ColoredBox(color: index % 2 == 0 ? themeOf.withOpacity(.4) : Colors.transparent, child: Row(children: children)));
 
 Expanded dataTableListTile({required String title, String? subtitle, int flex = 1, bool hideImage = false, String? img, Color? color}) {
   return Expanded(

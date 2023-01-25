@@ -159,36 +159,50 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
                         itemCount: adList.length,
-                        itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                              dataTableListTile(
-                                  flex: 2, title: adList[index]["title"].toString(), subtitle: 'Type: ${(adList[index]["adType"].toString().toUpperCase())}', hideImage: true, color: Colors.redAccent),
-                              dataTableListTile(
-                                  flex: 2, title: adList[index]["createdBy"]["name"], subtitle: 'Posted on: ${adList[index]["createdAt"].toString().split("T")[0]}', hideImage: true, color: Colors.redAccent),
-                              dataTableNetworkImagesForAds(flex: 4, images: adList[index]["photos"] ?? [], onTap: () {}),
-                              dataTableChip(flex: 2, label: adList[index]["inactive"] ? "Disabled" : "Active", color: Colors.redAccent),
-                              dataTableIcon(
-                                  toolTip: "View Details",
-                                  onTap: () => route(
-                                      context,
-                                      RentSellAdDetails(
-                                          userId: adList[index]["createdBy"]["userId"],
-                                          adId: adList[index]["advertId"],
-                                          status: (adList[index]["inactive"] ? "Disabled" : "Active").toUpperCase(),
-                                          title: adList[index]["title"].toString(),
-                                          imageList: adList[index]["photos"])),
-                                  icon: Icons.open_in_new_rounded),
-                              dataTableIcon(
-                                  toolTip: "Enable Ad",
-                                  onTap: () async => await showPrompt(
-                                      context: context,
-                                      onTap: () async {
-                                        routeBack(context);
-                                        adList[index]["inactive"]
-                                            ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"])
-                                            : await disableAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"]);
-                                      }),
-                                  icon: adList[index]["inactive"] ? Icons.visibility_outlined : Icons.disabled_visible_rounded,
-                                  color: adList[index]["inactive"] ? Colors.green : Colors.redAccent)
-                            ])))));
+                        itemBuilder: (context, index) => dataTableAlternativeColorCells(
+                                onTap: () => route(
+                                    context,
+                                    RentSellAdDetails(
+                                        userId: adList[index]["createdBy"]["userId"],
+                                        adId: adList[index]["advertId"],
+                                        status: (adList[index]["inactive"] ? "Disabled" : "Active").toUpperCase(),
+                                        title: adList[index]["title"].toString(),
+                                        imageList: adList[index]["photos"])),
+                                index: index,
+                                children: [
+                                  dataTableListTile(
+                                      flex: 2, title: adList[index]["title"].toString(), subtitle: 'Type: ${(adList[index]["adType"].toString().toUpperCase())}', hideImage: true, color: Colors.redAccent),
+                                  dataTableListTile(
+                                      flex: 2,
+                                      title: adList[index]["createdBy"]["name"],
+                                      subtitle: 'Posted on: ${adList[index]["createdAt"].toString().split("T")[0]}',
+                                      hideImage: true,
+                                      color: Colors.redAccent),
+                                  dataTableNetworkImagesForAds(flex: 4, images: adList[index]["photos"] ?? [], onTap: () {}),
+                                  dataTableChip(flex: 2, label: adList[index]["inactive"] ? "Disabled" : "Active", color: Colors.redAccent),
+                                  dataTableIcon(
+                                      toolTip: "View Details",
+                                      onTap: () => route(
+                                          context,
+                                          RentSellAdDetails(
+                                              userId: adList[index]["createdBy"]["userId"],
+                                              adId: adList[index]["advertId"],
+                                              status: (adList[index]["inactive"] ? "Disabled" : "Active").toUpperCase(),
+                                              title: adList[index]["title"].toString(),
+                                              imageList: adList[index]["photos"])),
+                                      icon: Icons.open_in_new_rounded),
+                                  dataTableIcon(
+                                      toolTip: "Enable Ad",
+                                      onTap: () async => await showPrompt(
+                                          context: context,
+                                          onTap: () async {
+                                            routeBack(context);
+                                            adList[index]["inactive"]
+                                                ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"])
+                                                : await disableAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"]);
+                                          }),
+                                      icon: adList[index]["inactive"] ? Icons.visibility_outlined : Icons.disabled_visible_rounded,
+                                      color: adList[index]["inactive"] ? Colors.green : Colors.redAccent)
+                                ])))));
   }
 }

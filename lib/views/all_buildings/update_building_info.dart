@@ -220,6 +220,8 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                       (index) => Padding(
                                             padding: const EdgeInsets.only(top: 6),
                                             child: Chip(
+                                              elevation: 1,
+                                                side: const BorderSide(style: BorderStyle.none),
                                                 backgroundColor: primaryColor.withOpacity(.2),
                                                 deleteIcon: const Icon(Icons.cancel_outlined, size: 18),
                                                 visualDensity: VisualDensity.compact,

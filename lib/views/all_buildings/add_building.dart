@@ -138,6 +138,8 @@ class _AddBuildingState extends State<AddBuilding> {
                               children: List.generate(
                                   buildingFlatList.length,
                                   (index) => Chip(
+                                    elevation: 1,
+                                      side: const BorderSide(style: BorderStyle.none),
                                       backgroundColor: primaryColor.withOpacity(.2),
                                       deleteIcon: const Icon(Icons.cancel_outlined, size: 18),
                                       visualDensity: VisualDensity.compact,

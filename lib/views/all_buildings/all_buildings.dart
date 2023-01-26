@@ -160,6 +160,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                 entryCount: foundBuildings.length,
                 primaryButtonOnTap: () => route(context, const AddBuilding()),
                 searchWidget: primaryTextField(
+                    fillColor: primaryColor.withOpacity(.1),
                     bottomPadding: 0,
                     labelText: "Search Building",
                     icon: Icons.search_rounded,
@@ -247,6 +248,7 @@ class _AllBuildingsState extends State<AllBuildings> {
 
   AlertDialog viewContactInformation({required bool isPending, required BuildContext context, required VoidCallback onActive, required VoidCallback onReject, required Map contactInformation}) {
     return AlertDialog(
+        backgroundColor: Colors.white,
         title: const Center(child: Text("Contact Information")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
@@ -272,6 +274,7 @@ class _AllBuildingsState extends State<AllBuildings> {
 
   AlertDialog viewGuardCredentials({required String buildingName, required BuildContext context, required String password, required String email}) {
     return AlertDialog(
+        backgroundColor: Colors.white,
         title: const Center(child: Text("Guard Device Access Point Created", textAlign: TextAlign.center)),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 150),
         buttonPadding: EdgeInsets.zero,

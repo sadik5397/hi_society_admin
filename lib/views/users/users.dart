@@ -184,12 +184,12 @@ class _UsersState extends State<Users> {
                           }));
                 },
                 primaryButtonText: "Announcement",
-                showPlusButton: false,
                 entryCount: foundUsers.length,
                 headerRow: ["Select", "Name", "Building", "Action"],
                 flex: [1, 4, 4, 2],
                 title: "All Users",
                 searchWidget: primaryTextField(
+                    fillColor: primaryColor.withOpacity(.1),
                     bottomPadding: 0,
                     labelText: "Search Anything",
                     icon: Icons.search_rounded,
@@ -237,29 +237,31 @@ class _UsersState extends State<Users> {
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {
-    return AlertDialog(
+    return AlertDialog(backgroundColor: Colors.white,
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          primaryTextField(labelText: "New Password", controller: newPasswordController),
+          primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)
+        ]),
         actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)]);
   }
 
   AlertDialog createNotification({required BuildContext context, required VoidCallback onSubmit}) {
-    return AlertDialog(
+    return AlertDialog(backgroundColor: Colors.white,
         title: const Center(child: Text("Send Instant Push Notification")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [primaryTextField(labelText: "Notification Title", controller: notificationTitle), primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)]),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          primaryTextField(labelText: "Notification Title", controller: notificationTitle),
+          primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)
+        ]),
         actions: [primaryButton(paddingTop: 0, title: "Send Now", onTap: onSubmit)]);
   }
 
   AlertDialog moreUserOptions({required BuildContext context, required Map userData}) {
-    return AlertDialog(
+    return AlertDialog(backgroundColor: Colors.white,
         title: Center(child: (Text(capitalizeAllWord(userData["name"].toString())))),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 400),
         buttonPadding: EdgeInsets.zero,

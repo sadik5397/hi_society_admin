@@ -243,7 +243,7 @@ Padding primaryTextField(
                 isDense: false,
                 alignLabelWithHint: true,
                 filled: true,
-                fillColor: fillColor,
+                fillColor: fillColor ?? primaryColor.withOpacity(.1),
                 contentPadding: const EdgeInsets.all(12),
                 // labelStyle: textFieldLabel,
                 hintText: hintText,
@@ -338,7 +338,9 @@ ListTile basicListTile({required BuildContext context, required String title, re
       tileColor: Colors.grey.shade50,
       enableFeedback: true,
       dense: false,
-      trailing: isVerified ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white)) : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
+      trailing: isVerified
+          ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white))
+          : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
       title: Text(title, style: TextStyle(color: isVerified ? primaryColor : Colors.black87)),
       subtitle: Text(subTitle),
       onTap: onTap);
@@ -351,7 +353,8 @@ ListTile smartListTile({required BuildContext context, required String title, St
       enableFeedback: true,
       dense: false,
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
+        Padding(
+            padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
         Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.edit), onPressed: onEdit, color: primaryColor, iconSize: 24, visualDensity: VisualDensity.comfortable))
       ]),
       title: Text(title),
@@ -359,7 +362,8 @@ ListTile smartListTile({required BuildContext context, required String title, St
       onTap: onTap);
 }
 
-Padding sidebarMenuItem({String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
+Padding sidebarMenuItem(
+    {String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
   return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: isHeader
@@ -376,7 +380,9 @@ Padding sidebarMenuItem({String pageName = "", required BuildContext context, Wi
               onPressed: () => route(context, toPage ?? const AllBuildings()),
               child: Padding(
                 padding: EdgeInsets.only(left: isSubMenu ? 36 : 0),
-                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
               )));
 }
 
@@ -385,7 +391,7 @@ Theme sidebarMenuHead({required BuildContext context, required String title, req
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
           initiallyExpanded: false,
-          childrenPadding: const EdgeInsets.only(left: 36,right: 12),
+          childrenPadding: const EdgeInsets.only(left: 36, right: 12),
           maintainState: true,
           iconColor: Colors.white,
           collapsedIconColor: Colors.white,
@@ -454,11 +460,15 @@ Container dataTableContainer(
               const SizedBox(width: 12),
               if (entryCount > 0)
                 Chip(
+                    elevation: 1,
+                    side: const BorderSide(style: BorderStyle.none),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     backgroundColor: Colors.black.withOpacity(.05),
                     label: SelectableText("$entryCount Entries", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
               if (entryString != "")
                 Chip(
+                    elevation: 1,
+                    side: const BorderSide(style: BorderStyle.none),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     backgroundColor: Colors.black.withOpacity(.05),
                     label: SelectableText(entryString, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal))),
@@ -468,15 +478,18 @@ Container dataTableContainer(
                 primaryButton(
                     title: primaryButtonText,
                     onTap: primaryButtonOnTap,
-                    width: 160,
+                    width: 200,
                     paddingBottom: 0,
                     paddingRight: 0,
                     icon: primaryButtonText == "Edit"
                         ? Icons.edit
-                        : showPlusButton
-                            ? Icons.add
-                            : null),
-              if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 160, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
+                        : primaryButtonText == "Announcement"
+                            ? Icons.notifications_active_outlined
+                            : showPlusButton
+                                ? Icons.add
+                                : null),
+              if (secondaryButtonOnTap != null)
+                primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 200, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
             ])),
         const Divider(height: 1),
         Padding(
@@ -521,6 +534,8 @@ Expanded dataTableChip({required String label, Color color = const Color(0xff219
       child: Align(
           alignment: alignment,
           child: Chip(
+              elevation: 1,
+              side: const BorderSide(style: BorderStyle.none),
               label: SelectableText(label.toUpperCase(), style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 14, height: 0)),
               backgroundColor: color.withOpacity(.08),
               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -599,7 +614,8 @@ Padding photoUploaderPro({required VoidCallback onTap, required String base64img
                           dashPattern: const [3, 6],
                           color: Colors.black26,
                           strokeWidth: 1,
-                          child: Container(height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
+                          child: Container(
+                              height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
                       : Container(
                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
                           child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),

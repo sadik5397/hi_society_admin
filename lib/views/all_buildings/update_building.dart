@@ -27,6 +27,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   Map<String, dynamic> buildingExecutiveUsers = {};
   List buildingCommittee = [];
   List flatOwners = [];
+  List managers = [];
   List residents = [];
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
@@ -41,6 +42,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         showSnackBar(context: context, label: result["message"]);
         setState(() => buildingExecutiveUsers = result["data"]);
         setState(() => buildingCommittee = result["data"]["committeeHeads"] + result["data"]["committeeMembers"]);
+        setState(() => managers = result["data"]["manager"]);
         setState(() => flatOwners = result["data"]["flatOwners"]);
         setState(() => residents = result["data"]["residents"]);
       } else {
@@ -162,8 +164,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   headerPadding: buildingInfo == {} ? 8 : 0,
                   title: "Building Information",
                   primaryButtonText: "Edit",
-                  primaryButtonOnTap: () =>
-                      route(context, UpdateBuildingInfo(buildingID: widget.buildingID, buildingName: widget.buildingName, buildingNameAddress: widget.buildingAddress, buildingPhoto: widget.buildingPhoto)),
+                  primaryButtonOnTap: () => route(
+                      context, UpdateBuildingInfo(buildingID: widget.buildingID, buildingName: widget.buildingName, buildingNameAddress: widget.buildingAddress, buildingPhoto: widget.buildingPhoto)),
                   child: (buildingInfo == {})
                       ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
                       : Row(
@@ -229,19 +231,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   primaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Building_Manager", buildingName: widget.buildingName)),
                   headerRow: ["Name", "Role", "Status", "Action"],
                   flex: [2, 2, 1, 1],
-                  child: (buildingExecutiveUsers["manager"] == null)
+                  child: (managers.isEmpty)
                       ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Manager Found")))
                       : ListView.builder(
                           padding: EdgeInsets.zero,
                           shrinkWrap: true,
                           primary: false,
-                          itemCount: 1,
+                          itemCount: managers.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                                 dataTableListTile(
                                     flex: 4,
-                                    title: buildingExecutiveUsers["manager"]["name"],
-                                    subtitle: buildingExecutiveUsers["manager"]["email"],
-                                    img: buildingExecutiveUsers["manager"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingExecutiveUsers["manager"]["photo"]}'),
+                                    title: managers[index]["name"],
+                                    subtitle: managers[index]["email"],
+                                    img: managers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${managers[index]["photo"]}'),
                                 dataTableSingleInfo(flex: 4, title: "Building Manager"),
                                 dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
@@ -252,14 +254,14 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                       showDialog(
                                           context: context,
                                           builder: (BuildContext context) => updatePassword(
-                                              userId: buildingExecutiveUsers["manager"]["userId"],
+                                              userId: managers[index]["userId"],
                                               context: context,
                                               onSubmit: () async {
                                                 updateUserPassword(
                                                     accessToken: accessToken,
                                                     confirmPassword: confirmPasswordController.text,
                                                     newPassword: newPasswordController.text,
-                                                    userId: buildingExecutiveUsers["manager"]["userId"]);
+                                                    userId: managers[index]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -271,11 +273,11 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                           context: context,
                                           onTap: () async {
                                             Navigator.pop(context);
-                                            await removeManager(accessToken: accessToken, buildingID: widget.buildingID, managerID: buildingExecutiveUsers["manager"]["userId"]);
+                                            await removeManager(accessToken: accessToken, buildingID: widget.buildingID, managerID: managers[index]["userId"]);
                                           });
                                     },
                                     icon: Icons.cancel_outlined,
-                                    color: Colors.redAccent),
+                                    color: Colors.redAccent)
                               ]))),
 
               //endregion
@@ -437,7 +439,10 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               context: context,
                                               onSubmit: () async {
                                                 updateUserPassword(
-                                                    accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: residents[index]["userId"]);
+                                                    accessToken: accessToken,
+                                                    confirmPassword: confirmPasswordController.text,
+                                                    newPassword: newPasswordController.text,
+                                                    userId: residents[index]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -462,12 +467,14 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {
     return AlertDialog(
+        backgroundColor: Colors.white,
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          primaryTextField(labelText: "New Password", controller: newPasswordController),
+          primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)
+        ]),
         actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)]);
   }
 }

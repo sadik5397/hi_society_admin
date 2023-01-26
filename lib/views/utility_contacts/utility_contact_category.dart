@@ -168,7 +168,7 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
   }
 
   AlertDialog addNewCategory({required BuildContext context, required VoidCallback onSubmit}) {
-    return AlertDialog(
+    return AlertDialog(backgroundColor: Colors.white,
       title: const Center(child: Text("Add New Utility Category")),
       insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
       buttonPadding: EdgeInsets.zero,
@@ -178,7 +178,7 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
   }
 
   AlertDialog updateCategory({required BuildContext context, required VoidCallback onSubmit}) {
-    return AlertDialog(
+    return AlertDialog(backgroundColor: Colors.white,
       title: const Center(child: Text("Add New Utility Category")),
       insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
       buttonPadding: EdgeInsets.zero,

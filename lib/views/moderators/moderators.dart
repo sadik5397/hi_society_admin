@@ -156,7 +156,7 @@ class _ModeratorsState extends State<Moderators> {
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {
-    return AlertDialog(
+    return AlertDialog(backgroundColor: Colors.white,
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,

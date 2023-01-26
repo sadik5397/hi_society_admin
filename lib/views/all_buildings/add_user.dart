@@ -261,6 +261,7 @@ class _AddUserState extends State<AddUser> {
 
   AlertDialog viewInformationAfterSignUp({required BuildContext context, required VoidCallback onSubmit, required String name, required String email, required String role, required String password}) {
     return AlertDialog(
+        backgroundColor: Colors.white,
         title: Center(child: Text("New $role Created", textAlign: TextAlign.center)),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
@@ -283,6 +284,7 @@ class _AddUserState extends State<AddUser> {
 
   AlertDialog viewInformationAfterAssign({required BuildContext context, required VoidCallback onSubmit, required String email, required String role}) {
     return AlertDialog(
+        backgroundColor: Colors.white,
         title: Center(child: Text("New $role Created", textAlign: TextAlign.center)),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,

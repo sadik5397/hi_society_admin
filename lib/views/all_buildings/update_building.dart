@@ -23,7 +23,7 @@ class UpdateBuilding extends StatefulWidget {
 class _UpdateBuildingState extends State<UpdateBuilding> {
   //Variables
   String accessToken = "";
-  Map<String, dynamic> buildingInfo = {};
+  Map? buildingInfo;
   Map<String, dynamic> buildingExecutiveUsers = {};
   List buildingCommittee = [];
   List flatOwners = [];
@@ -102,7 +102,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
-  Future<void> removeCommitteeMember({required String accessToken, required int userID}) async {
+  Future<void> removeMember({required String accessToken, required int userID}) async {
     print({"uid": userID, "role": "homeless"}.toString());
     try {
       var response = await http.post(Uri.parse("$baseUrl/auth/test/role/assign"), headers: authHeader(accessToken), body: jsonEncode({"uid": userID, "role": "homeless"}));
@@ -125,7 +125,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSnackBar(context: context, label: result["message"]);
+        await removeMember(accessToken: accessToken, userID: userID);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -161,28 +161,26 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
               dataTableContainer(
                   isScrollableWidget: false,
                   paddingBottom: 0,
-                  headerPadding: buildingInfo == {} ? 8 : 0,
+                  headerPadding: buildingInfo == null ? 8 : 0,
                   title: "Building Information",
                   primaryButtonText: "Edit",
-                  primaryButtonOnTap: () => route(
-                      context, UpdateBuildingInfo(buildingID: widget.buildingID, buildingName: widget.buildingName, buildingNameAddress: widget.buildingAddress, buildingPhoto: widget.buildingPhoto)),
-                  child: (buildingInfo == {})
+                  primaryButtonOnTap: () =>
+                      route(context, UpdateBuildingInfo(buildingID: widget.buildingID, buildingName: widget.buildingName, buildingNameAddress: widget.buildingAddress, buildingPhoto: widget.buildingPhoto)),
+                  child: buildingInfo == null
                       ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
-                      : Row(
-                          children: [
-                            dataTableListTile(flex: 2, title: 'Building Name: ${buildingInfo["buildingName"]}', img: '$baseUrl/photos/${buildingInfo["photo"]}'),
-                            dataTableChip(
-                                flex: 2,
-                                label: buildingInfo["approvalStatus"] == "accepted" ? "active" : buildingInfo["approvalStatus"],
-                                color: buildingInfo["approvalStatus"] == "pending"
-                                    ? const Color(0xFFE67E22)
-                                    : buildingInfo["approvalStatus"] == "rejected"
-                                        ? const Color(0xFFFF2C2C)
-                                        : const Color(0xFF3498DB)),
-                            dataTableSingleInfo(flex: 2, title: 'Address:\n${buildingInfo["address"]}', alignment: TextAlign.start),
-                            dataTableNull()
-                          ],
-                        )),
+                      : Row(children: [
+                          dataTableListTile(flex: 2, title: 'Building Name: ${buildingInfo!["buildingName"]}', img: '$baseUrl/photos/${buildingInfo!["photo"]}'),
+                          dataTableChip(
+                              flex: 2,
+                              label: buildingInfo!["approvalStatus"] == "accepted" ? "active" : buildingInfo!["approvalStatus"],
+                              color: buildingInfo!["approvalStatus"] == "pending"
+                                  ? const Color(0xFFE67E22)
+                                  : buildingInfo!["approvalStatus"] == "rejected"
+                                      ? const Color(0xFFFF2C2C)
+                                      : const Color(0xFF3498DB)),
+                          dataTableSingleInfo(flex: 2, title: 'Address:\n${buildingInfo!["address"]}', alignment: TextAlign.start),
+                          dataTableNull()
+                        ])),
               //endregion
 
               //region Guard
@@ -258,10 +256,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               context: context,
                                               onSubmit: () async {
                                                 updateUserPassword(
-                                                    accessToken: accessToken,
-                                                    confirmPassword: confirmPasswordController.text,
-                                                    newPassword: newPasswordController.text,
-                                                    userId: managers[index]["userId"]);
+                                                    accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: managers[index]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -439,10 +434,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               context: context,
                                               onSubmit: () async {
                                                 updateUserPassword(
-                                                    accessToken: accessToken,
-                                                    confirmPassword: confirmPasswordController.text,
-                                                    newPassword: newPasswordController.text,
-                                                    userId: residents[index]["userId"]);
+                                                    accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: residents[index]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -471,10 +463,9 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          primaryTextField(labelText: "New Password", controller: newPasswordController),
-          primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)
-        ]),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)]);
   }
 }

@@ -30,6 +30,8 @@ class _UsersState extends State<Users> {
   TextEditingController notificationBody = TextEditingController();
   TextEditingController searchController = TextEditingController();
   final Debouncer onSearchDebouncer = Debouncer(delay: const Duration(milliseconds: 500));
+  List<String> roles = ["Moderator", "Committee Head", "Committee Member", "Building Manager", "Flat Owner", "Resident Head", "Resident Member", "Access Point", "Not Assigned"];
+  String? selectedRole;
 
 //APIs
   Future<void> readUserList({required String accessToken}) async {
@@ -50,7 +52,8 @@ class _UsersState extends State<Users> {
 
   Future<void> updateUserPassword({required String accessToken, required String newPassword, required String confirmPassword, required int userId}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
+      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"),
+          headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(newPassword);
       if (kDebugMode) print(result);
@@ -141,6 +144,7 @@ class _UsersState extends State<Users> {
   }
 
   void runSearch(String enteredKeyword) {
+    setState(() => selectedRole = null);
     List searchResults = [];
     selectedUsers = [];
     enteredKeyword.isEmpty
@@ -149,8 +153,26 @@ class _UsersState extends State<Users> {
             data["phone"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
             data["buildingName"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
             data["buildingAddress"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
-            data["role"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
+            // data["role"].toString().toLowerCase().contains(enteredKeyword.toLowerCase()) ||
             data["email"].toString().toLowerCase().contains(enteredKeyword.toLowerCase())))).toList();
+    setState(() => foundUsers = searchResults);
+    List selectedUserList = List.generate(foundUsers.length, (index) => false);
+    setState(() => selectableUsers = selectedUserList);
+  }
+
+  void runRoleFilter(String selectedRoleString) {
+    runSearch(searchController.text);
+    setState(() => selectedRole = selectedRoleString);
+    List searchResults = [];
+    if (selectedRoleString == roles[0]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("moderator")))).toList();
+    if (selectedRoleString == roles[1]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("committee_head")))).toList();
+    if (selectedRoleString == roles[2]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("committee_member")))).toList();
+    if (selectedRoleString == roles[3]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("building_manager")))).toList();
+    if (selectedRoleString == roles[4]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("flat_owner")))).toList();
+    if (selectedRoleString == roles[5]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("resident_head")))).toList();
+    if (selectedRoleString == roles[6]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("resident")))).toList();
+    if (selectedRoleString == roles[7]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("guard")))).toList();
+    if (selectedRoleString == roles[8]) searchResults = (foundUsers.where((data) => (data["role"].toString().contains("homeless")))).toList();
     setState(() => foundUsers = searchResults);
     List selectedUserList = List.generate(foundUsers.length, (index) => false);
     setState(() => selectableUsers = selectedUserList);
@@ -206,39 +228,58 @@ class _UsersState extends State<Users> {
                 headerRow: ["Select", "Name", "Role", "Building", "Action"],
                 flex: [1, 4, 2, 4, 2],
                 title: "All Users",
-                searchWidget: primaryTextField(
-                    fillColor: primaryColor.withOpacity(.1),
-                    bottomPadding: 0,
-                    labelText: "Search Anything",
-                    icon: Icons.search_rounded,
-                    controller: searchController,
-                    width: 250,
-                    hasSubmitButton: true,
-                    textCapitalization: TextCapitalization.words,
-                    onFieldSubmitted: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
-                    onChanged: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
-                    onFieldSubmittedAlternate: () => runSearch(searchController.text)),
+                searchWidget: Row(children: [
+                  primaryTextField(
+                      fillColor: primaryColor.withOpacity(.1),
+                      bottomPadding: 0,
+                      labelText: "Search Anything",
+                      icon: Icons.search_rounded,
+                      controller: searchController,
+                      width: 250,
+                      hasSubmitButton: true,
+                      textCapitalization: TextCapitalization.words,
+                      onFieldSubmitted: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
+                      onChanged: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
+                      onFieldSubmittedAlternate: () => runSearch(searchController.text)),
+                  primaryDropdown(paddingBottom: 0, width: 200, title: "Role", keyTitle: '', options: roles, value: selectedRole, onChanged: (value) => runRoleFilter(value.toString()))
+                ]),
                 child: (foundUsers.isEmpty)
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
                         itemCount: foundUsers.length,
-                        itemBuilder: (context, index) => dataTableAlternativeColorCells(onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)), index: index, children: [
-                              dataTableCheckBox(
-                                  value: selectableUsers[index],
-                                  onChanged: (value) {
-                                    setState(() => selectableUsers[index] = value);
-                                    if (kDebugMode) print('${foundUsers[index]["userId"]} = ${selectableUsers[index]}');
-                                    selectableUsers[index] ? selectedUsers.add(foundUsers[index]["userId"]) : selectedUsers.remove(foundUsers[index]["userId"]);
-                                  }),
-                              dataTableListTile(flex: 4, img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}', title: foundUsers[index]["name"].toString(), subtitle: foundUsers[index]["email"].toString()),
-                              dataTableSingleInfo(
-                                  flex: 2,
-                                  title: 'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"].toString().replaceAll("_", " "))}'),
-                              foundUsers[index]["buildingName"] != null
-                                  ? dataTableListTile(flex: 4, title: foundUsers[index]["buildingName"].toString(), subtitle: foundUsers[index]["buildingAddress"].toString(), img: foundUsers[index]["buildingPhoto"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["buildingPhoto"]}')
-                                  : dataTableNull(flex: 4),
-                              dataTableIcon(flex: 2, toolTip: "More Options", onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)), icon: Icons.read_more)
-                            ])))));
+                        itemBuilder: (context, index) => dataTableAlternativeColorCells(
+                                onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
+                                index: index,
+                                children: [
+                                  dataTableCheckBox(
+                                      value: selectableUsers[index],
+                                      onChanged: (value) {
+                                        setState(() => selectableUsers[index] = value);
+                                        if (kDebugMode) print('${foundUsers[index]["userId"]} = ${selectableUsers[index]}');
+                                        selectableUsers[index] ? selectedUsers.add(foundUsers[index]["userId"]) : selectedUsers.remove(foundUsers[index]["userId"]);
+                                      }),
+                                  dataTableListTile(
+                                      flex: 4,
+                                      img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}',
+                                      title: foundUsers[index]["name"].toString(),
+                                      subtitle: foundUsers[index]["email"].toString()),
+                                  dataTableSingleInfo(
+                                      flex: 2,
+                                      title:
+                                          'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"].toString().replaceAll("_", " "))}'),
+                                  foundUsers[index]["buildingName"] != null
+                                      ? dataTableListTile(
+                                          flex: 4,
+                                          title: foundUsers[index]["buildingName"].toString(),
+                                          subtitle: foundUsers[index]["buildingAddress"].toString(),
+                                          img: foundUsers[index]["buildingPhoto"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["buildingPhoto"]}')
+                                      : dataTableNull(flex: 4),
+                                  dataTableIcon(
+                                      flex: 2,
+                                      toolTip: "More Options",
+                                      onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
+                                      icon: Icons.read_more)
+                                ])))));
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {
@@ -247,7 +288,9 @@ class _UsersState extends State<Users> {
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)]);
   }
 
@@ -257,7 +300,9 @@ class _UsersState extends State<Users> {
         title: const Center(child: Text("Send Instant Push Notification")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [primaryTextField(labelText: "Notification Title", controller: notificationTitle), primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)]),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [primaryTextField(labelText: "Notification Title", controller: notificationTitle), primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Send Now", onTap: onSubmit)]);
   }
 
@@ -277,14 +322,27 @@ class _UsersState extends State<Users> {
                   DataColumn(label: Text("Key", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor))),
                   DataColumn(label: Text("Value", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor)))
                 ], rows: [
-                  DataRow(cells: [const DataCell(Text("User ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["userId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
-                  DataRow(cells: [const DataCell(Text("Profile Name", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["name"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
+                  DataRow(cells: [
+                    const DataCell(Text("User ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["userId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Profile Name", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["name"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
                   DataRow(cells: [
                     const DataCell(Text("Mobile", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText((userData["phone"] == "00000000000" || userData["phone"] == "000000000" || userData["phone"] == "___________") ? "N/A" : userData["phone"], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                    DataCell(SelectableText((userData["phone"] == "00000000000" || userData["phone"] == "000000000" || userData["phone"] == "___________") ? "N/A" : userData["phone"],
+                        style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
                   ]),
-                  DataRow(cells: [const DataCell(Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["email"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
-                  DataRow(cells: [const DataCell(Text("Registered", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["createdAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
+                  DataRow(cells: [
+                    const DataCell(Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["email"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
+                    const DataCell(Text("Registered", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["createdAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
                   DataRow(cells: [
                     const DataCell(Text("Building", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                     DataCell(SelectableText(userData["buildingName"] != null ? userData["buildingName"].toString() : "N/A", style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
@@ -303,7 +361,10 @@ class _UsersState extends State<Users> {
                                 : capitalizeAllWord(userData["role"].toString().replaceAll("_", " ")),
                         style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
                   ]),
-                  DataRow(cells: [const DataCell(Text("Flat", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["flatName"] == null ? "N/A" : userData["flatName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))])
+                  DataRow(cells: [
+                    const DataCell(Text("Flat", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["flatName"] == null ? "N/A" : userData["flatName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ])
                 ]))
           ]),
           const SizedBox(height: 24),

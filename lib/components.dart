@@ -283,9 +283,10 @@ Padding primaryTextField(
 }
 
 Padding primaryDropdown(
-    {double? width, double? paddingLeft, double? paddingRight, required String title, required List<String> options, required dynamic value, required void Function(Object? value) onChanged}) {
+    {double? width, double? paddingLeft,double? paddingBottom, double? paddingRight, required String title, String? keyTitle, required List<String> options, required dynamic value, required void Function
+        (Object? value) onChanged}) {
   return Padding(
-      padding: EdgeInsets.fromLTRB(paddingLeft ?? 12, 0, paddingRight ?? 12, 12 * 1.5),
+      padding: EdgeInsets.fromLTRB(paddingLeft ?? 12, 0, paddingRight ?? 12, paddingBottom ?? 12 * 1.5),
       child: DropdownButton2(
         underline: const SizedBox(),
         iconEnabledColor: Colors.black.withOpacity(.5),
@@ -300,7 +301,7 @@ Padding primaryDropdown(
         dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.white),
         hint: Text(title, style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w500)),
         items: options.map((item) => DropdownMenuItem<String>(value: item, child: Text(item, style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w500)))).toList(),
-        selectedItemBuilder: (context) => List.generate(options.length, (index) => Align(alignment: const Alignment(-1, 0), child: Text("$title: ${options[index]}"))),
+        selectedItemBuilder: (context) => List.generate(options.length, (index) => Align(alignment: const Alignment(-1, 0), child: Text("${keyTitle ?? title}${keyTitle != null ? '' : ': '}${options[index]}"))),
         value: value,
         onChanged: onChanged,
         buttonWidth: width ?? double.maxFinite,
@@ -338,9 +339,7 @@ ListTile basicListTile({required BuildContext context, required String title, re
       tileColor: Colors.grey.shade50,
       enableFeedback: true,
       dense: false,
-      trailing: isVerified
-          ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white))
-          : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
+      trailing: isVerified ? CircleAvatar(backgroundColor: primaryColor, child: const Icon(Icons.download_done_rounded, color: Colors.white)) : const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
       title: Text(title, style: TextStyle(color: isVerified ? primaryColor : Colors.black87)),
       subtitle: Text(subTitle),
       onTap: onTap);
@@ -353,8 +352,7 @@ ListTile smartListTile({required BuildContext context, required String title, St
       enableFeedback: true,
       dense: false,
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-        Padding(
-            padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
+        Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.delete), onPressed: onDelete, color: Colors.redAccent, iconSize: 24, visualDensity: VisualDensity.comfortable)),
         Padding(padding: const EdgeInsets.all(12), child: IconButton(icon: const Icon(Icons.edit), onPressed: onEdit, color: primaryColor, iconSize: 24, visualDensity: VisualDensity.comfortable))
       ]),
       title: Text(title),
@@ -362,8 +360,7 @@ ListTile smartListTile({required BuildContext context, required String title, St
       onTap: onTap);
 }
 
-Padding sidebarMenuItem(
-    {String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
+Padding sidebarMenuItem({String pageName = "", required BuildContext context, Widget? toPage, IconData icon = Icons.chevron_right, required String label, bool isHeader = false, bool isSubMenu = false}) {
   return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: isHeader
@@ -380,9 +377,7 @@ Padding sidebarMenuItem(
               onPressed: () => route(context, toPage ?? const AllBuildings()),
               child: Padding(
                 padding: EdgeInsets.only(left: isSubMenu ? 36 : 0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
+                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20)), Icon(icon)]),
               )));
 }
 
@@ -489,8 +484,7 @@ Container dataTableContainer(
                             : showPlusButton
                                 ? Icons.add
                                 : null),
-              if (secondaryButtonOnTap != null)
-                primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 200, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
+              if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 200, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
             ])),
         const Divider(height: 1),
         Padding(
@@ -500,7 +494,9 @@ Container dataTableContainer(
                     headerRow.length,
                     (index) => Expanded(
                         flex: flex[index],
-                        child: (index == 0 && selectAllFunction != null) ? selectAllFunction : SelectableText(headerRow[index], textAlign: index == 0 ? TextAlign.start : TextAlign.center, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))))),
+                        child: (index == 0 && selectAllFunction != null)
+                            ? selectAllFunction
+                            : SelectableText(headerRow[index], textAlign: index == 0 ? TextAlign.start : TextAlign.center, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))))),
         isScrollableWidget ? Expanded(child: child) : child
       ]));
 }
@@ -615,8 +611,7 @@ Padding photoUploaderPro({required VoidCallback onTap, required String base64img
                           dashPattern: const [3, 6],
                           color: Colors.black26,
                           strokeWidth: 1,
-                          child: Container(
-                              height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
+                          child: Container(height: (height ?? 100) - 18, width: (width ?? 100) - 18, alignment: Alignment.center, child: const Icon(Icons.camera_alt_outlined, color: Colors.black26, size: 32)))
                       : Container(
                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(16) / 2),
                           child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),

@@ -23,6 +23,9 @@ class _RentSellAdsState extends State<RentSellAds> {
   String accessToken = "";
   String myRole = "";
   List adList = [];
+  TextEditingController otherReasonController = TextEditingController();
+  String? selectedQaReason;
+  int selectedReason = 0;
 
 //APIs
   Future<void> readAdList({required String accessToken}) async {
@@ -53,7 +56,6 @@ class _RentSellAdsState extends State<RentSellAds> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        // showSuccess(context: context, label: "Notification Sent!", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -85,7 +87,7 @@ class _RentSellAdsState extends State<RentSellAds> {
     }
   }
 
-  Future<void> disableAd({required String accessToken, required int adId, required int userId}) async {
+  Future<void> disableAd({required String accessToken, required int adId, required int userId, required String reason}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/deactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -93,13 +95,12 @@ class _RentSellAdsState extends State<RentSellAds> {
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSuccess(
             context: context,
-            label: "Marked as Inappropriate",
+            label: reason,
             title: "Ad Disabled",
             onTap: () async {
-              routeBack(context);
-              await defaultInit();
+              route(context, const RentSellAds());
             });
-        await sendNotification(accessToken: accessToken, title: "Your Apartment Rent-Sell Ad taken down", body: "Your ad removed because it is marked as inappropriate", userId: userId);
+        await sendNotification(accessToken: accessToken, title: "Your Apartment Rent-Sell Ad taken down", body: "Reason: $reason", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -171,13 +172,33 @@ class _RentSellAdsState extends State<RentSellAds> {
                                       icon: Icons.open_in_new_rounded),
                                   dataTableIcon(
                                       toolTip: "Remove Ad",
-                                      onTap: () async => await showPrompt(
+                                      onTap: () async => showDialog(
                                           context: context,
-                                          onTap: () async {
-                                            routeBack(context);
-                                            adList[index]["inactive"]
-                                                ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"])
-                                                : await disableAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"]);
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                                backgroundColor: Colors.white,
+                                                title: const Center(child: Text("Disable Reason")),
+                                                insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
+                                                buttonPadding: EdgeInsets.zero,
+                                                content: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: List.generate(
+                                                        qaReason.length,
+                                                        (index) => primaryButton(
+                                                            allCapital: false,
+                                                            primary: false,
+                                                            title: qaReason[index],
+                                                            onTap: () async {
+                                                              await showPrompt(
+                                                                  context: context,
+                                                                  onTap: () async {
+                                                                    routeBack(context);
+                                                                    adList[index]["inactive"]
+                                                                        ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"])
+                                                                        : await disableAd(
+                                                                            accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"], reason: qaReason[index]);
+                                                                  });
+                                                            }))));
                                           }),
                                       icon: adList[index]["inactive"] ? Icons.visibility_outlined : Icons.disabled_visible_rounded,
                                       color: adList[index]["inactive"] ? Colors.green : Colors.redAccent)

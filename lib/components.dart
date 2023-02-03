@@ -24,6 +24,7 @@ import 'dart:async';
 String placeholderImage = "https://hisocietybd.com/_app_assets/placeholder.png";
 Color themeOf = const Color(0xFFe6f5ff);
 Color primaryColor = const Color(0xff0392f7);
+List<String> qaReason = ["Inappropriate Information", "Inappropriate Photo(s)", "Inappropriate Text", "Invalid Contact Information"];
 //endregion
 
 //region Static Functions
@@ -283,8 +284,15 @@ Padding primaryTextField(
 }
 
 Padding primaryDropdown(
-    {double? width, double? paddingLeft,double? paddingBottom, double? paddingRight, required String title, String? keyTitle, required List<String> options, required dynamic value, required void Function
-        (Object? value) onChanged}) {
+    {double? width,
+    double? paddingLeft,
+    double? paddingBottom,
+    double? paddingRight,
+    required String title,
+    String? keyTitle,
+    required List<String> options,
+    required dynamic value,
+    required void Function(Object? value) onChanged}) {
   return Padding(
       padding: EdgeInsets.fromLTRB(paddingLeft ?? 12, 0, paddingRight ?? 12, paddingBottom ?? 12 * 1.5),
       child: DropdownButton2(
@@ -316,6 +324,7 @@ Widget primaryButton(
     double width = double.maxFinite,
     required String title,
     IconData? icon,
+    bool allCapital = true,
     required VoidCallback onTap,
     bool primary = true}) {
   return Padding(
@@ -329,7 +338,7 @@ Widget primaryButton(
               shape: RoundedRectangleBorder(side: const BorderSide(color: Colors.transparent), borderRadius: BorderRadius.circular(12))),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [if (icon != null) Icon(icon, size: 18), if (icon != null) const SizedBox(width: 6), Text(title.toUpperCase())],
+            children: [if (icon != null) Icon(icon, size: 18), if (icon != null) const SizedBox(width: 6), Text(allCapital ? title.toUpperCase() : title)],
           )));
 }
 

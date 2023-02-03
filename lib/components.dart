@@ -445,6 +445,7 @@ Container dataTableContainer(
     String primaryButtonText = "Add New",
     bool showPlusButton = true,
     VoidCallback? primaryButtonOnTap,
+    Widget? selectAllFunction,
     String secondaryButtonText = "Add New",
     List<String> headerRow = const [],
     List<int> flex = const [],
@@ -499,7 +500,7 @@ Container dataTableContainer(
                     headerRow.length,
                     (index) => Expanded(
                         flex: flex[index],
-                        child: SelectableText(headerRow[index], textAlign: index == 0 ? TextAlign.start : TextAlign.center, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))))),
+                        child: (index == 0 && selectAllFunction != null) ? selectAllFunction : SelectableText(headerRow[index], textAlign: index == 0 ? TextAlign.start : TextAlign.center, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))))),
         isScrollableWidget ? Expanded(child: child) : child
       ]));
 }

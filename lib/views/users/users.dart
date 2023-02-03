@@ -19,6 +19,7 @@ class Users extends StatefulWidget {
 class _UsersState extends State<Users> {
 //Variables
   String accessToken = "";
+  bool selectAll = false;
   List userList = [];
   List foundUsers = [];
   List selectableUsers = [];
@@ -49,8 +50,7 @@ class _UsersState extends State<Users> {
 
   Future<void> updateUserPassword({required String accessToken, required String newPassword, required String confirmPassword, required int userId}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"),
-          headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
+      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(newPassword);
       if (kDebugMode) print(result);
@@ -171,6 +171,22 @@ class _UsersState extends State<Users> {
             context: context,
             header: "User Management",
             child: dataTableContainer(
+                selectAllFunction: Row(children: [
+                  Checkbox(
+                      value: selectAll,
+                      onChanged: (value) {
+                        setState(() => selectableUsers = List.generate(foundUsers.length, (index) => !selectAll));
+                        if (selectAll) {
+                          setState(() => selectedUsers.clear());
+                        } else {
+                          for (int i = 0; i < foundUsers.length; i++) {
+                            setState(() => selectedUsers.add(foundUsers[i]["userId"]));
+                          }
+                        }
+                        setState(() => selectAll = value ?? false);
+                      }),
+                  const SelectableText("All", textAlign: TextAlign.start, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))
+                ]),
                 primaryButtonOnTap: () {
                   setState(() => notificationTitle.clear());
                   setState(() => notificationBody.clear());
@@ -183,10 +199,12 @@ class _UsersState extends State<Users> {
                             Navigator.pop(context);
                           }));
                 },
+                // primaryButtonOnTap: ()=> print(selectedUsers.toString()),
                 primaryButtonText: "Announcement",
+                // primaryButtonText: selectableUsers.length.toString(),
                 entryCount: foundUsers.length,
-                headerRow: ["Select", "Name", "Building", "Action"],
-                flex: [1, 4, 4, 2],
+                headerRow: ["Select", "Name", "Role", "Building", "Action"],
+                flex: [1, 4, 2, 4, 2],
                 title: "All Users",
                 searchWidget: primaryTextField(
                     fillColor: primaryColor.withOpacity(.1),
@@ -204,64 +222,48 @@ class _UsersState extends State<Users> {
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
                         itemCount: foundUsers.length,
-                        itemBuilder: (context, index) => dataTableAlternativeColorCells(
-                                onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
-                                index: index,
-                                children: [
-                                  dataTableCheckBox(
-                                      value: selectableUsers[index],
-                                      onChanged: (value) {
-                                        setState(() => selectableUsers[index] = value);
-                                        if (kDebugMode) print('${foundUsers[index]["userId"]} = ${selectableUsers[index]}');
-                                        selectableUsers[index] ? selectedUsers.add(foundUsers[index]["userId"]) : selectedUsers.remove(foundUsers[index]["userId"]);
-                                      }),
-                                  dataTableListTile(
-                                      flex: 4,
-                                      img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}',
-                                      title: foundUsers[index]["name"].toString(),
-                                      subtitle:
-                                          'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"].toString().replaceAll("_", " "))}'),
-                                  foundUsers[index]["buildingName"] != null
-                                      ? dataTableListTile(
-                                          flex: 4,
-                                          title: foundUsers[index]["buildingName"].toString(),
-                                          subtitle: foundUsers[index]["buildingAddress"].toString(),
-                                          img: foundUsers[index]["buildingPhoto"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["buildingPhoto"]}')
-                                      : dataTableNull(flex: 4),
-                                  dataTableIcon(
-                                      flex: 2,
-                                      toolTip: "More Options",
-                                      onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)),
-                                      icon: Icons.read_more)
-                                ])))));
+                        itemBuilder: (context, index) => dataTableAlternativeColorCells(onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)), index: index, children: [
+                              dataTableCheckBox(
+                                  value: selectableUsers[index],
+                                  onChanged: (value) {
+                                    setState(() => selectableUsers[index] = value);
+                                    if (kDebugMode) print('${foundUsers[index]["userId"]} = ${selectableUsers[index]}');
+                                    selectableUsers[index] ? selectedUsers.add(foundUsers[index]["userId"]) : selectedUsers.remove(foundUsers[index]["userId"]);
+                                  }),
+                              dataTableListTile(flex: 4, img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}', title: foundUsers[index]["name"].toString(), subtitle: foundUsers[index]["email"].toString()),
+                              dataTableSingleInfo(
+                                  flex: 2,
+                                  title: 'Role: ${foundUsers[index]["role"] == null ? "Not Available" : foundUsers[index]["role"] == "homeless" ? "Not Assigned" : capitalizeAllWord(foundUsers[index]["role"].toString().replaceAll("_", " "))}'),
+                              foundUsers[index]["buildingName"] != null
+                                  ? dataTableListTile(flex: 4, title: foundUsers[index]["buildingName"].toString(), subtitle: foundUsers[index]["buildingAddress"].toString(), img: foundUsers[index]["buildingPhoto"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["buildingPhoto"]}')
+                                  : dataTableNull(flex: 4),
+                              dataTableIcon(flex: 2, toolTip: "More Options", onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(userData: foundUsers[index], context: context)), icon: Icons.read_more)
+                            ])))));
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {
-    return AlertDialog(backgroundColor: Colors.white,
+    return AlertDialog(
+        backgroundColor: Colors.white,
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          primaryTextField(labelText: "New Password", controller: newPasswordController),
-          primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)
-        ]),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)]);
   }
 
   AlertDialog createNotification({required BuildContext context, required VoidCallback onSubmit}) {
-    return AlertDialog(backgroundColor: Colors.white,
+    return AlertDialog(
+        backgroundColor: Colors.white,
         title: const Center(child: Text("Send Instant Push Notification")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          primaryTextField(labelText: "Notification Title", controller: notificationTitle),
-          primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)
-        ]),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [primaryTextField(labelText: "Notification Title", controller: notificationTitle), primaryTextField(labelText: "Notification Body Text", controller: notificationBody, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Send Now", onTap: onSubmit)]);
   }
 
   AlertDialog moreUserOptions({required BuildContext context, required Map userData}) {
-    return AlertDialog(backgroundColor: Colors.white,
+    return AlertDialog(
+        backgroundColor: Colors.white,
         title: Center(child: (Text(capitalizeAllWord(userData["name"].toString())))),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 400),
         buttonPadding: EdgeInsets.zero,
@@ -275,27 +277,14 @@ class _UsersState extends State<Users> {
                   DataColumn(label: Text("Key", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor))),
                   DataColumn(label: Text("Value", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor)))
                 ], rows: [
-                  DataRow(cells: [
-                    const DataCell(Text("User ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText(userData["userId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                  ]),
-                  DataRow(cells: [
-                    const DataCell(Text("Profile Name", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText(userData["name"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                  ]),
+                  DataRow(cells: [const DataCell(Text("User ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["userId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
+                  DataRow(cells: [const DataCell(Text("Profile Name", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["name"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
                   DataRow(cells: [
                     const DataCell(Text("Mobile", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText((userData["phone"] == "00000000000" || userData["phone"] == "000000000" || userData["phone"] == "___________") ? "N/A" : userData["phone"],
-                        style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                    DataCell(SelectableText((userData["phone"] == "00000000000" || userData["phone"] == "000000000" || userData["phone"] == "___________") ? "N/A" : userData["phone"], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
                   ]),
-                  DataRow(cells: [
-                    const DataCell(Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText(userData["email"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                  ]),
-                  DataRow(cells: [
-                    const DataCell(Text("Registered", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText(userData["createdAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                  ]),
+                  DataRow(cells: [const DataCell(Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["email"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
+                  DataRow(cells: [const DataCell(Text("Registered", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["createdAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))]),
                   DataRow(cells: [
                     const DataCell(Text("Building", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                     DataCell(SelectableText(userData["buildingName"] != null ? userData["buildingName"].toString() : "N/A", style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
@@ -314,10 +303,7 @@ class _UsersState extends State<Users> {
                                 : capitalizeAllWord(userData["role"].toString().replaceAll("_", " ")),
                         style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
                   ]),
-                  DataRow(cells: [
-                    const DataCell(Text("Flat", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    DataCell(SelectableText(userData["flatName"] == null ? "N/A" : userData["flatName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                  ])
+                  DataRow(cells: [const DataCell(Text("Flat", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))), DataCell(SelectableText(userData["flatName"] == null ? "N/A" : userData["flatName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))])
                 ]))
           ]),
           const SizedBox(height: 24),

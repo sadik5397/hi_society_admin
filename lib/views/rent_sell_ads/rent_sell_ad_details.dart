@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../api.dart';
 import '../../components.dart';
+import 'rent_sell_ads.dart';
 
 class RentSellAdDetails extends StatefulWidget {
   const RentSellAdDetails({Key? key, required this.adId, required this.title, required this.imageList, required this.status, required this.userId}) : super(key: key);
@@ -88,7 +89,7 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
     }
   }
 
-  Future<void> disableAd({required String accessToken, required int adId, required int userId}) async {
+  Future<void> disableAd({required String accessToken, required int adId, required int userId, required String reason}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/apartment-ads/deactivate?adId=$adId"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -96,13 +97,12 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSuccess(
             context: context,
-            label: "Marked as Inappropriate",
+            label: reason,
             title: "Ad Disabled",
             onTap: () async {
-              routeBack(context);
-              await defaultInit();
+              route(context, const RentSellAds());
             });
-        await sendNotification(accessToken: accessToken, title: "Your Apartment Rent-Sell Ad taken down", body: "Your ad removed because it is marked as inappropriate", userId: userId);
+        await sendNotification(accessToken: accessToken, title: "Your Apartment Rent-Sell Ad taken down", body: "Reason: $reason", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -115,7 +115,8 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    setState(() => myRole = pref.getString("role") ?? "");    await readAdDetail(accessToken: accessToken);
+    setState(() => myRole = pref.getString("role") ?? "");
+    await readAdDetail(accessToken: accessToken);
   }
 
 //Initiate
@@ -134,9 +135,33 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
             context: context,
             header: "Apartment Rent/Sell Ad",
             child: dataTableContainer(
-                primaryButtonOnTap: () async => widget.status == "ACTIVE"
-                    ? await disableAd(accessToken: accessToken, adId: widget.adId, userId: widget.userId)
-                    : await reActiveAd(accessToken: accessToken, adId: widget.adId, userId: widget.userId),
+                primaryButtonOnTap: () async => showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          backgroundColor: Colors.white,
+                          title: const Center(child: Text("Disable Reason")),
+                          insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
+                          buttonPadding: EdgeInsets.zero,
+                          content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                  qaReason.length,
+                                  (index) => primaryButton(
+                                      allCapital: false,
+                                      primary: false,
+                                      title: qaReason[index],
+                                      onTap: () async {
+                                        await showPrompt(
+                                            context: context,
+                                            onTap: () async {
+                                              routeBack(context);
+                                              widget.status != "ACTIVE"
+                                                  ? await reActiveAd(accessToken: accessToken, adId: widget.adId, userId: widget.userId)
+                                                  : await disableAd(accessToken: accessToken, adId: widget.adId, userId: widget.userId, reason: qaReason[index]);
+                                            });
+                                      }))));
+                    }),
                 primaryButtonText: widget.status == "ACTIVE" ? "Disable Ad" : "Enable Ad",
                 title: widget.title,
                 entryString: widget.status,

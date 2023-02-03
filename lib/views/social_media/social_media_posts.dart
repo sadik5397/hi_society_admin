@@ -84,7 +84,9 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
     }
   }
 
-  Future<void> disablePost({required String accessToken, required int postId, required int userId}) async {
+  Future<void> disablePost({required String accessToken, required int postId, required int userId, required String reason}) async {
+    print("$baseUrl/social-media/mod/remove/post");
+    print({"postId": postId});
     try {
       var response = await http.post(Uri.parse("$baseUrl/social-media/mod/remove/post"), headers: authHeader(accessToken), body: jsonEncode({"postId": postId}));
       Map result = jsonDecode(response.body);
@@ -92,13 +94,12 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSuccess(
             context: context,
-            label: "Marked as Inappropriate",
+            label: reason,
             title: "Post Disabled",
             onTap: () async {
-              routeBack(context);
-              await defaultInit();
+              route(context, const SocialMediaPosts());
             });
-        await sendNotification(accessToken: accessToken, title: "Your Social Media Post taken down", body: "Your post removed because it is marked as inappropriate", userId: userId);
+        await sendNotification(accessToken: accessToken, title: "Your Social Media Post taken down", body: "Reason: $reason", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -111,7 +112,8 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    setState(() => myRole = pref.getString("role") ?? "");    await readPostList(accessToken: accessToken);
+    setState(() => myRole = pref.getString("role") ?? "");
+    await readPostList(accessToken: accessToken);
   }
 
 //Initiate
@@ -153,11 +155,31 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
                               dataTableChip(flex: 2, label: "Active"),
                               dataTableIcon(
                                   toolTip: "Remove Post",
-                                  onTap: () async => await showPrompt(
+                                  onTap: () async => showDialog(
                                       context: context,
-                                      onTap: () async {
-                                        routeBack(context);
-                                        await disablePost(accessToken: accessToken, postId: postList[index]["postId"], userId: postList[index]["user"]["userId"]);
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            title: const Center(child: Text("Disable Reason")),
+                                            insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
+                                            buttonPadding: EdgeInsets.zero,
+                                            content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: List.generate(
+                                                    qaReason.length,
+                                                    (index) => primaryButton(
+                                                        allCapital: false,
+                                                        primary: false,
+                                                        title: qaReason[index],
+                                                        onTap: () async {
+                                                          await showPrompt(
+                                                              context: context,
+                                                              onTap: () async {
+                                                                routeBack(context);
+                                                                await disablePost(
+                                                                    accessToken: accessToken, postId: postList[index]["postId"], userId: postList[index]["user"]["userId"], reason: qaReason[index]);
+                                                              });
+                                                        }))));
                                       }),
                                   icon: Icons.disabled_visible_rounded,
                                   color: Colors.redAccent)

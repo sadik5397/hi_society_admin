@@ -34,22 +34,28 @@ class _AddBuildingState extends State<AddBuilding> {
   late File _image = File("");
   String base64img = "";
   final ImagePicker _picker = ImagePicker();
+  String? selectedDistricts;
+  String? selectedCity;
 
 //APIs
   Future<void> createBuilding({required String name, required String photo, required String address, required List<String> flats, required String accessToken, required VoidCallback successRoute}) async {
-    try {
-      var response = await http.post(Uri.parse("$baseUrl/building"), headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats}));
-      Map result = jsonDecode(response.body);
-      if (kDebugMode) print(result);
-      if (kDebugMode) print(result);
-      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        setState(() => apiResult = result["data"]);
-        successRoute.call();
-      } else {
-        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+    if (selectedCity == null) {
+      showError(context: context, title: "Please Select Location");
+    } else {
+      try {
+        var response = await http.post(Uri.parse("$baseUrl/building"), headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo, "address": address, "flats": flats}));
+        Map result = jsonDecode(response.body);
+        if (kDebugMode) print(result);
+        if (kDebugMode) print(result);
+        if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+          setState(() => apiResult = result["data"]);
+          successRoute.call();
+        } else {
+          showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        }
+      } on Exception catch (e) {
+        showError(context: context, label: e.toString());
       }
-    } on Exception catch (e) {
-      showError(context: context, label: e.toString());
     }
   }
 
@@ -95,10 +101,30 @@ class _AddBuildingState extends State<AddBuilding> {
                     key: _formKey,
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
-                        Expanded(flex: 1, child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required")),
+                        Expanded(child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required"))
+                      ]),
+                      Row(children: [
+                        Expanded(
+                          child: primaryDropdown(
+                              title: "Location",
+                              options: locationList,
+                              value: selectedDistricts,
+                              onChanged: (value) => setState(() {
+                                    selectedDistricts = value.toString();
+                                    selectedCity = null;
+                                  })),
+                        ),
+                        if (selectedDistricts == locationList[0])
+                          Expanded(child: primaryDropdown(title: "Area", options: locationInDhaka, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
+                        if (selectedDistricts == locationList[1])
+                          Expanded(child: primaryDropdown(title: "Area", options: locationInDhakaDivision, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
+                        if (selectedDistricts == locationList[2])
+                          Expanded(child: primaryDropdown(title: "Area", options: locationInChattogram, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
+                        if (selectedDistricts == locationList[3])
+                          Expanded(child: primaryDropdown(title: "Area", options: locationInSylhet, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
                         Expanded(
                           flex: 2,
-                          child: primaryTextField(controller: buildingAddressController, labelText: "Full Address", required: true, errorText: "Building address required"),
+                          child: primaryTextField(controller: buildingAddressController, labelText: "Address Line", required: true, errorText: "Building address required"),
                         )
                       ]),
                       Row(children: [
@@ -138,7 +164,7 @@ class _AddBuildingState extends State<AddBuilding> {
                               children: List.generate(
                                   buildingFlatList.length,
                                   (index) => Chip(
-                                    elevation: 1,
+                                      elevation: 1,
                                       side: const BorderSide(style: BorderStyle.none),
                                       backgroundColor: primaryColor.withOpacity(.2),
                                       deleteIcon: const Icon(Icons.cancel_outlined, size: 18),
@@ -171,7 +197,7 @@ class _AddBuildingState extends State<AddBuilding> {
                                       accessToken: accessToken!,
                                       flats: buildingFlatList,
                                       name: buildingNameController.text,
-                                      address: buildingAddressController.text,
+                                      address: "${buildingAddressController.text}, $selectedCity, $selectedDistricts",
                                       photo: (base64img == "") ? "" : "data:image/png;base64,$base64img",
                                       successRoute: () => showSuccess(context: context, label: "${buildingNameController.text} Added Successfully", onTap: () => route(context, const AllBuildings())));
                                 } else {

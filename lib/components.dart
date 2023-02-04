@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,6 @@ import 'package:hi_society_admin/views/users/users.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'views/all_buildings/all_buildings.dart';
 import 'views/security_alerts/security_alert.dart';
 import 'views/sign_in.dart';
@@ -25,6 +23,109 @@ String placeholderImage = "https://hisocietybd.com/_app_assets/placeholder.png";
 Color themeOf = const Color(0xFFe6f5ff);
 Color primaryColor = const Color(0xff0392f7);
 List<String> qaReason = ["Inappropriate Information", "Inappropriate Photo(s)", "Inappropriate Text", "Invalid Contact Information"];
+List<String> locationList = ['Dhaka', 'Dhaka Division', 'Chattogram', 'Sylhet'];
+List<String> locationInDhaka = [
+  'Badda',
+  'Banani',
+  'Banani DOHS',
+  'Banglamotor',
+  'Bangshal',
+  'Baridhara',
+  'Basabo',
+  'Basundhara',
+  'Cantonment',
+  'Chaukbazar',
+  'Demra',
+  'Dhamrai',
+  'Dhanmondi',
+  'Dohar',
+  'Elephant',
+  'Farmgate',
+  'Gulshan',
+  'Hazaribagh',
+  'Jatrabari',
+  'Kafrul',
+  'Kamrangirchar',
+  'Keraniganj',
+  'Khilgaon',
+  'Khilkhet',
+  'Kotwali',
+  'Lalbag',
+  'Malibag',
+  'Mirpur',
+  'Mirpur DOHS',
+  'Mogbazar',
+  'Mohakhali',
+  'Mohakhali DOHS',
+  'Mohammadpur',
+  'Motijheel',
+  'Nawabganj',
+  'Paltan',
+  'Purbachal',
+  'Ramna',
+  'Rampura',
+  'Savar',
+  'Shajahanpur',
+  'Sutrapur',
+  'Tejgaon',
+  'Tongi',
+  'Uttara',
+  'Wari'
+];
+List<String> locationInDhakaDivision = [
+  'Faridpur',
+  'Gazipur',
+  'Gopalganj',
+  'Kishoreganj',
+  'Madaripur',
+  'Manikganj',
+  'Munshiganj',
+  'Mymensingh',
+  'Narayanganj',
+  'Narsingdi',
+  'Rajbari',
+  'Shariatpur',
+  'Tangail',
+];
+List<String> locationInChattogram = [
+  'Agrabad',
+  'Nasirabad',
+  'Chawkbazar',
+  'Khulshi',
+  'CDA Avenue',
+  'Halishahar',
+  'Chandgaon',
+  'Muradpur',
+  'Lalkhan Bazar',
+  'Kotwali',
+  'Baizid',
+  'Panchlaish',
+  'Bandar',
+  'Jamalkhan',
+  'Pahartali',
+  'Double Mooring',
+  'Sholashahar',
+  'Anderkilla',
+  'Patenga',
+  'Cornelhat',
+  'Bakoliya',
+  'Mirsharai',
+  'Hathazari',
+  'Satkania',
+  'Rangunia',
+  'Banskhali',
+  'Lohagara',
+  'Raozan',
+  'Patiya',
+  'Karnafuly',
+  'Anwara',
+  'Boalkhali',
+  'Fatikchari',
+  'Chandanaish',
+  'Sandwip',
+  'Sitakunda'
+];
+List<String> locationInSylhet = ['Zinda Bazar', 'Bandar Bazar', 'Uposhohor', 'Amber Khana', 'South Surma'];
 //endregion
 
 //region Static Functions

@@ -37,30 +37,35 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
   dynamic apiResult;
   List flatObject = [];
   FocusNode focusNode = FocusNode();
-
+  String? selectedDistricts;
+  String? selectedCity;
   late File _image = File("");
   String base64img = "";
   final ImagePicker _picker = ImagePicker();
 
 //APIs
   Future<void> updateBuilding({required String name, required String photo, required String address, required String accessToken, required VoidCallback successRoute}) async {
-    try {
-      if (kDebugMode) {
-        print(jsonEncode({"name": name, "photo": photo, "address": address, "buildingId": widget.buildingID}));
-      }
-      var response = await http.post(Uri.parse("$baseUrl/building/info/update"),
-          headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo != "" ? photo : null, "address": address, "buildingId": widget.buildingID}));
-      Map result = jsonDecode(response.body);
+    if (selectedCity == null) {
+      showError(context: context, title: "Please Select Location");
+    } else {
+      try {
+        if (kDebugMode) {
+          print(jsonEncode({"name": name, "photo": photo, "address": address, "buildingId": widget.buildingID}));
+        }
+        var response = await http.post(Uri.parse("$baseUrl/building/info/update"),
+            headers: authHeader(accessToken), body: jsonEncode({"name": name, "photo": photo != "" ? photo : null, "address": address, "buildingId": widget.buildingID}));
+        Map result = jsonDecode(response.body);
 
-      if (kDebugMode) print(result);
-      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        setState(() => apiResult = result["data"]);
-        successRoute.call();
-      } else {
-        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        if (kDebugMode) print(result);
+        if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+          setState(() => apiResult = result["data"]);
+          successRoute.call();
+        } else {
+          showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+        }
+      } on Exception catch (e) {
+        showError(context: context, label: e.toString());
       }
-    } on Exception catch (e) {
-      showError(context: context, label: e.toString());
     }
   }
 
@@ -116,11 +121,32 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
     }
   }
 
+  addressSeparator(String address) {
+    String tempAddress = "";
+    List tempList = address.toString().split(", ");
+    if (tempList.length > 2) {
+      setState(() => selectedDistricts = tempList[tempList.length - 1]);
+      tempList.removeLast();
+    }
+    if (tempList.length > 1) {
+      setState(() => selectedCity = tempList[tempList.length - 1]);
+      tempList.removeLast();
+    }
+    for (int i = 0; i < tempList.length; i++) {
+      tempAddress = i == 0 ? tempList[i] : '$tempAddress, ${tempList[i]}';
+    }
+    setState(() => buildingAddressController.text = tempAddress);
+    print(tempAddress);
+    print(selectedCity);
+    print(selectedDistricts);
+  }
+
 //Functions
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
     await readFlats(accessToken: accessToken);
+    addressSeparator(widget.buildingNameAddress);
   }
 
   Future getImage() async {
@@ -146,6 +172,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        floatingActionButton: FloatingActionButton.small(onPressed: () => addressSeparator(widget.buildingNameAddress)),
         body: includeDashboard(
             isScrollablePage: true,
             pageName: "all buildings",
@@ -159,10 +186,30 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                       key: _formKey,
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          Expanded(flex: 1, child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required")),
+                          Expanded(child: primaryTextField(controller: buildingNameController, labelText: "Name of the Building", autoFocus: true, required: true, errorText: "Building name required"))
+                        ]),
+                        Row(children: [
+                          Expanded(
+                            child: primaryDropdown(
+                                title: "Location",
+                                options: locationList,
+                                value: selectedDistricts,
+                                onChanged: (value) => setState(() {
+                                      selectedDistricts = value.toString();
+                                      selectedCity = null;
+                                    })),
+                          ),
+                          if (selectedDistricts == locationList[0])
+                            Expanded(child: primaryDropdown(title: "Area", options: locationInDhaka, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
+                          if (selectedDistricts == locationList[1])
+                            Expanded(child: primaryDropdown(title: "Area", options: locationInDhakaDivision, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
+                          if (selectedDistricts == locationList[2])
+                            Expanded(child: primaryDropdown(title: "Area", options: locationInChattogram, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
+                          if (selectedDistricts == locationList[3])
+                            Expanded(child: primaryDropdown(title: "Area", options: locationInSylhet, value: selectedCity, onChanged: (value) => setState(() => selectedCity = value.toString()))),
                           Expanded(
                             flex: 2,
-                            child: primaryTextField(controller: buildingAddressController, labelText: "Full Address", required: true, errorText: "Building address required"),
+                            child: primaryTextField(controller: buildingAddressController, labelText: "Address Line", required: true, errorText: "Building address required"),
                           )
                         ]),
                         //region Photo
@@ -197,9 +244,8 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                     }
                                     await updateBuilding(
                                         accessToken: accessToken,
-                                        // flats: buildingFlatList, //todo: flats are not updating
                                         name: buildingNameController.text,
-                                        address: buildingAddressController.text,
+                                        address: "${buildingAddressController.text}, $selectedCity, $selectedDistricts",
                                         photo: (base64img == "") ? "" : "data:image/png;base64,$base64img",
                                         successRoute: () => showSuccess(context: context, label: "${buildingNameController.text} Updated Successfully", onTap: () => route(context, const AllBuildings())));
                                   } else {
@@ -220,7 +266,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                       (index) => Padding(
                                             padding: const EdgeInsets.only(top: 6),
                                             child: Chip(
-                                              elevation: 1,
+                                                elevation: 1,
                                                 side: const BorderSide(style: BorderStyle.none),
                                                 backgroundColor: primaryColor.withOpacity(.2),
                                                 deleteIcon: const Icon(Icons.cancel_outlined, size: 18),

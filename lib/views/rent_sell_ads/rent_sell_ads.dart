@@ -30,7 +30,7 @@ class _RentSellAdsState extends State<RentSellAds> {
 //APIs
   Future<void> readAdList({required String accessToken}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/apartment-ads/list?limit=30"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/apartment-ads/list?limit=5000"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {

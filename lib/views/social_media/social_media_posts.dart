@@ -26,7 +26,7 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
 //APIs
   Future<void> readPostList({required String accessToken}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/social-media/list/post?limit=30"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/social-media/list/post?limit=5000"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {

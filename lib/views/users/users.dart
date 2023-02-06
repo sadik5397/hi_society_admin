@@ -36,7 +36,7 @@ class _UsersState extends State<Users> {
 //APIs
   Future<void> readUserList({required String accessToken}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/building/list/user/with-building?limit=500"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/building/list/user/with-building?limit=5000"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {

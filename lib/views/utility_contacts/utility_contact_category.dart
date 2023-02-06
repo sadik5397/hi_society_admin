@@ -130,7 +130,7 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
                     }),
                 title: "Category",
                 child: (utilityCategoryList.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         itemCount: utilityCategoryList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [

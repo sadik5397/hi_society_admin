@@ -141,7 +141,7 @@ class _RentSellAdsState extends State<RentSellAds> {
                 title: "All Active Ads",
                 showPlusButton: false,
                 child: (adList.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         itemCount: adList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(

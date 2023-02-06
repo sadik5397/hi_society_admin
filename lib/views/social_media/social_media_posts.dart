@@ -140,7 +140,7 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
                 title: "All Active Posts",
                 showPlusButton: false,
                 child: (postList.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         itemCount: postList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [

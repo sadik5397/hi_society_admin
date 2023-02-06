@@ -244,7 +244,7 @@ class _UsersState extends State<Users> {
                   primaryDropdown(paddingBottom: 0, width: 200, title: "Role", keyTitle: '', options: roles, value: selectedRole, onChanged: (value) => runRoleFilter(value.toString()))
                 ]),
                 child: (foundUsers.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         itemCount: foundUsers.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(

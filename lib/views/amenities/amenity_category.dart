@@ -130,7 +130,7 @@ class _AmenityCategoryState extends State<AmenityCategory> {
                     }),
                 title: "Category",
                 child: (amenityCategoryList.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         itemCount: amenityCategoryList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [

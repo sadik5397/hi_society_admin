@@ -535,6 +535,31 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
   ]);
 }
 
+class NoData extends StatefulWidget {
+  const NoData({Key? key}) : super(key: key);
+
+  @override
+  State<NoData> createState() => _NoDataState();
+}
+
+class _NoDataState extends State<NoData> {
+  bool loading = true;
+
+  Future defaultInit() async {
+    await Future.delayed(const Duration(seconds: 3));
+    setState(() => loading = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    defaultInit();
+  }
+
+  @override
+  Widget build(BuildContext context) => Center(child: loading ? const CircularProgressIndicator() : const Text("No Result!"));
+}
+
 //endregion
 
 //region DataTable Components

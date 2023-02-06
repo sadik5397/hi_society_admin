@@ -97,7 +97,7 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
                           });
                     }),
                 child: (securityAlertTypeList.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         itemCount: securityAlertTypeList.length,
                         itemBuilder: (context, index) =>

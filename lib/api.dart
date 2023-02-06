@@ -1,6 +1,6 @@
 // String baseUrl = "http://127.0.0.1:3000/api"; //Localhost
-String baseUrl = "https://g01.fusionbdtech.com"; //TestServer
-// String baseUrl = "http://ncbapi.smicee.com"; //LiveServer
+// String baseUrl = "https://g01.fusionbdtech.com"; //TestServer
+String baseUrl = "http://194.163.40.107:4441"; //LiveServer
 // String baseUrl = "http://127.0.0.1:3000"; //LocalhostAndroidEmulator
 // String baseUrl = "http://10.0.2.2:3000"; //LocalhostAndroidEmulator
 

@@ -172,7 +172,7 @@ class _AllBuildingsState extends State<AllBuildings> {
                     onChanged: (value) => onSearchDebouncer.debounce(() => runSearch(value)),
                     onFieldSubmittedAlternate: () => runSearch(searchController.text)),
                 child: foundBuildings.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         padding: EdgeInsets.zero,
                         itemCount: foundBuildings.length,

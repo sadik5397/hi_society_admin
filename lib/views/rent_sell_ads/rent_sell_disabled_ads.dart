@@ -156,7 +156,7 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
                 flex: [2, 2, 4, 2, 2],
                 title: "All Disabled Ads",
                 child: (adList.isEmpty)
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: NoData())
                     : ListView.builder(
                         itemCount: adList.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(

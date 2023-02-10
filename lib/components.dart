@@ -505,7 +505,7 @@ Theme sidebarMenuHead({required BuildContext context, required String title, req
           children: children));
 }
 
-Row includeDashboard({bool isScrollablePage = false, required Widget child, required BuildContext context, String? header, required String pageName, bool isAdmin = true}) {
+Row includeDashboard({bool isScrollablePage = false, required Widget child, required BuildContext context, String? header, required String pageName, bool isAdmin = true, bool isOpMod = false}) {
   return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Container(
         width: 280,
@@ -515,15 +515,16 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
               onTap: () => route(context, const AllBuildings()),
               child: Container(padding: const EdgeInsets.all(24), height: 84, width: 280, color: Colors.blueAccent, child: Image.asset("assets/logo.png", fit: BoxFit.fitHeight))),
           const SizedBox(height: 6),
-          if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
+          if (isAdmin || isOpMod) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "All Buildings", toPage: const AllBuildings()),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Users", toPage: const Users()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Rent/Sell Ads", toPage: const RentSellAds()),
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Social Media Posts", toPage: const SocialMediaPosts()),
-          sidebarMenuHead(context: context, title: "Options", children: [
-            if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
-            if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
-            if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
-          ]),
+          if (isAdmin)
+            sidebarMenuHead(context: context, title: "Options", children: [
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+            ]),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Moderators", toPage: const Moderators()),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Export Data", toPage: const ExportData()),
         ])),

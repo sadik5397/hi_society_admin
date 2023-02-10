@@ -20,6 +20,7 @@ class _AddModsState extends State<AddMods> {
   String accessToken = "";
   String newRandomPassword = "";
   TextEditingController existingUserEmailController = TextEditingController();
+  bool accessOperational = false;
   bool showPassword = false;
   bool showConfirmPassword = false;
   dynamic signedUpApiResult;
@@ -111,36 +112,55 @@ class _AddModsState extends State<AddMods> {
             context: context,
             header: "Create new Moderator",
             child: Column(mainAxisSize: MainAxisSize.min, children: [
+              // dataTableContainer(
+              //     headerPadding: 8,
+              //     paddingBottom: 0,
+              //     title: "Assign an Existing Registered User",
+              //     isScrollableWidget: false,
+              //     child: Column(children: [
+              //       Padding(
+              //           padding: const EdgeInsets.only(bottom: 8),
+              //           child: CheckboxListTile(
+              //               visualDensity: VisualDensity.compact,
+              //               controlAffinity: ListTileControlAffinity.leading,
+              //               value: accessOperational,
+              //               onChanged: (value) => setState(() => accessOperational = value ?? false),
+              //               title: const Text("Can access operational functions"))),
+              //       Row(children: [
+              //         Expanded(flex: 3, child: primaryTextField(labelText: "User Email Address", controller: existingUserEmailController)),
+              //         Expanded(
+              //             flex: 1,
+              //             child: primaryButton(
+              //                 paddingBottom: 24,
+              //                 paddingTop: 4,
+              //                 title: "Confirm",
+              //                 onTap: () async {
+              //                   await assignUserToRole(
+              //                       accessToken: accessToken,
+              //                       email: existingUserEmailController.text,
+              //                       onSuccess: () => showDialog(
+              //                           context: context,
+              //                           builder: (BuildContext context) {
+              //                             return viewInformationAfterAssign(
+              //                                 context: context, onSubmit: () async => route(context, const Moderators()), email: existingUserEmailController.text, role: "Moderator");
+              //                           }));
+              //                 }))
+              //       ])
+              //     ])),
               dataTableContainer(
                   headerPadding: 8,
                   paddingBottom: 0,
-                  title: "Assign an Existing Registered User",
-                  isScrollableWidget: false,
-                  child: Row(children: [
-                    Expanded(flex: 3, child: primaryTextField(labelText: "User Email Address", controller: existingUserEmailController)),
-                    Expanded(
-                        flex: 1,
-                        child: primaryButton(
-                            paddingBottom: 24,
-                            paddingTop: 4,
-                            title: "Confirm",
-                            onTap: () async {
-                              await assignUserToRole(
-                                  accessToken: accessToken,
-                                  email: existingUserEmailController.text,
-                                  onSuccess: () => showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return viewInformationAfterAssign(context: context, onSubmit: () async => route(context, const Moderators()), email: existingUserEmailController.text, role: "Moderator");
-                                      }));
-                            }))
-                  ])),
-              dataTableContainer(
-                  headerPadding: 8,
-                  paddingBottom: 0,
-                  title: "Or, Create & Assign a Completely New User",
+                  title: "Create new Moderator",
                   isScrollableWidget: false,
                   child: Column(children: [
+                    Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: CheckboxListTile(
+                            visualDensity: VisualDensity.compact,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: accessOperational,
+                            onChanged: (value) => setState(() => accessOperational = value ?? false),
+                            title: const Text("Can access operational functions"))),
                     Row(children: [Expanded(flex: 6, child: primaryTextField(controller: nameController, labelText: "Full Name", keyboardType: TextInputType.name, required: true, errorText: "Name required"))]),
                     Row(children: [
                       Expanded(flex: 3, child: primaryTextField(labelText: "User Email Address", controller: emailController, keyboardType: TextInputType.emailAddress)),
@@ -154,7 +174,7 @@ class _AddModsState extends State<AddMods> {
                               onTap: () async {
                                 await doSignUp(
                                     email: emailController.text,
-                                    name: nameController.text,
+                                    name: '${nameController.text} | (Operation)',
                                     onSuccess: () => showDialog(
                                         context: context,
                                         builder: (BuildContext context) {
@@ -202,11 +222,9 @@ class _AddModsState extends State<AddMods> {
         title: Center(child: Text("New $role Created", textAlign: TextAlign.center)),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const SelectableText("Email"),
-          SelectableText(email, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: primaryColor)),
-          const SizedBox(height: 6)
-        ]),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [const SelectableText("Email"), SelectableText(email, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: primaryColor)), const SizedBox(height: 6)]),
         actions: [
           Column(children: [primaryButton(icon: Icons.done, title: "Done", onTap: onSubmit)])
         ]);

@@ -107,7 +107,7 @@ class _ModeratorsState extends State<Moderators> {
                 headerRow: ["Name", "Role", "Status", "Action"],
                 flex: [4, 4, 3, 2],
                 child: (modUserList.isEmpty)
-                    ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Moderator Found")))
+                    ? const NoData()
                     : ListView.builder(
                         padding: EdgeInsets.zero,
                         shrinkWrap: true,

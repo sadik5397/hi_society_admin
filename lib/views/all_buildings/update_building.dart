@@ -29,11 +29,13 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   List flatOwners = [];
   List managers = [];
   List residents = [];
+  List ownedFlats = [];
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
 //APIs
   Future<void> readBuildingExecutiveUserList({required String accessToken, required int buildingID}) async {
+    ownedFlats.clear();
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/info/contacts/list/for-admin?buildingId=$buildingID"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
@@ -45,6 +47,10 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         setState(() => managers = result["data"]["manager"]);
         setState(() => flatOwners = result["data"]["flatOwners"]);
         setState(() => residents = result["data"]["residents"]);
+        for (int i=0;i<flatOwners.length;i++){
+          ownedFlats.add(flatOwners[i]["flat"]["flatName"]);
+        }
+        ownedFlats = ownedFlats.toSet().toList();
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -346,7 +352,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   isScrollableWidget: false,
                   title: "Building Flat Owners",
                   primaryButtonText: "Flat Owner",
-                  primaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Flat_Owner", buildingName: widget.buildingName)),
+                  primaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Flat_Owner", buildingName: widget.buildingName, ownedFlats: ownedFlats)),
                   headerRow: ["Name", "Role", "Status", "Action"],
                   flex: [2, 2, 1, 1],
                   child: (flatOwners.isEmpty)

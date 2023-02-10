@@ -27,6 +27,7 @@ class _AllBuildingsState extends State<AllBuildings> {
   dynamic guardAccess = {};
   bool isVerified = true;
   String myRole = "";
+  String myName = "";
   TextEditingController searchController = TextEditingController();
   final Debouncer onSearchDebouncer = Debouncer(delay: const Duration(milliseconds: 500));
 
@@ -37,10 +38,16 @@ class _AllBuildingsState extends State<AllBuildings> {
       Map result = jsonDecode(response.body);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         setState(() => myRole = result["data"]["role"]);
+        setState(() => myName = result["data"]["name"]);
         if (myRole == "admin" || myRole == "moderator") {
           final pref = await SharedPreferences.getInstance();
+          pref.setString("name", myName);
+          print(myName);
+          print(myRole);
           pref.setString("role", myRole);
-          if (myRole == "moderator") route(context, const RentSellAds());
+          if (myName.split(" | ").length != 2) {
+            if (myRole == "moderator") route(context, const RentSellAds());
+          }
         } else {
           setState(() => isVerified = false);
           ifError.call();
@@ -124,6 +131,7 @@ class _AllBuildingsState extends State<AllBuildings> {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
     setState(() => myRole = pref.getString("role") ?? "");
+    setState(() => myName = pref.getString("name") ?? "");
     await verifyMyself(accessToken: accessToken, ifError: () => route(context, const SignIn()));
     if (isVerified) await readAllBuilding(accessToken: accessToken);
     if (isVerified) foundBuildings = apiResult;
@@ -150,6 +158,7 @@ class _AllBuildingsState extends State<AllBuildings> {
     return Scaffold(
         body: includeDashboard(
             isAdmin: myRole == "admin",
+            isOpMod: myName.split(" | ").length == 2 && myName.split(" | ")[1] == "(Operation)",
             pageName: "All Buildings",
             context: context,
             header: "All Registered Buildings",
@@ -177,73 +186,74 @@ class _AllBuildingsState extends State<AllBuildings> {
                         padding: EdgeInsets.zero,
                         itemCount: foundBuildings.length,
                         itemBuilder: (context, index) => dataTableAlternativeColorCells(
-                          onTap: () => route(
-                              context,
-                              UpdateBuilding(
-                                  buildingName: foundBuildings[index]["buildingName"],
-                                  buildingAddress: foundBuildings[index]["address"],
-                                  buildingID: foundBuildings[index]["buildingId"],
-                                  buildingPhoto: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : "",
-                                  guard: foundBuildings[index]["guard"])),
-                            index: index, children: [
-                              dataTableListTile(
-                                  flex: 6,
-                                  title: foundBuildings[index]["buildingName"],
-                                  subtitle: 'Address: ${foundBuildings[index]["address"]}',
-                                  img: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : null),
-                              dataTableChip(
-                                  flex: 2,
-                                  label: foundBuildings[index]["approvalStatus"] == "accepted" ? "active" : foundBuildings[index]["approvalStatus"],
-                                  color: foundBuildings[index]["approvalStatus"] == "pending"
-                                      ? const Color(0xFFE67E22)
-                                      : foundBuildings[index]["approvalStatus"] == "rejected"
-                                          ? const Color(0xFFFF2C2C)
-                                          : const Color(0xFF3498DB)),
-                              dataTableSingleInfo(flex: 2, title: foundBuildings[index]["uniqueId"]),
-                              dataTableSingleInfo(flex: 2, title: foundBuildings[index]["flats"].length.toString()),
-                              foundBuildings[index]["createdBy"] != null
-                                  ? dataTableIcon(
-                                      onTap: () => showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return viewContactInformation(
-                                                isPending: foundBuildings[index]["approvalStatus"] == "pending",
-                                                context: context,
-                                                contactInformation: foundBuildings[index]["createdBy"],
-                                                onActive: () async => await activateBuildingAndCreateGuardDeviceAccess(
-                                                    accessToken: accessToken,
-                                                    buildingID: foundBuildings[index]["buildingId"],
-                                                    onSuccess: () async {
-                                                      routeBack(context);
-                                                      // await defaultInit();
-                                                      await showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext context) => viewGuardCredentials(
-                                                              buildingName: foundBuildings[index]["buildingName"], context: context, password: guardAccess["password"], email: guardAccess["email"]));
-                                                    }),
-                                                onReject: () async => await rejectBuilding(
-                                                    accessToken: accessToken,
-                                                    buildingID: foundBuildings[index]["buildingId"],
-                                                    onSuccess: () async {
-                                                      routeBack(context);
-                                                      await defaultInit();
-                                                    }));
-                                          }),
-                                      toolTip: "Contact",
-                                      icon: Icons.call_rounded)
-                                  : dataTableNull(),
-                              dataTableIcon(
-                                toolTip: "More Options",
-                                  onTap: () => route(
-                                      context,
-                                      UpdateBuilding(
-                                          buildingName: foundBuildings[index]["buildingName"],
-                                          buildingAddress: foundBuildings[index]["address"],
-                                          buildingID: foundBuildings[index]["buildingId"],
-                                          buildingPhoto: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : "",
-                                          guard: foundBuildings[index]["guard"])),
-                                  icon: Icons.read_more),
-                            ])))));
+                                onTap: () => route(
+                                    context,
+                                    UpdateBuilding(
+                                        buildingName: foundBuildings[index]["buildingName"],
+                                        buildingAddress: foundBuildings[index]["address"],
+                                        buildingID: foundBuildings[index]["buildingId"],
+                                        buildingPhoto: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : "",
+                                        guard: foundBuildings[index]["guard"])),
+                                index: index,
+                                children: [
+                                  dataTableListTile(
+                                      flex: 6,
+                                      title: foundBuildings[index]["buildingName"],
+                                      subtitle: 'Address: ${foundBuildings[index]["address"]}',
+                                      img: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : null),
+                                  dataTableChip(
+                                      flex: 2,
+                                      label: foundBuildings[index]["approvalStatus"] == "accepted" ? "active" : foundBuildings[index]["approvalStatus"],
+                                      color: foundBuildings[index]["approvalStatus"] == "pending"
+                                          ? const Color(0xFFE67E22)
+                                          : foundBuildings[index]["approvalStatus"] == "rejected"
+                                              ? const Color(0xFFFF2C2C)
+                                              : const Color(0xFF3498DB)),
+                                  dataTableSingleInfo(flex: 2, title: foundBuildings[index]["uniqueId"]),
+                                  dataTableSingleInfo(flex: 2, title: foundBuildings[index]["flats"].length.toString()),
+                                  foundBuildings[index]["createdBy"] != null
+                                      ? dataTableIcon(
+                                          onTap: () => showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return viewContactInformation(
+                                                    isPending: foundBuildings[index]["approvalStatus"] == "pending",
+                                                    context: context,
+                                                    contactInformation: foundBuildings[index]["createdBy"],
+                                                    onActive: () async => await activateBuildingAndCreateGuardDeviceAccess(
+                                                        accessToken: accessToken,
+                                                        buildingID: foundBuildings[index]["buildingId"],
+                                                        onSuccess: () async {
+                                                          routeBack(context);
+                                                          // await defaultInit();
+                                                          await showDialog(
+                                                              context: context,
+                                                              builder: (BuildContext context) => viewGuardCredentials(
+                                                                  buildingName: foundBuildings[index]["buildingName"], context: context, password: guardAccess["password"], email: guardAccess["email"]));
+                                                        }),
+                                                    onReject: () async => await rejectBuilding(
+                                                        accessToken: accessToken,
+                                                        buildingID: foundBuildings[index]["buildingId"],
+                                                        onSuccess: () async {
+                                                          routeBack(context);
+                                                          await defaultInit();
+                                                        }));
+                                              }),
+                                          toolTip: "Contact",
+                                          icon: Icons.call_rounded)
+                                      : dataTableNull(),
+                                  dataTableIcon(
+                                      toolTip: "More Options",
+                                      onTap: () => route(
+                                          context,
+                                          UpdateBuilding(
+                                              buildingName: foundBuildings[index]["buildingName"],
+                                              buildingAddress: foundBuildings[index]["address"],
+                                              buildingID: foundBuildings[index]["buildingId"],
+                                              buildingPhoto: foundBuildings[index]["photo"] != null ? '$baseUrl/photos/${foundBuildings[index]["photo"]}' : "",
+                                              guard: foundBuildings[index]["guard"])),
+                                      icon: Icons.read_more),
+                                ])))));
   }
 
   AlertDialog viewContactInformation({required bool isPending, required BuildContext context, required VoidCallback onActive, required VoidCallback onReject, required Map contactInformation}) {

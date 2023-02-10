@@ -24,7 +24,8 @@ class RentSellAdDetails extends StatefulWidget {
 
 class _RentSellAdDetailsState extends State<RentSellAdDetails> {
 //Variables
-  String accessToken = "";
+  String accessToken = "";  String myName = "";
+
   String myRole = "";
   Map<String, dynamic> apiResult = {};
 
@@ -115,8 +116,8 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    setState(() => myRole = pref.getString("role") ?? "");
-    await readAdDetail(accessToken: accessToken);
+        setState(() => myRole = pref.getString("role") ?? "");
+setState(() => myName = pref.getString("name") ?? "");    await readAdDetail(accessToken: accessToken);
   }
 
 //Initiate
@@ -130,7 +131,8 @@ class _RentSellAdDetailsState extends State<RentSellAdDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            isAdmin: myRole == "admin",
+ isAdmin: myRole == "admin",
+            isOpMod: myName.split(" | ").length == 2 && myName.split(" | ")[1] == "(Operation)",
             pageName: "Rent/Sell Ads",
             context: context,
             header: "Apartment Rent/Sell Ad",

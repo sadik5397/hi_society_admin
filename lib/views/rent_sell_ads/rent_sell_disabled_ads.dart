@@ -20,7 +20,8 @@ class RentSellDisabledAds extends StatefulWidget {
 class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
 //Variables
   String accessToken = "";
-  String myRole = "";
+  String myRole = "";  String myName = "";
+
   List adList = [];
 
 //APIs
@@ -128,8 +129,8 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    setState(() => myRole = pref.getString("role") ?? "");
-    await readDisabledAdList(accessToken: accessToken);
+        setState(() => myRole = pref.getString("role") ?? "");
+setState(() => myName = pref.getString("name") ?? "");    await readDisabledAdList(accessToken: accessToken);
   }
 
 //Initiate
@@ -143,7 +144,8 @@ class _RentSellDisabledAdsState extends State<RentSellDisabledAds> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            isAdmin: myRole == "admin",
+ isAdmin: myRole == "admin",
+            isOpMod: myName.split(" | ").length == 2 && myName.split(" | ")[1] == "(Operation)",
             pageName: "Rent/Sell Ads",
             context: context,
             header: "Apartment Rent/Sell Ads Moderation",

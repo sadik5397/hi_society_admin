@@ -21,6 +21,7 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
 //Variables
   String accessToken = "";
   String myRole = "";
+  String myName = "";
   List postList = [];
 
 //APIs
@@ -113,6 +114,7 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
     setState(() => myRole = pref.getString("role") ?? "");
+    setState(() => myName = pref.getString("name") ?? "");
     await readPostList(accessToken: accessToken);
   }
 
@@ -128,6 +130,7 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
     return Scaffold(
         body: includeDashboard(
             isAdmin: myRole == "admin",
+            isOpMod: myName.split(" | ").length == 2 && myName.split(" | ")[1] == "(Operation)",
             pageName: "Social Media Posts",
             context: context,
             header: "Social Media Posts Moderation",

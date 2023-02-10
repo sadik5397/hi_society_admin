@@ -11,10 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../api.dart';
 
 class AddUser extends StatefulWidget {
-  const AddUser({Key? key, required this.buildingId, required this.role, required this.buildingName}) : super(key: key);
+  const AddUser({Key? key, required this.buildingId, required this.role, required this.buildingName, this.ownedFlats}) : super(key: key);
   final String role;
   final String buildingName;
   final int buildingId;
+  final List? ownedFlats;
 
   @override
   State<AddUser> createState() => _AddUserState();
@@ -129,6 +130,15 @@ class _AddUserState extends State<AddUser> {
             flats.add(result["data"][i]["flatName"]);
             flatIds.add(result["data"][i]["flatId"]);
           });
+        }
+        if (widget.ownedFlats != null) {
+          for (int i = 0; i < widget.ownedFlats!.length; i++) {
+            int ind = flats.indexOf(widget.ownedFlats![i]);
+            setState(() {
+              flats.removeAt(ind);
+              flatIds.removeAt(ind);
+            });
+          }
         }
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());

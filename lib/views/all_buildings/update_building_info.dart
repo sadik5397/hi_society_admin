@@ -89,13 +89,15 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
     }
   }
 
-  Future<void> addFlat({required String flatName, required VoidCallback successRoute}) async {
+  Future<void> addFlat({required List<String> flatName, required VoidCallback successRoute}) async {
+    Map result = {};
     try {
-      var response = await http.post(Uri.parse("$baseUrl/building/create/flat"), headers: authHeader(accessToken), body: jsonEncode({"flatName": flatName, "buildingId": widget.buildingID}));
-      Map result = jsonDecode(response.body);
-      if (kDebugMode) print(result);
+      for (int i = 0; i < flatName.length; i++) {
+        var response = await http.post(Uri.parse("$baseUrl/building/create/flat"), headers: authHeader(accessToken), body: jsonEncode({"flatName": flatName[i], "buildingId": widget.buildingID}));
+        result = jsonDecode(response.body);
+        if (kDebugMode) print(result);
+      }
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        setState(() => apiResult = result["data"]);
         successRoute.call();
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
@@ -172,7 +174,6 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton.small(onPressed: () => addressSeparator(widget.buildingNameAddress)),
         body: includeDashboard(
             isScrollablePage: true,
             pageName: "all buildings",
@@ -294,8 +295,10 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                       title: "Add Flat",
                                       onTap: () async {
                                         if (newFlatListController.text != "") {
-                                          buildingFlatList.add(newFlatListController.text);
-                                          await addFlat(flatName: newFlatListController.text, successRoute: () async => await showSuccess(context: context, label: "Flat Added"));
+                                          setState(() => buildingFlatList.addAll(newFlatListController.text.replaceAll(" ", "").toUpperCase().split(",")));
+                                          await addFlat(
+                                              flatName: newFlatListController.text.replaceAll(" ", "").toUpperCase().split(","),
+                                              successRoute: () async => await showSuccess(context: context, label: "${newFlatListController.text.replaceAll(" ", "").split(",").length} Flat Added"));
                                           newFlatListController.clear();
                                         }
                                       }))

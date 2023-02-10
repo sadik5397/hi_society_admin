@@ -1,0 +1,36 @@
+{
+  user: {
+    userId: 15,
+    name: M
+    R
+    Haq,
+    phone: 01722222222,
+    email: rr@gmail.com,
+    photo: profile-pic/f09107f9f622e427d7f3d818514159938a7e8804.png,
+    gender: prefer_not_to_say,
+    passwordResetKey: null,
+    passwordResetKeyExpire: null,
+    role: {
+      roleEntryId: 14,
+      role: flat_owner
+    }
+  },
+  flat: {
+    flatId: 20,
+    flatName: A1,
+    assignmentCode: null,
+    maxResident: 1,
+    residentHead: {
+      userId: 11,
+      name: R
+      R
+      Haque,
+      phone: 01722222222,
+      email: r@gmail.com,
+      photo: profile-pic/8af467c0dd9246283b49b16b798498b7eca7ea67.png,
+      gender: prefer_not_to_say,
+      passwordResetKey: null,
+      passwordResetKeyExpire: null
+    }
+  }
+}

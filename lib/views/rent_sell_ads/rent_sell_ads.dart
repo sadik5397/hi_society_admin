@@ -21,7 +21,8 @@ class RentSellAds extends StatefulWidget {
 class _RentSellAdsState extends State<RentSellAds> {
 //Variables
   String accessToken = "";
-  String myRole = "";
+  String myRole = "";  String myName = "";
+
   List adList = [];
   TextEditingController otherReasonController = TextEditingController();
   String? selectedQaReason;
@@ -113,8 +114,8 @@ class _RentSellAdsState extends State<RentSellAds> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-    setState(() => myRole = pref.getString("role") ?? "");
-    await readAdList(accessToken: accessToken);
+        setState(() => myRole = pref.getString("role") ?? "");
+setState(() => myName = pref.getString("name") ?? "");    await readAdList(accessToken: accessToken);
   }
 
 //Initiate
@@ -128,7 +129,8 @@ class _RentSellAdsState extends State<RentSellAds> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            isAdmin: myRole == "admin",
+ isAdmin: myRole == "admin",
+            isOpMod: myName.split(" | ").length == 2 && myName.split(" | ")[1] == "(Operation)",
             pageName: "Rent/Sell Ads",
             context: context,
             header: "Apartment Rent/Sell Ads Moderation",

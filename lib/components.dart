@@ -19,7 +19,7 @@ import 'views/utility_contacts/utility_contact_category.dart';
 import 'dart:async';
 
 //region Static Values
-String placeholderImage = "https://hisocietybd.com/_app_assets/placeholder.png";
+String placeholderImage = "$baseUrl/placeholder.png";
 Color themeOf = const Color(0xFFe6f5ff);
 Color primaryColor = const Color(0xff0392f7);
 List<String> qaReason = ["Inappropriate Information", "Inappropriate Photo(s)", "Inappropriate Text", "Invalid Contact Information"];

@@ -99,6 +99,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
+        await defaultInit();
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -110,11 +111,12 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   Future<void> removeRole({required String accessToken, required int userID, required String existingRole}) async {
     print({"uid": userID, "role": existingRole}.toString());
     try {
-      var response = await http.post(Uri.parse("$baseUrl/auth/test/roles/remove-role/userId=$userID&role=$existingRole"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/auth/test/roles/remove-role?userId=$userID&role=$existingRole"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
+        await defaultInit();
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -129,9 +131,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        if (kDebugMode) print("$role-------------------------------$userId");
-        if (role == "resident_head" || role == "resident") await http.post(Uri.parse("$baseUrl/auth/test/role/assign?uid=$userId&role=homeless"));
         showSuccess(context: context, label: "This user just became homeless 😢", onTap: () => routeBack(context));
+        await defaultInit();
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }

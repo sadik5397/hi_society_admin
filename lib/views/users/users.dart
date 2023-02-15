@@ -415,8 +415,10 @@ class _UsersState extends State<Users> {
                         await showPrompt(
                             context: context,
                             onTap: () async {
+                              // print("--------------------");
+                              // print(userData.toString());
                               routeBack(context);
-                              await unAssignBuilding(accessToken: accessToken, role: userData["role"].toString(), userId: userData["role"]["userId"]);
+                              await unAssignBuilding(accessToken: accessToken, role: userData["role"].toString(), userId: userData["userId"]);
                             });
                       }
                     }))

@@ -47,7 +47,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         setState(() => managers = result["data"]["manager"]);
         setState(() => flatOwners = result["data"]["flatOwners"]);
         setState(() => residents = result["data"]["residents"]);
-        for (int i=0;i<flatOwners.length;i++){
+        for (int i = 0; i < flatOwners.length; i++) {
           ownedFlats.add(flatOwners[i]["flat"]["flatName"]);
         }
         ownedFlats = ownedFlats.toSet().toList();
@@ -294,8 +294,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                       ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Head", buildingName: widget.buildingName))
                       : null,
                   secondaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Member", buildingName: widget.buildingName)),
-                  headerRow: ["Name", "Role", "Status", "Action"],
-                  flex: [2, 2, 1, 1],
+                  headerRow: ["Name", "Role", "Action"],
+                  flex: [2, 1, 1],
                   child: (buildingCommittee.isEmpty)
                       ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Committee Found")))
                       : ListView.builder(
@@ -309,10 +309,9 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     title: buildingCommittee[index]["member"]["name"],
                                     subtitle: buildingCommittee[index]["member"]["email"],
                                     img: buildingCommittee[index]["member"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingCommittee[index]["member"]["photo"]}'),
-                                dataTableSingleInfo(flex: 4, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
-                                dataTableChip(flex: 2, label: "Active"),
+                                dataTableSingleInfo(flex: 2, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
+                                // dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
-                                    flex: 2,
                                     toolTip: "Change Password",
                                     onTap: () {
                                       setState(() => newPasswordController.clear());
@@ -332,18 +331,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               }));
                                     },
                                     icon: Icons.lock_reset),
-                                // dataTableIcon(
-                                //     toolTip: "Demote Member",
-                                //     onTap: () {
-                                //       showPrompt(
-                                //           context: context,
-                                //           onTap: () async {
-                                //             Navigator.pop(context);
-                                //             await removeCommitteeMember(accessToken: accessToken, userID: buildingCommittee[index]["member"]["userId"]);
-                                //           });
-                                //     },
-                                //     icon: Icons.cancel_outlined,
-                                //     color: Colors.redAccent)
+                                dataTableIcon(
+                                    toolTip: "Demote From Committee",
+                                    onTap: () {
+                                      showPrompt(
+                                          context: context,
+                                          onTap: () async {
+                                            Navigator.pop(context);
+                                            // await removeManager(accessToken: accessToken, buildingID: widget.buildingID, managerID: managers[index]["userId"]);
+                                            //todo: remove Committee role
+                                          });
+                                    },
+                                    icon: Icons.cancel_outlined,
+                                    color: Colors.redAccent)
                               ]))),
               //endregion
 
@@ -353,8 +353,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   title: "Building Flat Owners",
                   primaryButtonText: "Flat Owner",
                   primaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Flat_Owner", buildingName: widget.buildingName, ownedFlats: ownedFlats)),
-                  headerRow: ["Name", "Role", "Status", "Action"],
-                  flex: [2, 2, 1, 1],
+                  headerRow: ["Name", "Role",  "Action"],
+                  flex: [2, 1, 1],
                   child: (flatOwners.isEmpty)
                       ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Flat Owner Found")))
                       : ListView.builder(
@@ -369,7 +369,6 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     subtitle: flatOwners[index]["user"]["email"],
                                     img: flatOwners[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${flatOwners[index]["user"]["photo"]}'),
                                 dataTableSingleInfo(flex: 4, title: "Flat Owner - ${flatOwners[index]["flat"]["flatName"]}"),
-                                dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
                                     flex: 2,
                                     toolTip: "Change Password",
@@ -391,18 +390,19 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               }));
                                     },
                                     icon: Icons.lock_reset),
-                                // dataTableIcon(
-                                //     toolTip: "Demote Flat Owner",
-                                //     onTap: () {
-                                //       showPrompt(
-                                //           context: context,
-                                //           onTap: () async {
-                                //             Navigator.pop(context);
-                                //             await removeCommitteeMember(accessToken: accessToken, userID: flatOwners[index]["user"]["userId"]);
-                                //           });
-                                //     },
-                                //     icon: Icons.cancel_outlined,
-                                //     color: Colors.redAccent)
+                            dataTableIcon(
+                                toolTip: "Demote Flat Owner",
+                                onTap: () {
+                                  showPrompt(
+                                      context: context,
+                                      onTap: () async {
+                                        Navigator.pop(context);
+                                        // await removeManager(accessToken: accessToken, buildingID: widget.buildingID, managerID: managers[index]["userId"]);
+                                        //todo: remove Flat Owner
+                                      });
+                                },
+                                icon: Icons.cancel_outlined,
+                                color: Colors.redAccent)
                               ]))),
               //endregion
 

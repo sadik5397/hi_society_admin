@@ -405,23 +405,23 @@ class _UsersState extends State<Users> {
                                 Navigator.pop(context);
                               }));
                     })),
-            Expanded(
-                child: primaryButton(
-                    width: 200,
-                    paddingLeft: 6,
-                    title: "Un-assign Building",
-                    onTap: () async {
-                      if (userData["role"] != "homeless") {
-                        await showPrompt(
-                            context: context,
-                            onTap: () async {
-                              // print("--------------------");
-                              // print(userData.toString());
-                              routeBack(context);
-                              await unAssignBuilding(accessToken: accessToken, role: userData["role"].toString(), userId: userData["userId"]);
-                            });
-                      }
-                    }))
+            // Expanded(
+            //     child: primaryButton(
+            //         width: 200,
+            //         paddingLeft: 6,
+            //         title: "Un-assign Building",
+            //         onTap: () async {
+            //           if (userData["role"] != "homeless") {
+            //             await showPrompt(
+            //                 context: context,
+            //                 onTap: () async {
+            //                   // print("--------------------");
+            //                   // print(userData.toString());
+            //                   routeBack(context);
+            //                   await unAssignBuilding(accessToken: accessToken, role: userData["role"].toString(), userId: userData["userId"]);
+            //                 });
+            //           }
+            //         }))
           ])
         ]));
   }

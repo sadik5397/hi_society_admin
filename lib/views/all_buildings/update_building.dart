@@ -35,6 +35,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
 
 //APIs
   Future<void> readBuildingExecutiveUserList({required String accessToken, required int buildingID}) async {
+    print("................$buildingID................");
     ownedFlats.clear();
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/info/contacts/list/for-admin?buildingId=$buildingID"), headers: authHeader(accessToken));
@@ -108,6 +109,40 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
+  Future<void> removeCommittee({required String accessToken, required int buildingID, required int userId}) async {
+    print({"memberId": userId, "buildingId": buildingID}.toString());
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/building/remove/committee"), headers: authHeader(accessToken), body: jsonEncode({"memberId": userId, "buildingId": buildingID}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+        await defaultInit();
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
+  Future<void> removeFlatOwner({required String accessToken, required int flatId, required int userId}) async {
+    print({"userId": userId, "flatId": flatId}.toString());
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/building/remove/flat-owner/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "flatId": flatId}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+        await defaultInit();
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
   Future<void> removeRole({required String accessToken, required int userID, required String existingRole}) async {
     print({"uid": userID, "role": existingRole}.toString());
     try {
@@ -125,7 +160,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
-  Future<void> unAssignBuilding({required String accessToken, required int userId, required String role}) async {
+  Future<void> removeResident({required String accessToken, required int userId, required String role}) async {
     try {
       var response = await http.post(Uri.parse("$baseUrl/building/remove/building/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId}));
       Map result = jsonDecode(response.body);
@@ -320,7 +355,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                           context: context,
                                           onTap: () async {
                                             Navigator.pop(context);
-                                            await removeRole(accessToken: accessToken, existingRole: buildingCommittee[index]["isHead"] ? "committee_head" : "committee_member", userID: buildingCommittee[index]["member"]["userId"]);
+                                            await removeCommittee(accessToken: accessToken, buildingID: widget.buildingID, userId: buildingCommittee[index]["member"]["userId"]);
                                           });
                                     },
                                     icon: Icons.cancel_outlined,
@@ -369,7 +404,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                           context: context,
                                           onTap: () async {
                                             Navigator.pop(context);
-                                            await removeRole(accessToken: accessToken, existingRole: "flat_owner", userID: flatOwners[index]["user"]["userId"]);
+                                            await removeFlatOwner(accessToken: accessToken, flatId: flatOwners[index]["flat"]["flatId"], userId: flatOwners[index]["user"]["userId"]);
                                           });
                                     },
                                     icon: Icons.cancel_outlined,
@@ -410,13 +445,13 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     },
                                     icon: Icons.lock_reset),
                                 dataTableIcon(
-                                    toolTip: "Demote Un-Assign Flat",
+                                    toolTip: "Un-Assign Flat",
                                     onTap: () async {
                                       await showPrompt(
                                           context: context,
                                           onTap: () async {
                                             routeBack(context);
-                                            await unAssignBuilding(accessToken: accessToken, role: "resident", userId: residents[index]["userId"]);
+                                            await removeResident(accessToken: accessToken, role: "resident", userId: residents[index]["userId"]);
                                           });
                                     },
                                     icon: Icons.cancel_outlined,

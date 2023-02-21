@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
-import 'package:hi_society_admin/views/users/users.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'views/sign_in.dart';
@@ -13,6 +13,7 @@ Future<void> main() async {
   final pref = await SharedPreferences.getInstance();
   final String? accessTokenFromSharedPreferences = pref.getString("accessToken");
   if (kDebugMode) print("Access Token from Android Local Shared Preference Status: $accessTokenFromSharedPreferences");
+  FlutterNativeSplash.preserve(widgetsBinding: WidgetsFlutterBinding.ensureInitialized());
   runApp(MyApp(accessToken: accessTokenFromSharedPreferences ?? ""));
 }
 
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FlutterNativeSplash.remove();
     return MaterialApp(
         title: 'Hi Society Admin',
         debugShowCheckedModeBanner: false,

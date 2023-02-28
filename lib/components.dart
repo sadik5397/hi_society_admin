@@ -615,8 +615,8 @@ Container dataTableContainer(
                     paddingRight: 0,
                     icon: primaryButtonText == "Edit"
                         ? Icons.edit
-                        : primaryButtonText == "Announcement"
-                            ? Icons.notifications_active_outlined
+                        : primaryButtonText == "Notification"
+                            ? Icons.notification_add_outlined
                             : showPlusButton
                                 ? Icons.add
                                 : null),

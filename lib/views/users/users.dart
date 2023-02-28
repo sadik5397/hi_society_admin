@@ -116,15 +116,13 @@ class _UsersState extends State<Users> {
     }
   }
 
-  Future<void> unAssignBuilding({required String accessToken, required int userId, required String role}) async {
+  Future<void> verifyUser({required String accessToken, required int userId, required bool verify}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/building/remove/building/by-user"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId}));
+      var response = await http.post(Uri.parse("$baseUrl/user/verify/email/by-admin"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "verified": verify}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        if (kDebugMode) print("$role-------------------------------$userId");
-        if (role == "resident_head" || role == "resident") await http.post(Uri.parse("$baseUrl/auth/test/role/assign?uid=$userId&role=homeless"));
-        showSuccess(context: context, label: "This user just became homeless 😢", onTap: () => routeBack(context));
+        showSuccess(context: context, title: "Code ${result["data"]["emailVerificationCode"]}", label: "User ${verify ? 'Verified' : 'Un-verified'} by Hi Society Admin", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -222,7 +220,7 @@ class _UsersState extends State<Users> {
                           }));
                 },
                 // primaryButtonOnTap: ()=> print(selectedUsers.toString()),
-                primaryButtonText: "Announcement",
+                primaryButtonText: "Notification",
                 // primaryButtonText: selectableUsers.length.toString(),
                 entryCount: foundUsers.length,
                 headerRow: ["Select", "Name", "Role", "Building", "Action"],
@@ -261,7 +259,7 @@ class _UsersState extends State<Users> {
                                   dataTableListTile(
                                       flex: 4,
                                       img: foundUsers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${foundUsers[index]["photo"]}',
-                                      title: foundUsers[index]["name"].toString(),
+                                      title: '${foundUsers[index]["emailVerified"]==1 ? "✔ " :""}${foundUsers[index]["name"]}',color: foundUsers[index]["emailVerified"]==1 ? primaryColor : Colors.black54,
                                       subtitle: foundUsers[index]["email"].toString()),
                                   dataTableSingleInfo(
                                       flex: 2,
@@ -327,6 +325,10 @@ class _UsersState extends State<Users> {
                     DataCell(SelectableText(userData["userId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
                   ]),
                   DataRow(cells: [
+                    const DataCell(Text("Verified?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    DataCell(SelectableText(userData["emailVerified"] == 1 ? "YES" : "NO", style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                  ]),
+                  DataRow(cells: [
                     const DataCell(Text("Profile Name", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                     DataCell(SelectableText(userData["name"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
                   ]),
@@ -371,6 +373,7 @@ class _UsersState extends State<Users> {
           Row(children: [
             Expanded(
                 child: primaryButton(
+                    icon: Icons.notification_add_outlined,
                     width: 200,
                     paddingRight: 6,
                     title: "Push Notification",
@@ -388,6 +391,7 @@ class _UsersState extends State<Users> {
                     })),
             Expanded(
                 child: primaryButton(
+                    icon: Icons.lock_reset_outlined,
                     width: 200,
                     paddingRight: 6,
                     paddingLeft: 6,
@@ -405,23 +409,20 @@ class _UsersState extends State<Users> {
                                 Navigator.pop(context);
                               }));
                     })),
-            // Expanded(
-            //     child: primaryButton(
-            //         width: 200,
-            //         paddingLeft: 6,
-            //         title: "Un-assign Building",
-            //         onTap: () async {
-            //           if (userData["role"] != "homeless") {
-            //             await showPrompt(
-            //                 context: context,
-            //                 onTap: () async {
-            //                   // print("--------------------");
-            //                   // print(userData.toString());
-            //                   routeBack(context);
-            //                   await unAssignBuilding(accessToken: accessToken, role: userData["role"].toString(), userId: userData["userId"]);
-            //                 });
-            //           }
-            //         }))
+            Expanded(
+                child: primaryButton(
+                    icon: userData["emailVerified"] == 0 ? Icons.verified_user_outlined : Icons.disabled_by_default_outlined,
+                    width: 200,
+                    paddingLeft: 6,
+                    title: userData["emailVerified"] == 1 ? "Un-verify User" : "Verify User",
+                    onTap: () async {
+                      await showPrompt(
+                          context: context,
+                          onTap: () async {
+                            routeBack(context);
+                            await verifyUser(accessToken: accessToken, userId: userData["userId"], verify: userData["emailVerified"] == 1 ? false : true);
+                          });
+                    }))
           ])
         ]));
   }

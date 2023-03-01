@@ -67,7 +67,7 @@ class _AddModsState extends State<AddMods> {
         showSnackBar(context: context, label: result["message"]);
         setState(() => signedUpApiResult = result["data"]);
         int thisUserId = result["data"]["userId"];
-        var response2 = await http.post(Uri.parse("$baseUrl/auth/test/role/assign?uid=$thisUserId&role=moderator"), headers: authHeader(accessToken));
+        var response2 = await http.post(Uri.parse("$baseUrl/auth/test/role/assign?userId=$thisUserId&role=moderator"), headers: authHeader(accessToken));
         Map result2 = jsonDecode(response2.body);
         if (kDebugMode) print(result2);
         if (result2["statusCode"] == 200 || result2["statusCode"] == 201) {
@@ -112,41 +112,6 @@ class _AddModsState extends State<AddMods> {
             context: context,
             header: "Create new Moderator",
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              // dataTableContainer(
-              //     headerPadding: 8,
-              //     paddingBottom: 0,
-              //     title: "Assign an Existing Registered User",
-              //     isScrollableWidget: false,
-              //     child: Column(children: [
-              //       Padding(
-              //           padding: const EdgeInsets.only(bottom: 8),
-              //           child: CheckboxListTile(
-              //               visualDensity: VisualDensity.compact,
-              //               controlAffinity: ListTileControlAffinity.leading,
-              //               value: accessOperational,
-              //               onChanged: (value) => setState(() => accessOperational = value ?? false),
-              //               title: const Text("Can access operational functions"))),
-              //       Row(children: [
-              //         Expanded(flex: 3, child: primaryTextField(labelText: "User Email Address", controller: existingUserEmailController)),
-              //         Expanded(
-              //             flex: 1,
-              //             child: primaryButton(
-              //                 paddingBottom: 24,
-              //                 paddingTop: 4,
-              //                 title: "Confirm",
-              //                 onTap: () async {
-              //                   await assignUserToRole(
-              //                       accessToken: accessToken,
-              //                       email: existingUserEmailController.text,
-              //                       onSuccess: () => showDialog(
-              //                           context: context,
-              //                           builder: (BuildContext context) {
-              //                             return viewInformationAfterAssign(
-              //                                 context: context, onSubmit: () async => route(context, const Moderators()), email: existingUserEmailController.text, role: "Moderator");
-              //                           }));
-              //                 }))
-              //       ])
-              //     ])),
               dataTableContainer(
                   headerPadding: 8,
                   paddingBottom: 0,
@@ -174,7 +139,7 @@ class _AddModsState extends State<AddMods> {
                               onTap: () async {
                                 await doSignUp(
                                     email: emailController.text,
-                                    name: '${nameController.text} | (Operation)',
+                                    name: accessOperational ? '${nameController.text} | (Operation)' : nameController.text,
                                     onSuccess: () => showDialog(
                                         context: context,
                                         builder: (BuildContext context) {

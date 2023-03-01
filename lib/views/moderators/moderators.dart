@@ -63,7 +63,7 @@ class _ModeratorsState extends State<Moderators> {
 
   Future<void> unAssignMod({required String accessToken, required int userId}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/auth/test/role/assign?uid=$userId&role=homeless"), headers: authHeader(accessToken));
+      var response = await http.post(Uri.parse("$baseUrl/auth/test/role/assign?userId=$userId&role=homeless"), headers: authHeader(accessToken));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {

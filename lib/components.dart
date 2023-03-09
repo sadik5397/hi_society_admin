@@ -7,6 +7,7 @@ import 'package:hi_society_admin/views/amenities/amenity_category.dart';
 import 'package:hi_society_admin/views/moderators/moderators.dart';
 import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ads.dart';
 import 'package:hi_society_admin/views/social_media/social_media_posts.dart';
+import 'package:hi_society_admin/views/subscription/add_package.dart';
 import 'package:hi_society_admin/views/test.dart';
 import 'package:hi_society_admin/views/users/users.dart';
 import 'package:page_transition/page_transition.dart';
@@ -15,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'views/all_buildings/all_buildings.dart';
 import 'views/security_alerts/security_alert.dart';
 import 'views/sign_in.dart';
+import 'views/subscription/packages.dart';
 import 'views/utility_contacts/utility_contact_category.dart';
 import 'dart:async';
 
@@ -298,6 +300,7 @@ Padding primaryTextField(
     bool isPassword = false,
     double? bottomPadding,
     bool isDate = false,
+    int? maxLines,
     bool hasSubmitButton = false,
     IconData icon = Icons.arrow_downward_sharp,
     TextInputType keyboardType = TextInputType.text,
@@ -333,6 +336,7 @@ Padding primaryTextField(
             controller: controller,
             // style: textFieldLabel,
             autofocus: autoFocus,
+            maxLines: maxLines,
             enabled: !isDisable,
             validator: (value) => required
                 ? value == null || value.isEmpty
@@ -524,6 +528,11 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+            ]),
+          if (isAdmin)
+            sidebarMenuHead(context: context, title: "Subscription", children: [
+              // sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Payment Statement", toPage: const UtilityContactCategory()), //todo:
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Packages", toPage: const Packages()),
             ]),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Moderators", toPage: const Moderators()),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Export Data", toPage: const ExportData()),
@@ -753,5 +762,32 @@ Padding photoUploaderPro({required VoidCallback onTap, required String base64img
                           child: ClipRRect(borderRadius: BorderRadius.circular(16) / 2, child: Image.memory(base64Decode(base64img), fit: BoxFit.cover)))),
         )),
   );
+}
+
+Container packageTile({required BuildContext context, required Map package}) {
+  return Container(
+      margin: EdgeInsets.only(left: 24, bottom: 24),
+      width: 380,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: primaryColor, width: 1)),
+      child: Column(children: [
+        Container(
+            alignment: Alignment.center,
+            margin: EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
+            width: double.maxFinite,
+            decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(6)),
+            child: Text(package["name"], style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))),
+        Text("BDT ${package["cost"]} /month", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.deepOrange, fontSize: 18, fontWeight: FontWeight.bold)),
+        Divider(indent: 12, endIndent: 12),
+        Text(package["description"], style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.normal, height: 2), textAlign: TextAlign.center),
+        Divider(indent: 12, endIndent: 12),
+        Text("Flat Limit: ${package["flatLimit"]}", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
+        Divider(indent: 12, endIndent: 12),
+        Text("Buffer Time: ${package["bufferTime"]} Days", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
+        Divider(indent: 12, endIndent: 12),
+        Text("Validity: 30 Days", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
+        Divider(indent: 12, endIndent: 12),
+        primaryButton(title: "Edit", onTap: () => route(context, AddPackage(data: package)), paddingTop: 6, paddingBottom: 16, primary: false, icon: Icons.edit)
+      ]));
 }
 //endregion

@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: const Color(0xfff7f7f7),
             brightness: Brightness.light,
             appBarTheme: AppBarTheme(backgroundColor: Colors.blue.shade50, centerTitle: true)),
-        home: accessToken.isEmpty ? const SignIn() : const Packages());
+        home: accessToken.isEmpty ? const SignIn() : const AllBuildings());
   }
 }
 //endregion

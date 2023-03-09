@@ -32,6 +32,11 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   List ownedFlats = [];
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  List packages = [];
+  List<String> packageNames = ["Free"];
+  List<int> packageIds = [0];
+  String selectedPackage = "";
+  Map subscriptionDetails = {};
 
 //APIs
   Future<void> readBuildingExecutiveUserList({required String accessToken, required int buildingID}) async {
@@ -60,14 +65,50 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
+  Future<void> readBuildingSubscriptionStatus({required String accessToken, required int buildingID}) async {
+    print("................BuildingSubscriptionStatus................");
+    ownedFlats.clear();
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/subscription/status/by-admin"), headers: authHeader(accessToken), body: jsonEncode({"buildingId": buildingID}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+        String pack = packageNames[packageIds.indexOf(result["data"]["subscriptionId"])];
+        setState(() => selectedPackage = pack);
+        setState(() => subscriptionDetails = result["data"]);
+      } else {
+        setState(() => selectedPackage = "Free");
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
   Future<void> updateUserPassword({required String accessToken, required String newPassword, required String confirmPassword, required int userId}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"), headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
+      var response = await http.post(Uri.parse("$baseUrl/user/update/password/by-admin"),
+          headers: authHeader(accessToken), body: jsonEncode({"userId": userId, "password": newPassword, "confirmPassword": confirmPassword}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(newPassword);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSuccess(context: context, label: "Password Updated", onTap: () => routeBack(context));
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
+  Future<void> assignPackageManually({required String accessToken, required int packageId}) async {
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/subscription/create"), headers: authHeader(accessToken), body: jsonEncode({"buildingId": widget.buildingID, "packageId": packageId}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSuccess(context: context, label: "Subscribed Manually", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -176,12 +217,36 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
+  Future<void> readAllPackages({required String accessToken}) async {
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/subscription/package/list"), headers: authHeader(accessToken));
+      Map result = jsonDecode(response.body);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        if (kDebugMode) print(result);
+        showSnackBar(context: context, label: result["message"]);
+        setState(() => packages = result["data"]);
+        for (int i = 0; i < packages.length; i++) {
+          setState(() {
+            packageNames.add(packages[i]["name"]);
+            packageIds.add(packages[i]["subscriptionPackageId"]);
+          });
+        }
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
 //Functions
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
     await readBuildingInfo(accessToken: accessToken, buildingID: widget.buildingID);
     await readBuildingExecutiveUserList(accessToken: accessToken, buildingID: widget.buildingID);
+    await readAllPackages(accessToken: accessToken);
+    await readBuildingSubscriptionStatus(accessToken: accessToken, buildingID: widget.buildingID);
   }
 
 //Initiate
@@ -206,7 +271,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   headerPadding: buildingInfo == null ? 8 : 0,
                   title: "Building Information",
                   primaryButtonText: "Edit",
-                  primaryButtonOnTap: () => route(context, UpdateBuildingInfo(buildingID: widget.buildingID, buildingName: widget.buildingName, buildingNameAddress: widget.buildingAddress, buildingPhoto: widget.buildingPhoto)),
+                  primaryButtonOnTap: () =>
+                      route(context, UpdateBuildingInfo(buildingID: widget.buildingID, buildingName: widget.buildingName, buildingNameAddress: widget.buildingAddress, buildingPhoto: widget.buildingPhoto)),
                   child: buildingInfo == null
                       ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
                       : Row(children: [
@@ -221,6 +287,43 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                       : const Color(0xFF3498DB)),
                           dataTableSingleInfo(flex: 2, title: 'Address:\n${buildingInfo!["address"]}', alignment: TextAlign.start),
                           dataTableNull()
+                        ])),
+              //endregion
+
+              //region subscription
+              dataTableContainer(
+                  isScrollableWidget: false,
+                  paddingBottom: 0,
+                  headerPadding: selectedPackage == "" ? 8 : 0,
+                  title: "Building Subscription",
+                  child: selectedPackage == ""
+                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
+                      : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Row(children: [
+                            Expanded(
+                                child:
+                                    primaryDropdown(paddingTop: 20, title: "Package", options: packageNames, value: selectedPackage, onChanged: (value) => setState(() => selectedPackage = value.toString()))),
+                            primaryButton(
+                                title: "Confirm",
+                                onTap: () => showPrompt(
+                                    context: context,
+                                    onTap: () async {
+                                      routeBack(context);
+                                      await assignPackageManually(accessToken: accessToken, packageId: packageIds[packageNames.indexOf(selectedPackage)]);
+                                    }),
+                                width: 200,
+                                paddingBottom: 0,
+                                paddingRight: 20,
+                                icon: Icons.paid_outlined)
+                          ]),
+                          Padding(
+                              padding: const EdgeInsets.all(14).copyWith(top: 0),
+                              child: Wrap(children: [
+                                if (subscriptionDetails["paidAt"] != null) Text("Last Payment at : ${subscriptionDetails["paidAt"].toString().split("T")[0]}"),
+                                if (subscriptionDetails["expiresAt"] != null) Text("Current Subscription Will be Expired at : ${subscriptionDetails["expiresAt"].toString().split("T")[0]}"),
+                                if (subscriptionDetails["nextSubscriptionAt"] != null) Text("Need to Renew by : ${subscriptionDetails["nextSubscriptionAt"].toString().split("T")[0]}"),
+                                if (subscriptionDetails["paidAt"] == null && selectedPackage != "Free") Text("Manually Subscribed by Admin at : ${subscriptionDetails["createdAt"].toString().split("T")[0]}")
+                              ]))
                         ])),
               //endregion
 
@@ -251,7 +354,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                             userId: widget.guard!["userId"],
                                             context: context,
                                             onSubmit: () async {
-                                              updateUserPassword(accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: widget.guard!["userId"]);
+                                              updateUserPassword(
+                                                  accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: widget.guard!["userId"]);
                                               Navigator.pop(context);
                                             }));
                                   },
@@ -276,7 +380,11 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           primary: false,
                           itemCount: managers.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                                dataTableListTile(flex: 4, title: managers[index]["name"], subtitle: managers[index]["email"], img: managers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${managers[index]["photo"]}'),
+                                dataTableListTile(
+                                    flex: 4,
+                                    title: managers[index]["name"],
+                                    subtitle: managers[index]["email"],
+                                    img: managers[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${managers[index]["photo"]}'),
                                 dataTableSingleInfo(flex: 2, title: "Building Manager"),
                                 dataTableIcon(
                                     toolTip: "Change Password",
@@ -289,7 +397,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               userId: managers[index]["userId"],
                                               context: context,
                                               onSubmit: () async {
-                                                updateUserPassword(accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: managers[index]["userId"]);
+                                                updateUserPassword(
+                                                    accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: managers[index]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -316,7 +425,9 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   title: "Building Committee",
                   primaryButtonText: "Add Head",
                   secondaryButtonText: "Add Member",
-                  primaryButtonOnTap: (buildingExecutiveUsers["committeeHeads"] == null || buildingExecutiveUsers["committeeHeads"].length == 0) ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Head", buildingName: widget.buildingName)) : null,
+                  primaryButtonOnTap: (buildingExecutiveUsers["committeeHeads"] == null || buildingExecutiveUsers["committeeHeads"].length == 0)
+                      ? () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Head", buildingName: widget.buildingName))
+                      : null,
                   secondaryButtonOnTap: () => route(context, AddUser(buildingId: widget.buildingID, role: "Committee_Member", buildingName: widget.buildingName)),
                   headerRow: ["Name", "Role", "Action"],
                   flex: [2, 1, 1],
@@ -329,7 +440,10 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           itemCount: buildingCommittee.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
                                 dataTableListTile(
-                                    flex: 4, title: buildingCommittee[index]["member"]["name"], subtitle: buildingCommittee[index]["member"]["email"], img: buildingCommittee[index]["member"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingCommittee[index]["member"]["photo"]}'),
+                                    flex: 4,
+                                    title: buildingCommittee[index]["member"]["name"],
+                                    subtitle: buildingCommittee[index]["member"]["email"],
+                                    img: buildingCommittee[index]["member"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${buildingCommittee[index]["member"]["photo"]}'),
                                 dataTableSingleInfo(flex: 2, title: buildingCommittee[index]["isHead"] ? "Committee Head" : "Committee Member"),
                                 // dataTableChip(flex: 2, label: "Active"),
                                 dataTableIcon(
@@ -343,7 +457,11 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               userId: buildingCommittee[index]["member"]["userId"],
                                               context: context,
                                               onSubmit: () async {
-                                                updateUserPassword(accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: buildingCommittee[index]["member"]["userId"]);
+                                                updateUserPassword(
+                                                    accessToken: accessToken,
+                                                    confirmPassword: confirmPasswordController.text,
+                                                    newPassword: newPasswordController.text,
+                                                    userId: buildingCommittee[index]["member"]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -379,7 +497,11 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           primary: false,
                           itemCount: flatOwners.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                                dataTableListTile(flex: 4, title: flatOwners[index]["user"]["name"], subtitle: flatOwners[index]["user"]["email"], img: flatOwners[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${flatOwners[index]["user"]["photo"]}'),
+                                dataTableListTile(
+                                    flex: 4,
+                                    title: flatOwners[index]["user"]["name"],
+                                    subtitle: flatOwners[index]["user"]["email"],
+                                    img: flatOwners[index]["user"]["photo"] == null ? placeholderImage : '$baseUrl/photos/${flatOwners[index]["user"]["photo"]}'),
                                 dataTableSingleInfo(flex: 2, title: "Flat Owner - ${flatOwners[index]["flat"]["flatName"]}"),
                                 dataTableIcon(
                                     toolTip: "Change Password",
@@ -392,7 +514,11 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               userId: flatOwners[index]["user"]["userId"],
                                               context: context,
                                               onSubmit: () async {
-                                                updateUserPassword(accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: flatOwners[index]["user"]["userId"]);
+                                                updateUserPassword(
+                                                    accessToken: accessToken,
+                                                    confirmPassword: confirmPasswordController.text,
+                                                    newPassword: newPasswordController.text,
+                                                    userId: flatOwners[index]["user"]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -426,7 +552,11 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           primary: false,
                           itemCount: residents.length,
                           itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
-                                dataTableListTile(flex: 4, title: residents[index]["name"], subtitle: residents[index]["email"], img: residents[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${residents[index]["photo"]}'),
+                                dataTableListTile(
+                                    flex: 4,
+                                    title: residents[index]["name"],
+                                    subtitle: residents[index]["email"],
+                                    img: residents[index]["photo"] == null ? placeholderImage : '$baseUrl/photos/${residents[index]["photo"]}'),
                                 dataTableSingleInfo(flex: 2, title: "Resident"),
                                 dataTableIcon(
                                     toolTip: "Change Password",
@@ -439,7 +569,8 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                               userId: residents[index]["userId"],
                                               context: context,
                                               onSubmit: () async {
-                                                updateUserPassword(accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: residents[index]["userId"]);
+                                                updateUserPassword(
+                                                    accessToken: accessToken, confirmPassword: confirmPasswordController.text, newPassword: newPasswordController.text, userId: residents[index]["userId"]);
                                                 Navigator.pop(context);
                                               }));
                                     },
@@ -468,7 +599,9 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
         title: const Center(child: Text("Update User Password")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
-        content: Column(mainAxisSize: MainAxisSize.min, children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [primaryTextField(labelText: "New Password", controller: newPasswordController), primaryTextField(labelText: "Confirm Password", controller: confirmPasswordController, bottomPadding: 0)]),
         actions: [primaryButton(paddingTop: 0, title: "Submit", onTap: onSubmit)]);
   }
 }

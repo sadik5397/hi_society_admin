@@ -336,7 +336,7 @@ Padding primaryTextField(
             controller: controller,
             // style: textFieldLabel,
             autofocus: autoFocus,
-            maxLines: maxLines,
+            maxLines: maxLines ?? 1,
             enabled: !isDisable,
             validator: (value) => required
                 ? value == null || value.isEmpty
@@ -391,6 +391,7 @@ Padding primaryTextField(
 Padding primaryDropdown(
     {double? width,
     double? paddingLeft,
+    double? paddingTop,
     double? paddingBottom,
     double? paddingRight,
     required String title,
@@ -399,7 +400,7 @@ Padding primaryDropdown(
     required dynamic value,
     required void Function(Object? value) onChanged}) {
   return Padding(
-      padding: EdgeInsets.fromLTRB(paddingLeft ?? 12, 0, paddingRight ?? 12, paddingBottom ?? 12 * 1.5),
+      padding: EdgeInsets.fromLTRB(paddingLeft ?? 12, paddingTop ?? 0, paddingRight ?? 12, paddingBottom ?? 12 * 1.5),
       child: DropdownButton2(
         underline: const SizedBox(),
         iconEnabledColor: Colors.black.withOpacity(.5),

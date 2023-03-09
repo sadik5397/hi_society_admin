@@ -160,7 +160,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
 
   Future getWebImage() async {
     Uint8List? bytesFromPicker = await ImagePickerWeb.getImageAsBytes();
-    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0); //todo: Image Compressor
+    // var result = await FlutterImageCompress.compressWithList(bytesFromPicker!, minWidth: 800, minHeight: 800, quality: 70, rotate: 0);
     setState(() => base64img = (base64Encode(List<int>.from(bytesFromPicker!))));
   }
 

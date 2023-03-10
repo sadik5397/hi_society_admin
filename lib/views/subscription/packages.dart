@@ -39,57 +39,6 @@ class _PackagesState extends State<Packages> {
     }
   }
 
-  // Future<void> addAmenityCategory({required String accessToken, required String name}) async {
-  //   try {
-  //     var response = await http.post(Uri.parse("$baseUrl/amenity-booking/create/amenity/category"), headers: authHeader(accessToken), body: jsonEncode({"categoryName": name}));
-  //     Map result = jsonDecode(response.body);
-  //     if (kDebugMode) print(name);
-  //     if (kDebugMode) print(result);
-  //     if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-  //       showSuccess(context: context, label: "$name Added");
-  //       setState(() => packages = result["data"]);
-  //     } else {
-  //       showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-  //     }
-  //   } on Exception catch (e) {
-  //     showError(context: context, label: e.toString());
-  //   }
-  // }
-  //
-  // Future<void> updateAmenityCategory({required String accessToken, required String name, required int cid}) async {
-  //   try {
-  //     var response = await http.post(Uri.parse("$baseUrl/amenity-booking/update/amenity/category"), headers: authHeader(accessToken), body: jsonEncode({"categoryName": name, "amenityCategoryId": cid}));
-  //     Map result = jsonDecode(response.body);
-  //     if (kDebugMode) print(name);
-  //     if (kDebugMode) print(result);
-  //     if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-  //       showSuccess(context: context, label: "Updated to $name");
-  //       setState(() => packages = result["data"]);
-  //       Navigator.pop(context);
-  //     } else {
-  //       showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-  //     }
-  //   } on Exception catch (e) {
-  //     showError(context: context, label: e.toString());
-  //   }
-  // }
-  //
-  // Future<void> deleteAmenityCategory({required String accessToken, required int cid}) async {
-  //   try {
-  //     var response = await http.post(Uri.parse("$baseUrl/amenity-booking/remove/amenity/category"), headers: authHeader(accessToken), body: jsonEncode({"amenityCategoryId": cid}));
-  //     Map result = jsonDecode(response.body);
-  //     if (kDebugMode) print(result);
-  //     if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-  //       showSuccess(context: context, label: "Amenity Deleted");
-  //       setState(() => packages = result["data"]);
-  //     } else {
-  //       showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
-  //     }
-  //   } on Exception catch (e) {
-  //     showError(context: context, label: e.toString());
-  //   }
-  // }
-
 //Functions
 
   defaultInit() async {
@@ -114,7 +63,6 @@ class _PackagesState extends State<Packages> {
             header: "Subscription Packages",
             child: dataTableContainer(
                 entryCount: packages.length,
-                // headerRow: ["Category Name", "Status", "Actions"],
                 flex: [4, 2, 2],
                 primaryButtonOnTap: () => route(context, const AddPackage()),
                 title: "Package Details",
@@ -123,11 +71,7 @@ class _PackagesState extends State<Packages> {
                     : Align(
                         alignment: Alignment.topLeft,
                         child: SingleChildScrollView(
-                          child: Wrap(
-                              runAlignment: WrapAlignment.start,
-                              children: List.generate(
-                                  packages.length,
-                                  (index) => packageTile(context: context, package: packages[index]))),
+                          child: Wrap(runAlignment: WrapAlignment.start, children: List.generate(packages.length, (index) => packageTile(context: context, package: packages[index]))),
                         )))));
   }
 }

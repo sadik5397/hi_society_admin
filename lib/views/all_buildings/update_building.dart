@@ -37,6 +37,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   List<int> packageIds = [0];
   String selectedPackage = "";
   Map subscriptionDetails = {};
+  bool canUpdate = true;
 
 //APIs
   Future<void> readBuildingExecutiveUserList({required String accessToken, required int buildingID}) async {
@@ -74,11 +75,12 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
-        String pack = packageNames[packageIds.indexOf(result["data"]["subscriptionId"])];
+        String pack = packageNames[packageIds.indexOf(result["data"]["package"]["subscriptionPackageId"])];
         setState(() => selectedPackage = pack);
         setState(() => subscriptionDetails = result["data"]);
       } else {
         setState(() => selectedPackage = "Free");
+        setState(() => canUpdate = false);
       }
     } on Exception catch (e) {
       showError(context: context, label: e.toString());
@@ -102,9 +104,10 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
-  Future<void> assignPackageManually({required String accessToken, required int packageId}) async {
+  Future<void> assignPackageManually({required String accessToken, required int packageId, required bool doUpdate}) async {
     try {
-      var response = await http.post(Uri.parse("$baseUrl/subscription/create"), headers: authHeader(accessToken), body: jsonEncode({"buildingId": widget.buildingID, "packageId": packageId}));
+      var response = await http.post(Uri.parse(doUpdate ? "$baseUrl/subscription/update" : "$baseUrl/subscription/create"),
+          headers: authHeader(accessToken), body: jsonEncode({"buildingId": widget.buildingID, "packageId": packageId}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
@@ -309,7 +312,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     context: context,
                                     onTap: () async {
                                       routeBack(context);
-                                      await assignPackageManually(accessToken: accessToken, packageId: packageIds[packageNames.indexOf(selectedPackage)]);
+                                      await assignPackageManually(accessToken: accessToken, packageId: packageIds[packageNames.indexOf(selectedPackage)], doUpdate: canUpdate);
                                     }),
                                 width: 200,
                                 paddingBottom: 0,

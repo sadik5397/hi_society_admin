@@ -8,6 +8,7 @@ import 'package:hi_society_admin/views/moderators/moderators.dart';
 import 'package:hi_society_admin/views/rent_sell_ads/rent_sell_ads.dart';
 import 'package:hi_society_admin/views/social_media/social_media_posts.dart';
 import 'package:hi_society_admin/views/subscription/add_package.dart';
+import 'package:hi_society_admin/views/subscription/verification.dart';
 import 'package:hi_society_admin/views/test.dart';
 import 'package:hi_society_admin/views/users/users.dart';
 import 'package:page_transition/page_transition.dart';
@@ -17,6 +18,7 @@ import 'views/all_buildings/all_buildings.dart';
 import 'views/security_alerts/security_alert.dart';
 import 'views/sign_in.dart';
 import 'views/subscription/packages.dart';
+import 'views/subscription/payment_list.dart';
 import 'views/utility_contacts/utility_contact_category.dart';
 import 'dart:async';
 
@@ -532,7 +534,8 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
             ]),
           if (isAdmin)
             sidebarMenuHead(context: context, title: "Subscription", children: [
-              // sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Payment Statement", toPage: const UtilityContactCategory()), //todo:
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Payment List", toPage: const PaymentList()),
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Verify Payment", toPage: const Verification()),
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Packages", toPage: const Packages()),
             ]),
           if (isAdmin) sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Moderators", toPage: const Moderators()),
@@ -571,6 +574,79 @@ class _NoDataState extends State<NoData> {
   Widget build(BuildContext context) => Center(child: loading ? const CircularProgressIndicator() : const Text("No Result!"));
 }
 
+//endregion
+
+//region AlertDialogue
+AlertDialog moreUserOptions({required BuildContext context, required Map data}) {
+  return AlertDialog(
+      backgroundColor: Colors.white,
+      title: Center(child: (Text(capitalizeAllWord(data["bkashPaymentId"].toString())))),
+      insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 400),
+      buttonPadding: EdgeInsets.zero,
+      content: DataTable(columns: [
+        DataColumn(label: Text("Key", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor))),
+        DataColumn(label: Text("Value", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor)))
+      ], rows: [
+        DataRow(cells: [
+          const DataCell(Text("Payment Status", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["status"].toString().toUpperCase(),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: data["status"].toString().toUpperCase() == "COMPLETED" ? Colors.green : Colors.redAccent)))
+        ]),
+        if (data["statusMsg"] != null)
+          DataRow(cells: [
+            const DataCell(Text("Reason", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+            DataCell(SelectableText(data["statusMsg"].toString().toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)))
+          ]),
+        DataRow(cells: [
+          const DataCell(Text("Payment Method", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["paymentMethod"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("bKash Payment ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["bkashPaymentId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Transaction ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["trxId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("HiSociety Invoice ID", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["invoiceId"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Transaction Date", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["updatedAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Payment Amount", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText('BDT ${data["amount"]}', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Payment of", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText('${data["months"]} Month(s)', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Building Name", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["subscription"]["building"]["buildingName"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Address", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["subscription"]["building"]["address"].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Last Paid", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["subscription"]["paidAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Expires at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["subscription"]["expiresAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ]),
+        DataRow(cells: [
+          const DataCell(Text("Next Subscription", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          DataCell(SelectableText(data["subscription"]["nextSubscriptionAt"].toString().split("T")[0], style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+        ])
+      ]));
+}
 //endregion
 
 //region DataTable Components
@@ -627,9 +703,11 @@ Container dataTableContainer(
                         ? Icons.edit
                         : primaryButtonText == "Notification"
                             ? Icons.notification_add_outlined
-                            : showPlusButton
-                                ? Icons.add
-                                : null),
+                            : primaryButtonText == "View All"
+                                ? Icons.clear_all_outlined
+                                : showPlusButton
+                                    ? Icons.add
+                                    : null),
               if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 200, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
             ])),
         const Divider(height: 1),
@@ -784,9 +862,9 @@ Container packageTile({required BuildContext context, required Map package}) {
         Divider(indent: 12, endIndent: 12),
         Text("Flat Limit: ${package["flatLimit"]}", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
         Divider(indent: 12, endIndent: 12),
-        Text("Buffer Time: ${package["bufferTime"]} Days", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
-        Divider(indent: 12, endIndent: 12),
-        Text("Validity: 30 Days", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
+        // Text("Buffer Time: ${package["bufferTime"]} Days", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
+        // Divider(indent: 12, endIndent: 12),
+        Text("Validity: 1 Month", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
         Divider(indent: 12, endIndent: 12),
         primaryButton(title: "Edit", onTap: () => route(context, AddPackage(data: package)), paddingTop: 6, paddingBottom: 16, primary: false, icon: Icons.edit)
       ]));

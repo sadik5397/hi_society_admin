@@ -1,14 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/components.dart';
-import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
 import 'package:hi_society_admin/views/subscription/packages.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../api.dart';
 
 class AddPackage extends StatefulWidget {
@@ -27,8 +23,8 @@ class _AddPackageState extends State<AddPackage> {
   late TextEditingController descriptionController = TextEditingController(text: widget.data == null ? "" : widget.data!["description"].toString());
   late TextEditingController costController = TextEditingController(text: widget.data == null ? "" : widget.data!["cost"].toString());
   late TextEditingController flatLimitController = TextEditingController(text: widget.data == null ? "1" : widget.data!["flatLimit"].toString());
-  final TextEditingController validityTimeController = TextEditingController(text: "30 (Fixed)");
-  late TextEditingController bufferTimeController = TextEditingController(text: widget.data == null ? "7" : widget.data!["bufferTime"].toString());
+  final TextEditingController validityTimeController = TextEditingController(text: "1 Month (Fixed)");
+  late TextEditingController bufferTimeController = TextEditingController(text: widget.data == null ? "0" : widget.data!["bufferTime"].toString());
 
   //APIs
   Future<void> createPackage({required String accessToken, required VoidCallback successRoute}) async {
@@ -98,7 +94,7 @@ class _AddPackageState extends State<AddPackage> {
     return Scaffold(
         body: includeDashboard(
             isScrollablePage: true,
-            pageName: "Subscription",
+            pageName: "Packages",
             context: context,
             header: widget.data == null ? "Create a New Monthly Package" : "Edit Package : ${widget.data!["name"]}",
             child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -125,8 +121,8 @@ class _AddPackageState extends State<AddPackage> {
                             maxLines: 6),
                         Row(children: [
                           Expanded(child: primaryTextField(labelText: "Flat Limit", controller: flatLimitController, keyboardType: TextInputType.number, required: true)),
-                          Expanded(child: primaryTextField(labelText: "Validity Days", controller: validityTimeController, keyboardType: TextInputType.number, required: true, isDisable: true)),
-                          Expanded(child: primaryTextField(labelText: "Buffer Days", controller: bufferTimeController, keyboardType: TextInputType.number, required: true))
+                          Expanded(child: primaryTextField(labelText: "Validity Duration", controller: validityTimeController, keyboardType: TextInputType.number, required: true, isDisable: true)),
+                          Expanded(child: primaryTextField(labelText: "Buffer Days", controller: bufferTimeController, keyboardType: TextInputType.number, required: true, isDisable: true))
                         ]),
                         primaryButton(
                             paddingBottom: 24,

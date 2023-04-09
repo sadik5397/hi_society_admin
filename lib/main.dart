@@ -2,9 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:hi_society_admin/views/subscription/packages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'views/sign_in.dart';
 
 //region Main

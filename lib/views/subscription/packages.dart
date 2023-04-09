@@ -58,7 +58,7 @@ class _PackagesState extends State<Packages> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            pageName: "Subscription",
+            pageName: "Packages",
             context: context,
             header: "Subscription Packages",
             child: dataTableContainer(

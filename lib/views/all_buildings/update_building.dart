@@ -1,11 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/views/all_buildings/add_user.dart';
+import 'package:hi_society_admin/views/subscription/payment_list.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../api.dart';
 import '../../components.dart';
 import 'update_building_info.dart';
@@ -38,6 +37,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   String selectedPackage = "";
   Map subscriptionDetails = {};
   bool canUpdate = true;
+  List paymentList = [];
 
 //APIs
   Future<void> readBuildingExecutiveUserList({required String accessToken, required int buildingID}) async {
@@ -242,6 +242,22 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     }
   }
 
+  Future<void> readPaymentList({required String accessToken}) async {
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/subscription/paymentID-list?buildingId=${widget.buildingID}&limit=15"), headers: authHeader(accessToken));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+        showSnackBar(context: context, label: result["message"]);
+        setState(() => paymentList = result["data"]);
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
 //Functions
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
@@ -250,6 +266,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
     await readBuildingExecutiveUserList(accessToken: accessToken, buildingID: widget.buildingID);
     await readAllPackages(accessToken: accessToken);
     await readBuildingSubscriptionStatus(accessToken: accessToken, buildingID: widget.buildingID);
+    await readPaymentList(accessToken: accessToken);
   }
 
 //Initiate
@@ -263,6 +280,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
+            context: context,
             isScrollablePage: true,
             pageName: "All Buildings",
             header: "Information: ${widget.buildingName}",
@@ -590,10 +608,40 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     },
                                     icon: Icons.cancel_outlined,
                                     color: Colors.redAccent)
+                              ]))),
+              //endregion
+
+              //region Payment List
+              dataTableContainer(
+                  isScrollableWidget: false,
+                  title: "Last 15 Successful Payments",
+                  headerRow: ["Date", "Amount", "Status", "Action"],
+                  primaryButtonText: "View All",
+                  primaryButtonOnTap: () => route(context, PaymentList()),
+                  flex: [1, 1, 1, 1],
+                  child: (paymentList.isEmpty)
+                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Payment Found")))
+                      : ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: residents.length,
+                          itemBuilder: (context, index) => dataTableAlternativeColorCells(index: index, children: [
+                                dataTableListTile(
+                                    hideImage: true, title: paymentList[index]["createdAt"].toString().split("T")[0], subtitle: paymentList[index]["createdAt"].toString().split("T")[1].split(".")[0]),
+                                dataTableListTile(
+                                    hideImage: true,
+                                    title: 'BDT ${paymentList[index]["amount"]}',
+                                    subtitle: paymentList[index]["bkashPaymentId"].toString() == "null" ? "INVALID Payment" : paymentList[index]["bkashPaymentId"].toString()),
+                                dataTableChip(label: paymentList[index]["status"].toString().toUpperCase(), color: paymentList[index]["status"] == "completed" ? Colors.green : Colors.redAccent),
+                                dataTableIcon(
+                                    toolTip: "More Options",
+                                    onTap: () async => await showDialog(context: context, builder: (BuildContext context) => moreUserOptions(data: paymentList[index], context: context)),
+                                    icon: Icons.read_more)
                               ])))
               //endregion
-            ]),
-            context: context));
+            ])
+            ));
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {

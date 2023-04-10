@@ -14,8 +14,9 @@ import '../../api.dart';
 import '../../components.dart';
 
 class AddSubscription extends StatefulWidget {
-  const AddSubscription({Key? key, required this.buildingID}) : super(key: key);
+  const AddSubscription({Key? key, required this.buildingID, required this.isNew}) : super(key: key);
   final int buildingID;
+  final bool isNew;
 
   @override
   State<AddSubscription> createState() => _AddSubscriptionState();
@@ -34,7 +35,7 @@ class _AddSubscriptionState extends State<AddSubscription> {
   List<String> packageNames = [];
   List<num> packageCost = [];
   List<int> packageIds = [];
-  List<String> paymentMethods = ["Cash", "Bank Transfer", "Others"];
+  List<String> paymentMethods = ["Cash", "Bank Transfer", "MFS", "Others"];
   List<String> months = List.generate(6, (index) => (index + 1).toString());
 
 //APIs
@@ -91,6 +92,21 @@ class _AddSubscriptionState extends State<AddSubscription> {
     }
   }
 
+  Future<void> doUpdatePackage({required String accessToken, required int packageId, required int buildingId, required bool isNew}) async {
+    print("$baseUrl/subscription/${isNew ? 'create' : 'update'}");
+    try {
+      var response = await http.post(Uri.parse("$baseUrl/subscription/${isNew ? 'create' : 'update'}"), headers: authHeader(accessToken), body: jsonEncode({"buildingId": buildingId, "packageId": packageId}));
+      Map result = jsonDecode(response.body);
+      if (kDebugMode) print(result);
+      if (result["statusCode"] == 200 || result["statusCode"] == 201) {
+      } else {
+        showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
+      }
+    } on Exception catch (e) {
+      showError(context: context, label: e.toString());
+    }
+  }
+
 //Functions
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
@@ -123,10 +139,15 @@ class _AddSubscriptionState extends State<AddSubscription> {
                             key: _formKey,
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                               Row(children: [
-                                Expanded(child: primaryDropdown(title: "Package", options: packageNames, value: selectedPackage, onChanged: (value) => setState(() {
-                                  selectedPackage = value.toString();
-                                  costController.text = (int.parse(selectedMonth ?? "1") * packageCost[packageNames.indexOf(selectedPackage ?? "")]).toString();
-                                }))),
+                                Expanded(
+                                    child: primaryDropdown(
+                                        title: "Package",
+                                        options: packageNames,
+                                        value: selectedPackage,
+                                        onChanged: (value) => setState(() {
+                                              selectedPackage = value.toString();
+                                              costController.text = (int.parse(selectedMonth ?? "1") * packageCost[packageNames.indexOf(selectedPackage ?? "")]).toString();
+                                            }))),
                                 Expanded(
                                     child: primaryDropdown(
                                         title: "How Months?",
@@ -148,6 +169,8 @@ class _AddSubscriptionState extends State<AddSubscription> {
                                     title: "Confirm",
                                     onTap: () async {
                                       if (_formKey.currentState!.validate()) {
+                                        print(widget.isNew.toString());
+                                        await doUpdatePackage(accessToken: accessToken, isNew: widget.isNew, packageId: packageIds[packageNames.indexOf(selectedPackage ?? "")], buildingId: widget.buildingID);
                                         await doSubscribeManually(
                                             accessToken: accessToken,
                                             buildingId: widget.buildingID,
@@ -155,13 +178,13 @@ class _AddSubscriptionState extends State<AddSubscription> {
                                             packageId: packageIds[packageNames.indexOf(selectedPackage ?? "")],
                                             paymentMethod: selectedMethod ?? "Cash",
                                             transactionId: referenceController.text,
-                                            successRoute: () => showSuccess(context: context, label: "$selectedMethod Payment Receive Recorded", onTap: () => route(context, const AllBuildings())));
+                                            successRoute: () =>
+                                                showSuccess(context: context, label: "BDT ${costController.text} $selectedMethod Payment Receive Recorded", onTap: () => route(context, const AllBuildings())));
                                       } else {
                                         showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                       }
-                                      // setState(() => loadingWait = false);
                                     })
-                              ]),
+                              ])
                             ])))
                   ])));
   }

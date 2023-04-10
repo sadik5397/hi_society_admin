@@ -582,58 +582,58 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                   headerPadding: selectedPackage == "" ? 8 : 0,
                   title: "Building Subscription",
                   primaryButtonText: "Manual Subscribe",
-                  primaryButtonOnTap: ()=>route(context, AddSubscription(buildingID: widget.buildingID)),
+                  primaryButtonOnTap: () => route(context, AddSubscription(buildingID: widget.buildingID, isNew: selectedPackage == "Free")),
                   child: selectedPackage == ""
-                  // Row(children: [
-                  //   Expanded(
-                  //       child:
-                  //           primaryDropdown(paddingTop: 20, title: "Package", options: packageNames, value: selectedPackage, onChanged: (value) => setState(() => selectedPackage = value.toString()))),
-                  //   primaryButton(
-                  //       title: "Confirm",
-                  //       onTap: () => showPrompt(
-                  //           context: context,
-                  //           onTap: () async {
-                  //             routeBack(context);
-                  //             await assignPackageManually(accessToken: accessToken, packageId: packageIds[packageNames.indexOf(selectedPackage)], doUpdate: canUpdate);
-                  //           }),
-                  //       width: 200,
-                  //       paddingBottom: 0,
-                  //       paddingRight: 20,
-                  //       icon: Icons.paid_outlined)
-                  // ]),
+                      // Row(children: [
+                      //   Expanded(
+                      //       child:
+                      //           primaryDropdown(paddingTop: 20, title: "Package", options: packageNames, value: selectedPackage, onChanged: (value) => setState(() => selectedPackage = value.toString()))),
+                      //   primaryButton(
+                      //       title: "Confirm",
+                      //       onTap: () => showPrompt(
+                      //           context: context,
+                      //           onTap: () async {
+                      //             routeBack(context);
+                      //             await assignPackageManually(accessToken: accessToken, packageId: packageIds[packageNames.indexOf(selectedPackage)], doUpdate: canUpdate);
+                      //           }),
+                      //       width: 200,
+                      //       paddingBottom: 0,
+                      //       paddingRight: 20,
+                      //       icon: Icons.paid_outlined)
+                      // ]),
                       ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
                       : Container(
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: DataTable(columns: [
-                        DataColumn(label: Text("Key", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor))),
-                        DataColumn(label: Text("Value", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor)))
-                      ], rows: [
-                        DataRow(cells: [
-                          const DataCell(Text("Current Subscription Package", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                          DataCell(SelectableText('${selectedPackage != "" ? selectedPackage : "FREE"}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)))
-                        ]),
-                        if (subscriptionDetails["paidAt"] != null)
-                          DataRow(cells: [
-                            const DataCell(Text("Last Payment at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                            DataCell(SelectableText(subscriptionDetails["paidAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                          ]),
-                        if (subscriptionDetails["expiresAt"] != null)
-                          DataRow(cells: [
-                            const DataCell(Text("Current Subscription Will be Expired at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                            DataCell(SelectableText(subscriptionDetails["expiresAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                          ]),
-                        if (subscriptionDetails["nextSubscriptionAt"] != null)
-                          DataRow(cells: [
-                            const DataCell(Text("Need to Renew by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                            DataCell(SelectableText(subscriptionDetails["nextSubscriptionAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                          ]),
-                        if (subscriptionDetails["paidAt"] == null && selectedPackage != "Free")
-                          DataRow(cells: [
-                            const DataCell(Text("Manually Subscribed by Admin at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                            DataCell(SelectableText(subscriptionDetails["createdAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
-                          ])
-                      ]))),
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: DataTable(columns: [
+                            DataColumn(label: Text("Key", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor))),
+                            DataColumn(label: Text("Value", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor)))
+                          ], rows: [
+                            DataRow(cells: [
+                              const DataCell(Text("Current Subscription Package", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                              DataCell(SelectableText('${selectedPackage != "" ? selectedPackage : "FREE"}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)))
+                            ]),
+                            if (subscriptionDetails["paidAt"] != null)
+                              DataRow(cells: [
+                                const DataCell(Text("Last Payment at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                                DataCell(SelectableText(subscriptionDetails["paidAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                              ]),
+                            if (subscriptionDetails["expiresAt"] != null)
+                              DataRow(cells: [
+                                const DataCell(Text("Current Subscription Will be Expired at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                                DataCell(SelectableText(subscriptionDetails["expiresAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                              ]),
+                            if (subscriptionDetails["nextSubscriptionAt"] != null)
+                              DataRow(cells: [
+                                const DataCell(Text("Need to Renew by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                                DataCell(SelectableText(subscriptionDetails["nextSubscriptionAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                              ]),
+                            if (subscriptionDetails["paidAt"] == null && selectedPackage != "Free")
+                              DataRow(cells: [
+                                const DataCell(Text("Manually Subscribed by Admin at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                                DataCell(SelectableText(subscriptionDetails["createdAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                              ])
+                          ]))),
               //endregion
 
               //region Payment List

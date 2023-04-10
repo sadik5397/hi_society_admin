@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hi_society_admin/views/all_buildings/add_subscription.dart';
 import 'package:hi_society_admin/views/all_buildings/add_user.dart';
 import 'package:hi_society_admin/views/subscription/payment_list.dart';
 import 'package:http/http.dart' as http;
@@ -309,44 +310,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                           dataTableSingleInfo(flex: 2, title: 'Address:\n${buildingInfo!["address"]}', alignment: TextAlign.start),
                           dataTableNull()
                         ])),
-              //endregion
-
-              //region subscription
-              dataTableContainer(
-                  isScrollableWidget: false,
-                  paddingBottom: 0,
-                  headerPadding: selectedPackage == "" ? 8 : 0,
-                  title: "Building Subscription",
-                  child: selectedPackage == ""
-                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
-                      : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Row(children: [
-                            Expanded(
-                                child:
-                                    primaryDropdown(paddingTop: 20, title: "Package", options: packageNames, value: selectedPackage, onChanged: (value) => setState(() => selectedPackage = value.toString()))),
-                            primaryButton(
-                                title: "Confirm",
-                                onTap: () => showPrompt(
-                                    context: context,
-                                    onTap: () async {
-                                      routeBack(context);
-                                      await assignPackageManually(accessToken: accessToken, packageId: packageIds[packageNames.indexOf(selectedPackage)], doUpdate: canUpdate);
-                                    }),
-                                width: 200,
-                                paddingBottom: 0,
-                                paddingRight: 20,
-                                icon: Icons.paid_outlined)
-                          ]),
-                          Padding(
-                              padding: const EdgeInsets.all(14).copyWith(top: 0),
-                              child: Wrap(children: [
-                                if (subscriptionDetails["paidAt"] != null) Text("Last Payment at : ${subscriptionDetails["paidAt"].toString().split("T")[0]}"),
-                                if (subscriptionDetails["expiresAt"] != null) Text("Current Subscription Will be Expired at : ${subscriptionDetails["expiresAt"].toString().split("T")[0]}"),
-                                if (subscriptionDetails["nextSubscriptionAt"] != null) Text("Need to Renew by : ${subscriptionDetails["nextSubscriptionAt"].toString().split("T")[0]}"),
-                                if (subscriptionDetails["paidAt"] == null && selectedPackage != "Free") Text("Manually Subscribed by Admin at : ${subscriptionDetails["createdAt"].toString().split("T")[0]}")
-                              ]))
-                        ])),
-              //endregion
+              //endregion2
 
               //region Guard
               if (widget.guard != null)
@@ -611,10 +575,71 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                               ]))),
               //endregion
 
+              //region Subscription
+              dataTableContainer(
+                  isScrollableWidget: false,
+                  paddingBottom: 0,
+                  headerPadding: selectedPackage == "" ? 8 : 0,
+                  title: "Building Subscription",
+                  primaryButtonText: "Manual Subscribe",
+                  primaryButtonOnTap: ()=>route(context, AddSubscription(buildingID: widget.buildingID)),
+                  child: selectedPackage == ""
+                  // Row(children: [
+                  //   Expanded(
+                  //       child:
+                  //           primaryDropdown(paddingTop: 20, title: "Package", options: packageNames, value: selectedPackage, onChanged: (value) => setState(() => selectedPackage = value.toString()))),
+                  //   primaryButton(
+                  //       title: "Confirm",
+                  //       onTap: () => showPrompt(
+                  //           context: context,
+                  //           onTap: () async {
+                  //             routeBack(context);
+                  //             await assignPackageManually(accessToken: accessToken, packageId: packageIds[packageNames.indexOf(selectedPackage)], doUpdate: canUpdate);
+                  //           }),
+                  //       width: 200,
+                  //       paddingBottom: 0,
+                  //       paddingRight: 20,
+                  //       icon: Icons.paid_outlined)
+                  // ]),
+                      ? Center(child: Padding(padding: const EdgeInsets.all(12).copyWith(top: 0), child: const Text("No Information Found")))
+                      : Container(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: DataTable(columns: [
+                        DataColumn(label: Text("Key", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor))),
+                        DataColumn(label: Text("Value", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryColor)))
+                      ], rows: [
+                        DataRow(cells: [
+                          const DataCell(Text("Current Subscription Package", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                          DataCell(SelectableText('${selectedPackage != "" ? selectedPackage : "FREE"}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)))
+                        ]),
+                        if (subscriptionDetails["paidAt"] != null)
+                          DataRow(cells: [
+                            const DataCell(Text("Last Payment at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                            DataCell(SelectableText(subscriptionDetails["paidAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                          ]),
+                        if (subscriptionDetails["expiresAt"] != null)
+                          DataRow(cells: [
+                            const DataCell(Text("Current Subscription Will be Expired at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                            DataCell(SelectableText(subscriptionDetails["expiresAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                          ]),
+                        if (subscriptionDetails["nextSubscriptionAt"] != null)
+                          DataRow(cells: [
+                            const DataCell(Text("Need to Renew by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                            DataCell(SelectableText(subscriptionDetails["nextSubscriptionAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                          ]),
+                        if (subscriptionDetails["paidAt"] == null && selectedPackage != "Free")
+                          DataRow(cells: [
+                            const DataCell(Text("Manually Subscribed by Admin at", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                            DataCell(SelectableText(subscriptionDetails["createdAt"].toString().split("T")[0].toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 16)))
+                          ])
+                      ]))),
+              //endregion
+
               //region Payment List
               dataTableContainer(
                   isScrollableWidget: false,
-                  title: "Last 15 Successful Payments",
+                  title: "Last Payment",
                   headerRow: ["Date", "Amount", "Status", "Action"],
                   primaryButtonText: "View All",
                   primaryButtonOnTap: () => route(context, PaymentList()),
@@ -632,7 +657,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                 dataTableListTile(
                                     hideImage: true,
                                     title: 'BDT ${paymentList[index]["amount"]}',
-                                    subtitle: paymentList[index]["bkashPaymentId"].toString() == "null" ? "INVALID Payment" : paymentList[index]["bkashPaymentId"].toString()),
+                                    subtitle: paymentList[index]["bkashPaymentId"].toString() == "null" ? paymentList[index]["paymentMethod"].toString() : paymentList[index]["bkashPaymentId"].toString()),
                                 dataTableChip(label: paymentList[index]["status"].toString().toUpperCase(), color: paymentList[index]["status"] == "completed" ? Colors.green : Colors.redAccent),
                                 dataTableIcon(
                                     toolTip: "More Options",
@@ -640,8 +665,7 @@ class _UpdateBuildingState extends State<UpdateBuilding> {
                                     icon: Icons.read_more)
                               ])))
               //endregion
-            ])
-            ));
+            ])));
   }
 
   AlertDialog updatePassword({required BuildContext context, required VoidCallback onSubmit, required int userId}) {

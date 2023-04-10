@@ -703,11 +703,13 @@ Container dataTableContainer(
                         ? Icons.edit
                         : primaryButtonText == "Notification"
                             ? Icons.notification_add_outlined
-                            : primaryButtonText == "View All"
-                                ? Icons.clear_all_outlined
-                                : showPlusButton
-                                    ? Icons.add
-                                    : null),
+                            : primaryButtonText == "Manual Subscribe"
+                                ? Icons.payments_outlined
+                                : primaryButtonText == "View All"
+                                    ? Icons.clear_all_outlined
+                                    : showPlusButton
+                                        ? Icons.add
+                                        : null),
               if (secondaryButtonOnTap != null) primaryButton(title: secondaryButtonText, onTap: secondaryButtonOnTap, width: 200, paddingBottom: 0, paddingRight: 0, icon: showPlusButton ? Icons.add : null)
             ])),
         const Divider(height: 1),

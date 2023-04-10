@@ -126,7 +126,7 @@ class _PaymentListState extends State<PaymentList> {
                                   dataTableListTile(
                                       hideImage: true,
                                       title: 'BDT ${foundPayments[index]["amount"]}',
-                                      subtitle: foundPayments[index]["bkashPaymentId"].toString() == "null" ? "INVALID Payment" : foundPayments[index]["bkashPaymentId"].toString()),
+                                      subtitle: foundPayments[index]["bkashPaymentId"].toString() == "null" ? paymentList[index]["paymentMethod"].toString() : foundPayments[index]["bkashPaymentId"].toString()),
                                   dataTableChip(label: foundPayments[index]["status"].toString().toUpperCase(), color: foundPayments[index]["status"] == "completed" ? Colors.green : Colors.redAccent),
                                   dataTableIcon(
                                       toolTip: "More Options",

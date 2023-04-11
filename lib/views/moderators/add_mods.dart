@@ -60,7 +60,7 @@ class _AddModsState extends State<AddMods> {
     newRandomPassword = generateRandomString(10);
     try {
       var response = await http.post(Uri.parse("$baseUrl/user/create"),
-          headers: primaryHeader, body: jsonEncode({"email": email, "password": newRandomPassword, "confirmPassword": newRandomPassword, "name": name, "gender": "prefer_not_to_say", "phone": phone}));
+          headers: primaryHeader, body: jsonEncode({"email": email, "password": newRandomPassword, "confirmPassword": newRandomPassword, "name": name, "gender": "prefer_not_to_say", "phone": phone, "shouldVerifyEmail": false}));
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {

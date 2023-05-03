@@ -189,7 +189,8 @@ Container dashboardHeader({required BuildContext context, String? title, String?
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           SelectableText(title.toString(), style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black.withOpacity(.75))),
-          SelectableText("Logged in as $role", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
+          SelectableText("Logged in as $role ${baseUrl == 'https://dev.hisocietyserver.online' ? '(DEVELOPER MODE)' : ''}",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black.withOpacity(.75))),
         ]),
         IconButton(
             onPressed: () {

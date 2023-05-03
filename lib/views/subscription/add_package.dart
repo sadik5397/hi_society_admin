@@ -36,7 +36,8 @@ class _AddPackageState extends State<AddPackage> {
             "description": descriptionController.text,
             "cost": int.parse(costController.text),
             "flatLimit": int.parse(flatLimitController.text),
-            "bufferTime": int.parse(bufferTimeController.text)
+            "bufferTime": 1
+            // "bufferTime": int.parse(bufferTimeController.text)
           }));
       Map result = jsonDecode(response.body);
       print(result);
@@ -61,7 +62,8 @@ class _AddPackageState extends State<AddPackage> {
             "description": descriptionController.text,
             "cost": int.parse(costController.text),
             "flatLimit": int.parse(flatLimitController.text),
-            "bufferTime": int.parse(bufferTimeController.text)
+            "bufferTime": 1
+            // "bufferTime": int.parse(bufferTimeController.text)
           }));
       Map result = jsonDecode(response.body);
       print(result);

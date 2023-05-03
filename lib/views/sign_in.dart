@@ -18,7 +18,7 @@ class _SignInState extends State<SignIn> {
   String accessToken = "";
   bool loadingWait = false;
   bool showPassword = false;
-  final TextEditingController emailController = TextEditingController(text: "admin@hisocietybd.com");
+  final TextEditingController emailController = TextEditingController(text: "superdev@hisocietybd.com");
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   dynamic apiResult = {};

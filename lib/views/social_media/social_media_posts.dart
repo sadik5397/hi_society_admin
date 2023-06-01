@@ -170,17 +170,17 @@ class _SocialMediaPostsState extends State<SocialMediaPosts> {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: List.generate(
                                                     qaReason.length,
-                                                    (index) => primaryButton(
+                                                    (i) => primaryButton(
                                                         allCapital: false,
                                                         primary: false,
-                                                        title: qaReason[index],
+                                                        title: qaReason[i],
                                                         onTap: () async {
                                                           await showPrompt(
                                                               context: context,
                                                               onTap: () async {
                                                                 routeBack(context);
                                                                 await disablePost(
-                                                                    accessToken: accessToken, postId: postList[index]["postId"], userId: postList[index]["user"]["userId"], reason: qaReason[index]);
+                                                                    accessToken: accessToken, postId: postList[index]["postId"], userId: postList[index]["user"]["userId"], reason: qaReason[i]);
                                                               });
                                                         }))));
                                       }),

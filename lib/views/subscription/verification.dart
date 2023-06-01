@@ -28,7 +28,7 @@ class _VerificationState extends State<Verification> {
       Map results = jsonDecode(response.body);
       print(results);
       if (results["statusCode"] == 200 || results["statusCode"] == 201) {
-        if (kDebugMode) showSnackBar(context: context, label: results["message"]);
+        showSnackBar(context: context, label: results["message"]);
         List result = results["data"];
         for (int i = 0; i < result.length; i++) {
           if (result[i]["bkashPaymentId"] == trxID || result[i]["trxId"] == trxID || result[i]["invoiceId"] == trxID) setState(() => data = result[i]);

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hi_society_admin/api.dart';
 import 'package:hi_society_admin/views/amenities/amenity_category.dart';
@@ -214,14 +215,13 @@ dynamic routeBack(BuildContext context) => Navigator.pop(context);
 
 showSnackBar({required BuildContext context, String action = "Dismiss", required String label, int seconds = 0, int milliseconds = 100}) {
   final snackBar = SnackBar(
-    backgroundColor: primaryColor,
-    dismissDirection: DismissDirection.horizontal,
-    behavior: SnackBarBehavior.floating,
-    duration: Duration(seconds: seconds, milliseconds: milliseconds),
-    content: Text(label, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white)),
-    action: SnackBarAction(textColor: Colors.white, label: action, onPressed: () => ScaffoldMessenger.of(context).clearSnackBars()),
-  );
-  return ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      backgroundColor: primaryColor,
+      dismissDirection: DismissDirection.horizontal,
+      behavior: SnackBarBehavior.floating,
+      duration: Duration(seconds: seconds, milliseconds: milliseconds),
+      content: Text(label, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white)),
+      action: SnackBarAction(textColor: Colors.white, label: action, onPressed: () => ScaffoldMessenger.of(context).clearSnackBars()));
+  if (kDebugMode) return ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
 showError({required BuildContext context, String action = "OKAY", String? label, String? title, int? seconds}) {
@@ -508,7 +508,7 @@ Theme sidebarMenuHead({required BuildContext context, required String title, req
           maintainState: true,
           iconColor: Colors.white,
           collapsedIconColor: Colors.white,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 28),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 36),
           title: sidebarMenuItem(context: context, label: title, isHeader: true),
           children: children));
 }

@@ -42,7 +42,7 @@ class _AddPackageState extends State<AddPackage> {
       Map result = jsonDecode(response.body);
       print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        if (kDebugMode) showSnackBar(context: context, label: result["message"]);
+        showSnackBar(context: context, label: result["message"]);
         successRoute.call();
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
@@ -68,7 +68,7 @@ class _AddPackageState extends State<AddPackage> {
       Map result = jsonDecode(response.body);
       print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        if (kDebugMode) showSnackBar(context: context, label: result["message"]);
+        showSnackBar(context: context, label: result["message"]);
         successRoute.call();
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());

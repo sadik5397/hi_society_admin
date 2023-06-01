@@ -21,7 +21,8 @@ class RentSellAds extends StatefulWidget {
 class _RentSellAdsState extends State<RentSellAds> {
 //Variables
   String accessToken = "";
-  String myRole = "";  String myName = "";
+  String myRole = "";
+  String myName = "";
 
   List adList = [];
   TextEditingController otherReasonController = TextEditingController();
@@ -37,6 +38,7 @@ class _RentSellAdsState extends State<RentSellAds> {
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
         showSnackBar(context: context, label: result["message"]);
         setState(() => adList = result["data"].reversed.toList());
+        // setState(() => adList = result["data"]);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }
@@ -94,13 +96,7 @@ class _RentSellAdsState extends State<RentSellAds> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSuccess(
-            context: context,
-            label: reason,
-            title: "Ad Disabled",
-            onTap: () async {
-              route(context, const RentSellAds());
-            });
+        showSuccess(context: context, label: reason, title: "Ad Disabled", onTap: () async => route(context, const RentSellAds()));
         await sendNotification(accessToken: accessToken, title: "Your Apartment Rent-Sell Ad taken down", body: "Reason: $reason", userId: userId);
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
@@ -114,8 +110,9 @@ class _RentSellAdsState extends State<RentSellAds> {
   defaultInit() async {
     final pref = await SharedPreferences.getInstance();
     setState(() => accessToken = pref.getString("accessToken")!);
-        setState(() => myRole = pref.getString("role") ?? "");
-setState(() => myName = pref.getString("name") ?? "");    await readAdList(accessToken: accessToken);
+    setState(() => myRole = pref.getString("role") ?? "");
+    setState(() => myName = pref.getString("name") ?? "");
+    await readAdList(accessToken: accessToken);
   }
 
 //Initiate
@@ -129,7 +126,7 @@ setState(() => myName = pref.getString("name") ?? "");    await readAdList(acces
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
- isAdmin: myRole == "admin",
+            isAdmin: myRole == "admin",
             isOpMod: myName.split(" | ").length == 2 && myName.split(" | ")[1] == "(Operation)",
             pageName: "Rent/Sell Ads",
             context: context,
@@ -174,34 +171,38 @@ setState(() => myName = pref.getString("name") ?? "");    await readAdList(acces
                                       icon: Icons.open_in_new_rounded),
                                   dataTableIcon(
                                       toolTip: "Remove Ad",
-                                      onTap: () async => showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                                backgroundColor: Colors.white,
-                                                title: const Center(child: Text("Disable Reason")),
-                                                insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
-                                                buttonPadding: EdgeInsets.zero,
-                                                content: Column(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: List.generate(
-                                                        qaReason.length,
-                                                        (index) => primaryButton(
-                                                            allCapital: false,
-                                                            primary: false,
-                                                            title: qaReason[index],
-                                                            onTap: () async {
-                                                              await showPrompt(
-                                                                  context: context,
-                                                                  onTap: () async {
-                                                                    routeBack(context);
-                                                                    adList[index]["inactive"]
-                                                                        ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"])
-                                                                        : await disableAd(
-                                                                            accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"], reason: qaReason[index]);
-                                                                  });
-                                                            }))));
-                                          }),
+                                      onTap: () async {
+                                        print('adId : ${adList[index]["advertId"]}');
+                                        return showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                  backgroundColor: Colors.white,
+                                                  title: const Center(child: Text("Disable Reason")),
+                                                  insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
+                                                  buttonPadding: EdgeInsets.zero,
+                                                  content: Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: List.generate(
+                                                          qaReason.length,
+                                                          (i) => primaryButton(
+                                                              allCapital: false,
+                                                              primary: false,
+                                                              title: qaReason[i],
+                                                              onTap: () async {
+                                                                print('adId : ${adList[index]["advertId"]}');
+                                                                await showPrompt(
+                                                                    context: context,
+                                                                    onTap: () async {
+                                                                      routeBack(context);
+                                                                      // adList[index]["inactive"]
+                                                                      //     ? await reActiveAd(accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"]):
+                                                                      await disableAd(
+                                                                          accessToken: accessToken, adId: adList[index]["advertId"], userId: adList[index]["createdBy"]["userId"], reason: qaReason[i]);
+                                                                    });
+                                                              }))));
+                                            });
+                                      },
                                       icon: adList[index]["inactive"] ? Icons.visibility_outlined : Icons.disabled_visible_rounded,
                                       color: adList[index]["inactive"] ? Colors.green : Colors.redAccent)
                                 ])))));

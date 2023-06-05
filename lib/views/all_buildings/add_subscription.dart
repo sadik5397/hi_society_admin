@@ -1,15 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hi_society_admin/views/all_buildings/all_buildings.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-import 'package:image_picker_web/image_picker_web.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../api.dart';
 import '../../components.dart';
 

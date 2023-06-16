@@ -425,30 +425,32 @@ Padding primaryDropdown(
       ));
 }
 
-Widget primaryButton(
-    {double paddingTop = 0,
-    double paddingLeft = 12,
-    double paddingRight = 12,
-    double paddingBottom = 12,
-    double width = double.maxFinite,
-    required String title,
-    IconData? icon,
-    bool allCapital = true,
-    required VoidCallback onTap,
-    bool primary = true}) {
+Widget primaryButton({
+  double paddingTop = 0,
+  double paddingLeft = 12,
+  double paddingRight = 12,
+  double paddingBottom = 12,
+  double width = double.maxFinite,
+  required String title,
+  IconData? icon,
+  bool allCapital = true,
+  required VoidCallback onTap,
+  bool primary = true,
+  bool loadingWait = false,
+}) {
   return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(paddingLeft, paddingTop, paddingRight, paddingBottom),
       child: ElevatedButton(
-          onPressed: onTap,
+          onPressed: loadingWait ? () {} : onTap,
           style: ElevatedButton.styleFrom(
               backgroundColor: primary ? primaryColor : themeOf,
               fixedSize: Size(width, 44),
               foregroundColor: primary ? Colors.white : primaryColor,
               shape: RoundedRectangleBorder(side: const BorderSide(color: Colors.transparent), borderRadius: BorderRadius.circular(12))),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [if (icon != null) Icon(icon, size: 18), if (icon != null) const SizedBox(width: 6), Text(allCapital ? title.toUpperCase() : title)],
-          )));
+          child: loadingWait
+              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center, children: [if (icon != null) Icon(icon, size: 18), if (icon != null) const SizedBox(width: 6), Text(allCapital ? title.toUpperCase() : title)])));
 }
 
 ListTile basicListTile({required BuildContext context, required String title, required String subTitle, VoidCallback? onTap, bool isVerified = false}) {
@@ -551,7 +553,8 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
 }
 
 class NoData extends StatefulWidget {
-  const NoData({Key? key}) : super(key: key);
+  const NoData({Key? key, this.showLinear = false}) : super(key: key);
+  final bool showLinear;
 
   @override
   State<NoData> createState() => _NoDataState();
@@ -572,7 +575,12 @@ class _NoDataState extends State<NoData> {
   }
 
   @override
-  Widget build(BuildContext context) => Center(child: loading ? const CircularProgressIndicator() : const Text("No Result!"));
+  Widget build(BuildContext context) => Center(
+      child: loading
+          ? widget.showLinear
+              ? Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: LinearProgressIndicator(color: primaryColor))
+              : CircularProgressIndicator()
+          : const Text("No Result!"));
 }
 
 //endregion

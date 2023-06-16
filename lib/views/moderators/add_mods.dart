@@ -29,6 +29,7 @@ class _AddModsState extends State<AddMods> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  bool loadingWaitNew = false;
 
   //APIs
   Future<void> assignUserToRole({required String accessToken, required String email, required VoidCallback onSuccess}) async {
@@ -133,10 +134,13 @@ class _AddModsState extends State<AddMods> {
                       Expanded(
                           flex: 2,
                           child: primaryButton(
+                            loadingWait: loadingWaitNew,
                               paddingBottom: 24,
                               paddingTop: 4,
                               title: "Confirm",
                               onTap: () async {
+                                setState(() => loadingWaitNew = true);
+
                                 await doSignUp(
                                     email: emailController.text,
                                     name: accessOperational ? '${nameController.text} | (Operation)' : nameController.text,
@@ -152,6 +156,8 @@ class _AddModsState extends State<AddMods> {
                                               onSubmit: () async => route(context, const Moderators()));
                                         }),
                                     phone: phoneController.text);
+                                setState(() => loadingWaitNew = false);
+
                               }))
                     ])
                   ]))

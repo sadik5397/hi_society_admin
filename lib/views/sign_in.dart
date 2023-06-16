@@ -108,18 +108,18 @@ class _SignInState extends State<SignIn> {
                               Padding(
                                   padding: const EdgeInsets.only(top: 12),
                                   child: primaryButton(
-                                      // loadingWait: loadingWait,
+                                      loadingWait: loadingWait,
                                       width: 400,
                                       title: "Login to Admin Dashboard",
                                       onTap: () async {
                                         FocusManager.instance.primaryFocus?.unfocus();
-                                        // setState(() => loadingWait = true);
+                                        setState(() => loadingWait = true);
                                         if (_formKey.currentState!.validate()) {
                                           await doSignIn(email: emailController.text.toLowerCase(), password: passwordController.text, showHome: () => route(context, const AllBuildings()));
                                         } else {
                                           showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                         }
-                                        // setState(() => loadingWait = false);
+                                        setState(() => loadingWait = false);
                                       }))
                             ])),
                       ],

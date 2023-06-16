@@ -18,10 +18,12 @@ class _VerificationState extends State<Verification> {
   Map data = {};
   bool loaded = false;
   TextEditingController paymentID = TextEditingController();
+  bool isLoading = false;
 
   //APIs
   Future<void> checkHistory({required String accessToken, required String trxID}) async {
     setState(() => loaded = false);
+    setState(() => isLoading = true);
     try {
       var response = await http.post(Uri.parse("$baseUrl/subscription/paymentID-list?limit=9999"), headers: authHeader(accessToken));
       Map results = jsonDecode(response.body);
@@ -39,6 +41,7 @@ class _VerificationState extends State<Verification> {
       showError(context: context, label: e.toString());
     }
     setState(() => loaded = true);
+    setState(() => isLoading = false);
   }
 
 //Functions
@@ -74,6 +77,7 @@ class _VerificationState extends State<Verification> {
                       Expanded(
                           flex: 1,
                           child: primaryButton(
+                              loadingWait: isLoading,
                               paddingBottom: 24,
                               paddingTop: 4,
                               width: 180,
@@ -151,7 +155,7 @@ class _VerificationState extends State<Verification> {
                                   ])
                                 ])
                               ]))
-                          : Padding(padding: const EdgeInsets.only(bottom: 24), child: NoData())
+                          : Padding(padding: const EdgeInsets.only(bottom: 24), child: NoData(showLinear: true))
                   ]))
             ])));
   }

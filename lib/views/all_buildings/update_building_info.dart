@@ -26,7 +26,8 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
   //Variables
   String accessToken = "";
   late String thisBuildingPhoto = widget.buildingPhoto;
-  bool loadingWait = false;
+  bool loadingWaitBuilding = false;
+  bool loadingWaitFlat = false;
   List<String> buildingFlatList = [];
   List<int> buildingFlatListId = [];
   late TextEditingController buildingNameController = TextEditingController(text: widget.buildingName);
@@ -232,11 +233,11 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                             child: primaryButton(
                                 width: 200,
                                 icon: Icons.done_all_rounded,
-                                // loadingWait: loadingWait,
+                                loadingWait: loadingWaitBuilding,
                                 title: "Update Building",
                                 onTap: () async {
                                   FocusManager.instance.primaryFocus?.unfocus();
-                                  // setState(() => loadingWait = true);
+                                  setState(() => loadingWaitBuilding = true);
                                   if (_formKey.currentState!.validate()) {
                                     if (buildingFlatListController.text.isNotEmpty) {
                                       setState(() => buildingFlatList.addAll(buildingFlatListController.text.toString().replaceAll(' ', '').toUpperCase().split(",")));
@@ -252,7 +253,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                   } else {
                                     showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                   }
-                                  // setState(() => loadingWait = false);
+                                  setState(() => loadingWaitBuilding = false);
                                 })),
                         const SizedBox(height: 12),
                         if (buildingFlatList.isNotEmpty) const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text(" Flat List Confirmed:", textAlign: TextAlign.start)),
@@ -291,9 +292,11 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                               SizedBox(
                                   width: 150,
                                   child: primaryButton(
+                                      loadingWait: loadingWaitFlat,
                                       paddingLeft: 0,
                                       title: "Add Flat",
                                       onTap: () async {
+                                        setState(() => loadingWaitBuilding = true);
                                         if (newFlatListController.text != "") {
                                           setState(() => buildingFlatList.addAll(newFlatListController.text.replaceAll(" ", "").toUpperCase().split(",")));
                                           await addFlat(
@@ -301,6 +304,7 @@ class _UpdateBuildingInfoState extends State<UpdateBuildingInfo> {
                                               successRoute: () async => await showSuccess(context: context, label: "${newFlatListController.text.replaceAll(" ", "").split(",").length} Flat Added"));
                                           newFlatListController.clear();
                                         }
+                                        setState(() => loadingWaitBuilding = false);
                                       }))
                             ]))
                       ])))

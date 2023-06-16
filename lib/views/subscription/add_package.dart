@@ -17,6 +17,7 @@ class AddPackage extends StatefulWidget {
 class _AddPackageState extends State<AddPackage> {
   //variable
   String accessToken = "";
+  bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
   late TextEditingController packageNameController = TextEditingController(text: widget.data == null ? "" : widget.data!["name"].toString());
   late TextEditingController descriptionController = TextEditingController(text: widget.data == null ? "" : widget.data!["description"].toString());
@@ -126,11 +127,13 @@ class _AddPackageState extends State<AddPackage> {
                           Expanded(child: primaryTextField(labelText: "Buffer Days", controller: bufferTimeController, keyboardType: TextInputType.number, required: true, isDisable: true))
                         ]),
                         primaryButton(
+                           loadingWait: isLoading,
                             paddingBottom: 24,
                             paddingTop: 4,
                             width: 180,
                             title: widget.data == null ? "Submit" : "Update",
                             onTap: () async {
+                              setState(() => isLoading = true);
                               if (_formKey.currentState!.validate()) {
                                 widget.data == null
                                     ? await createPackage(accessToken: accessToken, successRoute: () => showSuccess(context: context, label: "New Package Added", onTap: () => route(context, const Packages())))
@@ -138,6 +141,7 @@ class _AddPackageState extends State<AddPackage> {
                               } else {
                                 showSnackBar(context: context, label: "Invalid Entry! Please Check");
                               }
+                              setState(() => isLoading = false);
                             })
                       ])))
             ])));

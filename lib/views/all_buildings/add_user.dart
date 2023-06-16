@@ -26,6 +26,7 @@ class _AddUserState extends State<AddUser> {
   String accessToken = "";
   String newRandomPassword = "";
   TextEditingController existingUserEmailController = TextEditingController();
+  bool loadingWaitOld = false, loadingWaitNew = false;
 
   // List<String> roles = ["Building_Manager", "Flat_Owner", "Committee_Head", "Committee_Member"];
   List<String> flats = [];
@@ -197,10 +198,12 @@ class _AddUserState extends State<AddUser> {
                     Expanded(
                         flex: 1,
                         child: primaryButton(
+                            loadingWait: loadingWaitOld,
                             paddingBottom: 24,
                             paddingTop: 4,
                             title: "Confirm",
                             onTap: () async {
+                              setState(() => loadingWaitOld = true);
                               if (widget.role == "Flat_Owner" && selectedFlat == null) showError(context: context, label: "Select a flat");
                               await assignUserToRole(
                                   flatId: widget.role == "Flat_Owner" ? flatIds[flats.indexOf(selectedFlat!)] : 0,
@@ -216,6 +219,7 @@ class _AddUserState extends State<AddUser> {
                                             email: existingUserEmailController.text,
                                             role: capitalizeAllWord(widget.role.replaceAll("_", " ")));
                                       }));
+                              setState(() => loadingWaitOld = false);
                             }))
                   ])),
               dataTableContainer(
@@ -242,10 +246,12 @@ class _AddUserState extends State<AddUser> {
                       Expanded(
                           flex: 2,
                           child: primaryButton(
+                              loadingWait: loadingWaitNew,
                               paddingBottom: 24,
                               paddingTop: 4,
                               title: "Confirm",
                               onTap: () async {
+                                setState(() => loadingWaitNew = true);
                                 if (widget.role == "Flat_Owner" && selectedFlat == null) showError(context: context, label: "Select a flat");
                                 await doSignUp(
                                     flatId: widget.role == "Flat_Owner" ? flatIds[flats.indexOf(selectedFlat!)] : 0,
@@ -264,6 +270,7 @@ class _AddUserState extends State<AddUser> {
                                         }),
                                     phone: phoneController.text,
                                     role: widget.role.toLowerCase());
+                                setState(() => loadingWaitNew = false);
                               }))
                     ])
                   ]))

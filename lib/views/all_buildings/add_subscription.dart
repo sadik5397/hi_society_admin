@@ -157,11 +157,13 @@ class _AddSubscriptionState extends State<AddSubscription> {
                               Row(children: [
                                 Expanded(child: primaryTextField(controller: referenceController, labelText: "Note/Reference/Description", required: true, errorText: "* Required")),
                                 primaryButton(
+                                  loadingWait: isLoading,
                                     width: 200,
                                     paddingBottom: 18,
                                     icon: Icons.done_all_rounded,
                                     title: "Confirm",
                                     onTap: () async {
+                                      setState(() => isLoading = true);
                                       if (_formKey.currentState!.validate()) {
                                         print(widget.isNew.toString());
                                         await doUpdatePackage(accessToken: accessToken, isNew: widget.isNew, packageId: packageIds[packageNames.indexOf(selectedPackage ?? "")], buildingId: widget.buildingID);
@@ -177,6 +179,7 @@ class _AddSubscriptionState extends State<AddSubscription> {
                                       } else {
                                         showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                       }
+                                      setState(() => isLoading = false);
                                     })
                               ])
                             ])))

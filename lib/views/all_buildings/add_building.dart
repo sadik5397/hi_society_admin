@@ -182,11 +182,11 @@ class _AddBuildingState extends State<AddBuilding> {
                           child: primaryButton(
                               width: 200,
                               icon: Icons.done_all_rounded,
-                              // loadingWait: loadingWait,
+                              loadingWait: loadingWait,
                               title: "Create Building",
                               onTap: () async {
                                 FocusManager.instance.primaryFocus?.unfocus();
-                                // setState(() => loadingWait = true);
+                                setState(() => loadingWait = true);
                                 if (_formKey.currentState!.validate()) {
                                   if (buildingFlatListController.text.isNotEmpty) {
                                     setState(() => buildingFlatList.addAll(buildingFlatListController.text.toString().replaceAll(' ', '').toUpperCase().split(",")));
@@ -203,7 +203,7 @@ class _AddBuildingState extends State<AddBuilding> {
                                 } else {
                                   showSnackBar(context: context, label: "Invalid Entry! Please Check");
                                 }
-                                // setState(() => loadingWait = false);
+                                setState(() => loadingWait = false);
                               }))
                     ]),
                   ))

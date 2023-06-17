@@ -69,8 +69,8 @@ class _UsersState extends State<Users> {
 
   Future<void> sendNotification({required String accessToken, required String title, required String body, required int userId}) async {
     Map payload = {
-      "notification": {"title": title, "body": body},
-      "data": {"topic": "announcement"}
+      // "notification": {"title": title, "body": body},
+      "data": {"title": title, "body": body,"topic": "announcement"}
     };
     String base64Str = json.encode(payload);
     try {
@@ -90,8 +90,8 @@ class _UsersState extends State<Users> {
 
   Future<void> sendNotificationToManyUsers({required String accessToken, required String title, required String body, required List<int> userIds}) async {
     Map payload = {
-      "notification": {"title": title, "body": body},
-      "data": {"topic": "announcement"}
+      // "notification": {"title": title, "body": body},
+      "data": {"title": title, "body": body,"topic": "announcement"}
     };
     String base64Str = json.encode(payload);
     try {
@@ -122,7 +122,7 @@ class _UsersState extends State<Users> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSuccess(context: context, title: "Code ${result["data"]["emailVerificationCode"]}", label: "User ${verify ? 'Verified' : 'Un-verified'} by Hi Society Admin", onTap: () => routeBack(context));
+        showSuccess(context: context, title: "Verification Successful", label: "User ${verify ? 'Verified' : 'Un-verified'} by Hi Society Admin", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }

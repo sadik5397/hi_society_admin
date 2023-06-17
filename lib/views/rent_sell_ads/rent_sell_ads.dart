@@ -49,8 +49,8 @@ class _RentSellAdsState extends State<RentSellAds> {
 
   Future<void> sendNotification({required String accessToken, required String title, required String body, required int userId}) async {
     Map payload = {
-      "notification": {"title": title, "body": body},
-      "data": {"topic": "announcement"}
+      // "notification": {"title": title, "body": body},
+      "data": {"title": title, "body": body,"topic": "announcement"}
     };
     String base64Str = json.encode(payload);
     try {

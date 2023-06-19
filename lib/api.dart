@@ -2,10 +2,10 @@
 // String baseUrl = "https://g01.fusionbdtech.com"; //TestServer
 
 // String baseUrl = "https://hisocietyserver.online"; //LiveServer
-// String baseUrl = "https://dev.hisocietyserver.online"; //DemoServer
+String baseUrl = "https://dev.hisocietyserver.online"; //DemoServer
 
 // String baseUrl = "http://194.163.40.107:4441"; //LiveServer
-String baseUrl = "http://127.0.0.1:3000"; //LocalhostAndroidEmulator
+// String baseUrl = "http://127.0.0.1:3000"; //LocalhostAndroidEmulator
 // String baseUrl = "http://10.0.2.2:3000"; //LocalhostAndroidEmulator
 
 Map<String, String> primaryHeader = {"Access-Control-Allow-Headers": "X-Requested-With", 'Accept': '*/*', "Access-Control_Allow_Origin": "*", "Content-Type": "application/json", "charset": "utf-8"};

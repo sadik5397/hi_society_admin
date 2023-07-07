@@ -122,7 +122,7 @@ class _UsersState extends State<Users> {
       Map result = jsonDecode(response.body);
       if (kDebugMode) print(result);
       if (result["statusCode"] == 200 || result["statusCode"] == 201) {
-        showSuccess(context: context, title: "Verification Successful", label: "User ${verify ? 'Verified' : 'Un-verified'} by Hi Society Admin", onTap: () => routeBack(context));
+        showSuccess(context: context, title: "Code ${result["data"]["emailVerificationCode"]}", label: "User ${verify ? 'Verified' : 'Un-verified'} by Hi Society Admin", onTap: () => routeBack(context));
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }

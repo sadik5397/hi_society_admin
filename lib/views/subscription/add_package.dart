@@ -18,6 +18,7 @@ class _AddPackageState extends State<AddPackage> {
   //variable
   String accessToken = "";
   bool isLoading = false;
+  late bool hasFinance = widget.data == null ? true : (widget.data!["isFinancial"] == 1 ? true : false);
   final _formKey = GlobalKey<FormState>();
   late TextEditingController packageNameController = TextEditingController(text: widget.data == null ? "" : widget.data!["name"].toString());
   late TextEditingController descriptionController = TextEditingController(text: widget.data == null ? "" : widget.data!["description"].toString());
@@ -34,6 +35,7 @@ class _AddPackageState extends State<AddPackage> {
           body: jsonEncode({
             "name": packageNameController.text,
             "description": descriptionController.text,
+            "isFinancial": hasFinance ? 1 : 2,
             "cost": int.parse(costController.text),
             "flatLimit": int.parse(flatLimitController.text),
             "bufferTime": 1
@@ -60,6 +62,7 @@ class _AddPackageState extends State<AddPackage> {
             "subscriptionPackageId": widget.data!["subscriptionPackageId"],
             "name": packageNameController.text,
             "description": descriptionController.text,
+            "isFinancial": hasFinance ? 1 : 2,
             "cost": int.parse(costController.text),
             "flatLimit": int.parse(flatLimitController.text),
             "bufferTime": 1
@@ -110,24 +113,21 @@ class _AddPackageState extends State<AddPackage> {
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
                           Expanded(flex: 2, child: primaryTextField(controller: packageNameController, labelText: "Package Name", keyboardType: TextInputType.name, required: true, errorText: "Name required")),
-                          Expanded(
-                              flex: 1, child: primaryTextField(controller: costController, labelText: "Price", hintText: "BDT", keyboardType: TextInputType.number, required: true, errorText: "Price required"))
+                          Expanded(flex: 1, child: primaryTextField(controller: costController, labelText: "Price", hintText: "BDT", keyboardType: TextInputType.number, required: true, errorText: "Price required"))
                         ]),
-                        primaryTextField(
-                            controller: descriptionController,
-                            labelText: "Package Description",
-                            hintText: "Point by Point",
-                            keyboardType: TextInputType.multiline,
-                            required: true,
-                            errorText: "Description required",
-                            maxLines: 6),
+                        primaryTextField(controller: descriptionController, labelText: "Package Description", hintText: "Point by Point", keyboardType: TextInputType.multiline, required: true, errorText: "Description required", maxLines: 6),
                         Row(children: [
                           Expanded(child: primaryTextField(labelText: "Flat Limit", controller: flatLimitController, keyboardType: TextInputType.number, required: true)),
                           Expanded(child: primaryTextField(labelText: "Validity Duration", controller: validityTimeController, keyboardType: TextInputType.number, required: true, isDisable: true)),
                           Expanded(child: primaryTextField(labelText: "Buffer Days", controller: bufferTimeController, keyboardType: TextInputType.number, required: true, isDisable: true))
                         ]),
+                        Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                            child: Row(
+                              children: [Checkbox(value: hasFinance, onChanged: (value) => setState(() => hasFinance = !hasFinance)), SizedBox(width: 12), Text("Include Finance & Staff Management")],
+                            )),
                         primaryButton(
-                           loadingWait: isLoading,
+                            loadingWait: isLoading,
                             paddingBottom: 24,
                             paddingTop: 4,
                             width: 180,

@@ -877,6 +877,8 @@ Container packageTile({required BuildContext context, required Map package}) {
         // Divider(indent: 12, endIndent: 12),
         Text("Validity: 1 Month", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
         Divider(indent: 12, endIndent: 12),
+        Text("Finance & Staff Mgt.: ${package["isFinancial"] == 1 ? 'Available' : 'Not Available'}", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
+        Divider(indent: 12, endIndent: 12),
         primaryButton(title: "Edit", onTap: () => route(context, AddPackage(data: package)), paddingTop: 6, paddingBottom: 16, primary: false, icon: Icons.edit)
       ]));
 }

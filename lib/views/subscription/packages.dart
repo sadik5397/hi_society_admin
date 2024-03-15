@@ -31,6 +31,7 @@ class _PackagesState extends State<Packages> {
         if (kDebugMode) print(result);
         showSnackBar(context: context, label: result["message"]);
         setState(() => packages = result["data"]);
+        print(packages.toString());
       } else {
         showError(context: context, label: result["message"][0].toString().length == 1 ? result["message"].toString() : result["message"][0].toString());
       }

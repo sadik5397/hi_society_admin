@@ -107,9 +107,9 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            pageName: "Utility Contacts",
+            pageName: "Home Service Contacts",
             context: context,
-            header: "Utility Contact Management",
+            header: "Home Service Contact Management",
             child: dataTableContainer(
                 entryCount: utilityCategoryList.length,
                 headerRow: ["Category Name", "Status", "Actions"],
@@ -168,21 +168,23 @@ class _UtilityContactCategoryState extends State<UtilityContactCategory> {
   }
 
   AlertDialog addNewCategory({required BuildContext context, required VoidCallback onSubmit}) {
-    return AlertDialog(backgroundColor: Colors.white,
-      title: const Center(child: Text("Add New Utility Category")),
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Center(child: Text("Add New Home Service Category")),
       insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
       buttonPadding: EdgeInsets.zero,
-      content: primaryTextField(labelText: "Utility Category", controller: categoryController),
+      content: primaryTextField(labelText: "Home Service Category", controller: categoryController),
       actions: [primaryButton(title: "Submit", onTap: onSubmit)],
     );
   }
 
   AlertDialog updateCategory({required BuildContext context, required VoidCallback onSubmit}) {
-    return AlertDialog(backgroundColor: Colors.white,
-      title: const Center(child: Text("Add New Utility Category")),
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Center(child: Text("Add New Home Service Category")),
       insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
       buttonPadding: EdgeInsets.zero,
-      content: primaryTextField(labelText: "Utility Category", controller: categoryController),
+      content: primaryTextField(labelText: "Home Service Category", controller: categoryController),
       actions: [primaryButton(title: "Submit", onTap: onSubmit)],
     );
   }

@@ -533,7 +533,7 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
           sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Social Media Posts", toPage: const SocialMediaPosts()),
           if (isAdmin)
             sidebarMenuHead(context: context, title: "Options", children: [
-              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Home Service", toPage: const UtilityContactCategory()),
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Emergency Alerts", toPage: const SecurityAlertGroup()),
             ]),

@@ -74,9 +74,9 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: includeDashboard(
-            pageName: "Security Alerts",
+            pageName: "Emergency Alerts",
             context: context,
-            header: "Security Alert Management",
+            header: "Emergency Alert Management",
             child: dataTableContainer(
                 title: "Category",
                 entryCount: securityAlertTypeList.length,
@@ -106,8 +106,8 @@ class _SecurityAlertGroupState extends State<SecurityAlertGroup> {
 
   AlertDialog addNewType({required BuildContext context, required VoidCallback onSubmit}) {
     return AlertDialog(
-      backgroundColor: Colors.white,
-        title: const Center(child: Text("Add New Security Alert Type")),
+        backgroundColor: Colors.white,
+        title: const Center(child: Text("Add New Emergency Alert Type")),
         insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 2 - 200),
         buttonPadding: EdgeInsets.zero,
         content: primaryTextField(labelText: "Alert Type", controller: alertTypeController),

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
@@ -15,13 +17,13 @@ import 'package:hi_society_admin/views/users/users.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'views/all_buildings/all_buildings.dart';
 import 'views/security_alerts/security_alert.dart';
 import 'views/sign_in.dart';
 import 'views/subscription/packages.dart';
 import 'views/subscription/payment_list.dart';
 import 'views/utility_contacts/utility_contact_category.dart';
-import 'dart:async';
 
 //region Static Values
 String placeholderImage = "$baseUrl/placeholder.png";
@@ -533,7 +535,7 @@ Row includeDashboard({bool isScrollablePage = false, required Widget child, requ
             sidebarMenuHead(context: context, title: "Options", children: [
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Utility Contacts", toPage: const UtilityContactCategory()),
               sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Amenities", toPage: const AmenityCategory()),
-              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Security Alerts", toPage: const SecurityAlertGroup()),
+              sidebarMenuItem(pageName: pageName, context: context, icon: Icons.chevron_right, label: "Emergency Alerts", toPage: const SecurityAlertGroup()),
             ]),
           if (isAdmin)
             sidebarMenuHead(context: context, title: "Subscription", children: [
@@ -877,7 +879,8 @@ Container packageTile({required BuildContext context, required Map package}) {
         // Divider(indent: 12, endIndent: 12),
         Text("Validity: 1 Month", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
         Divider(indent: 12, endIndent: 12),
-        Text("Finance & Staff Mgt.: ${package["isFinancial"] == 1 ? 'Available' : 'Not Available'}", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
+        Text("Finance & Staff Mgt.: ${package["isFinancial"] == 1 ? 'Available' : 'Not Available'}",
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
         Divider(indent: 12, endIndent: 12),
         primaryButton(title: "Edit", onTap: () => route(context, AddPackage(data: package)), paddingTop: 6, paddingBottom: 16, primary: false, icon: Icons.edit)
       ]));
